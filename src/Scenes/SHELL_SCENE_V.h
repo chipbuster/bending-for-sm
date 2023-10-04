@@ -11,11 +11,7 @@
 
 namespace HOBAK {
 
-#ifndef USING_HOMEBREW_GCC
-namespace fs = std::__fs::filesystem;
-#else
 namespace fs = std::filesystem;
-#endif
 
 class SHELL_SCENE_V : public SIMULATION_SCENE {
 public:
