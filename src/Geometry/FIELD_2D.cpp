@@ -1,16 +1,16 @@
 /*
 This file is part of HOBAK.
 
-HOBAK is free software: you can redistribute it and/or modify it under the terms of 
-the GNU General Public License as published by the Free Software Foundation, either 
-version 3 of the License, or (at your option) any later version.
+HOBAK is free software: you can redistribute it and/or modify it under the terms
+of the GNU General Public License as published by the Free Software Foundation,
+either version 3 of the License, or (at your option) any later version.
 
-HOBAK is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; 
-without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
-PURPOSE. See the GNU General Public License for more details.
+HOBAK is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along with HOBAK. 
-If not, see <https://www.gnu.org/licenses/>.
+You should have received a copy of the GNU General Public License along with
+HOBAK. If not, see <https://www.gnu.org/licenses/>.
 */
 #include "FIELD_2D.h"
 #include "TIMER.h"
@@ -22,9 +22,8 @@ namespace HOBAK {
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-FIELD_2D::FIELD_2D(const int& rows, const int& cols) :
-  _xRes(rows), _yRes(cols)
-{
+FIELD_2D::FIELD_2D(const int &rows, const int &cols)
+    : _xRes(rows), _yRes(cols) {
   _totalCells = _xRes * _yRes;
   _data = new REAL[_totalCells];
 
@@ -32,9 +31,7 @@ FIELD_2D::FIELD_2D(const int& rows, const int& cols) :
     _data[x] = 0.0;
 }
 
-FIELD_2D::FIELD_2D(const FIELD_2D& m) :
-  _xRes(m.xRes()), _yRes(m.yRes())
-{
+FIELD_2D::FIELD_2D(const FIELD_2D &m) : _xRes(m.xRes()), _yRes(m.yRes()) {
   _totalCells = _xRes * _yRes;
   _data = new REAL[_totalCells];
 
@@ -42,46 +39,34 @@ FIELD_2D::FIELD_2D(const FIELD_2D& m) :
     _data[x] = m[x];
 }
 
-FIELD_2D::FIELD_2D() :
-  _xRes(0), _yRes(0), _totalCells(0), _data(NULL)
-{
-}
+FIELD_2D::FIELD_2D() : _xRes(0), _yRes(0), _totalCells(0), _data(NULL) {}
 
-
-FIELD_2D::FIELD_2D(const MATRIX& m) :
-  _xRes(m.cols()), _yRes(m.rows())
-{
+FIELD_2D::FIELD_2D(const MATRIX &m) : _xRes(m.cols()), _yRes(m.rows()) {
   _totalCells = _xRes * _yRes;
   _data = new REAL[_totalCells];
 
   for (int y = 0; y < _yRes; y++)
     for (int x = 0; x < _xRes; x++)
-      (*this)(x,y) = m(_yRes - 1 - y, x);
+      (*this)(x, y) = m(_yRes - 1 - y, x);
 }
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-FIELD_2D::~FIELD_2D()
-{
-  delete[] _data;
-}
-  
+FIELD_2D::~FIELD_2D() { delete[] _data; }
+
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-void FIELD_2D::clear()
-{
+void FIELD_2D::clear() {
   for (int x = 0; x < _totalCells; x++)
     _data[x] = 0.0;
 }
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-void FIELD_2D::write(string filename) const
-{
-  FILE* file;
+void FIELD_2D::write(string filename) const {
+  FILE *file;
   file = fopen(filename.c_str(), "wb");
-  if (file == NULL)
-  {
+  if (file == NULL) {
     cout << __FILE__ << " " << __FUNCTION__ << " " << __LINE__ << " : " << endl;
     cout << " FIELD_2D write failed! " << endl;
     cout << " Could not open file " << filename.c_str() << endl;
@@ -89,33 +74,29 @@ void FIELD_2D::write(string filename) const
   }
 
   // write dimensions
-  fwrite((void*)&_xRes, sizeof(int), 1, file);
-  fwrite((void*)&_yRes, sizeof(int), 1, file);
+  fwrite((void *)&_xRes, sizeof(int), 1, file);
+  fwrite((void *)&_yRes, sizeof(int), 1, file);
 
   // always write out as a double
-  if (sizeof(REAL) != sizeof(double))
-  {
-    double* dataDouble = new double[_totalCells];
+  if (sizeof(REAL) != sizeof(double)) {
+    double *dataDouble = new double[_totalCells];
     for (int x = 0; x < _totalCells; x++)
       dataDouble[x] = _data[x];
 
-    fwrite((void*)dataDouble, sizeof(double), _totalCells, file);
+    fwrite((void *)dataDouble, sizeof(double), _totalCells, file);
     delete[] dataDouble;
     fclose(file);
-  }
-  else
-    fwrite((void*)_data, sizeof(REAL), _totalCells, file);
+  } else
+    fwrite((void *)_data, sizeof(REAL), _totalCells, file);
   fclose(file);
 }
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-void FIELD_2D::read(string filename)
-{
-  FILE* file;
+void FIELD_2D::read(string filename) {
+  FILE *file;
   file = fopen(filename.c_str(), "rb");
-  if (file == NULL)
-  {
+  if (file == NULL) {
     cout << __FILE__ << " " << __FUNCTION__ << " " << __LINE__ << " : " << endl;
     cout << " FIELD_2D read failed! " << endl;
     cout << " Could not open file " << filename.c_str() << endl;
@@ -123,37 +104,34 @@ void FIELD_2D::read(string filename)
   }
 
   // read dimensions
-  fread((void*)&_xRes, sizeof(int), 1, file);
-  fread((void*)&_yRes, sizeof(int), 1, file);
+  fread((void *)&_xRes, sizeof(int), 1, file);
+  fread((void *)&_yRes, sizeof(int), 1, file);
   _totalCells = _xRes * _yRes;
-  if (_data) delete[] _data;
+  if (_data)
+    delete[] _data;
   _data = new REAL[_totalCells];
 
   // always read in as a double
-  if (sizeof(REAL) != sizeof(double))
-  {
-    double* dataDouble = new double[_totalCells];
-    fread((void*)dataDouble, sizeof(double), _totalCells, file);
+  if (sizeof(REAL) != sizeof(double)) {
+    double *dataDouble = new double[_totalCells];
+    fread((void *)dataDouble, sizeof(double), _totalCells, file);
 
     for (int x = 0; x < _totalCells; x++)
       _data[x] = dataDouble[x];
 
     delete[] dataDouble;
-  }
-  else
-    fread((void*)_data, sizeof(REAL), _totalCells, file);
+  } else
+    fread((void *)_data, sizeof(REAL), _totalCells, file);
   fclose(file);
 }
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-void FIELD_2D::writePPM(string filename)
-{
+void FIELD_2D::writePPM(string filename) {
   FILE *fp;
-  unsigned char* pixels = new unsigned char[3 * _totalCells];
+  unsigned char *pixels = new unsigned char[3 * _totalCells];
 
-  for (int x = 0; x < _totalCells; x++)
-  {
+  for (int x = 0; x < _totalCells; x++) {
     pixels[3 * x] = 255 * _data[x];
     pixels[3 * x + 1] = 255 * _data[x];
     pixels[3 * x + 2] = 255 * _data[x];
@@ -168,15 +146,13 @@ void FIELD_2D::writePPM(string filename)
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-void FIELD_2D::writeMatlab(string filename, string variableName) const
-{
-  FILE* file;
+void FIELD_2D::writeMatlab(string filename, string variableName) const {
+  FILE *file;
   file = fopen(filename.c_str(), "w");
   fprintf(file, "%s = [", variableName.c_str());
-  for (int y = 0; y < _yRes; y++)
-  {
+  for (int y = 0; y < _yRes; y++) {
     for (int x = 0; x < _xRes; x++)
-      fprintf(file, "%f ", (*this)(x,y));
+      fprintf(file, "%f ", (*this)(x, y));
     fprintf(file, "; ");
   }
   fprintf(file, "];\n");
@@ -281,12 +257,10 @@ void FIELD_2D::shiftFFT()
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-void FIELD_2D::normalize()
-{
+void FIELD_2D::normalize() {
   REAL maxFound = 0.0;
   REAL minFound = _data[0];
-  for (int x = 0; x < _totalCells; x++)
-  {
+  for (int x = 0; x < _totalCells; x++) {
     maxFound = (_data[x] > maxFound) ? _data[x] : maxFound;
     minFound = (_data[x] < minFound) ? _data[x] : minFound;
   }
@@ -298,8 +272,7 @@ void FIELD_2D::normalize()
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-FIELD_2D& FIELD_2D::abs()
-{
+FIELD_2D &FIELD_2D::abs() {
   for (int x = 0; x < _totalCells; x++)
     _data[x] = fabs(_data[x]);
 
@@ -308,10 +281,8 @@ FIELD_2D& FIELD_2D::abs()
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-void FIELD_2D::resizeAndWipe(int xRes, int yRes)
-{
-  if (_xRes == xRes && _yRes == yRes)
-  {
+void FIELD_2D::resizeAndWipe(int xRes, int yRes) {
+  if (_xRes == xRes && _yRes == yRes) {
     clear();
     return;
   }
@@ -329,8 +300,7 @@ void FIELD_2D::resizeAndWipe(int xRes, int yRes)
 ///////////////////////////////////////////////////////////////////////
 // set this field to the result of convolving filter and input
 ///////////////////////////////////////////////////////////////////////
-void FIELD_2D::convolve(const FIELD_2D& filter, const FIELD_2D& input)
-{
+void FIELD_2D::convolve(const FIELD_2D &filter, const FIELD_2D &input) {
   TIMER functionTimer(__FUNCTION__);
 
   int filterWidth = filter.xRes();
@@ -346,13 +316,11 @@ void FIELD_2D::convolve(const FIELD_2D& filter, const FIELD_2D& input)
   // periodic boundaries
   int halfWidth = filterWidth / 2;
   for (int ix = 0; ix < iwidth; ix++)
-    for (int iy = 0; iy < iheight; iy++)
-    {
+    for (int iy = 0; iy < iheight; iy++) {
       int index = ix + iwidth * iy;
       float vd = 0;
       for (int iix = -halfWidth; iix <= halfWidth; iix++)
-        for (int iiy = -halfWidth; iiy <= halfWidth; iiy++)
-        {
+        for (int iiy = -halfWidth; iiy <= halfWidth; iiy++) {
           int xIndex = ix + iix;
           int yIndex = iy + iiy;
 
@@ -365,8 +333,9 @@ void FIELD_2D::convolve(const FIELD_2D& filter, const FIELD_2D& input)
             xIndex -= iwidth;
           if (yIndex >= iheight)
             yIndex -= iheight;
-          
-          vd += filter(iix + halfWidth,iiy + halfWidth) * input(xIndex, yIndex);
+
+          vd +=
+              filter(iix + halfWidth, iiy + halfWidth) * input(xIndex, yIndex);
         }
       _data[index] = vd;
     }
@@ -374,8 +343,7 @@ void FIELD_2D::convolve(const FIELD_2D& filter, const FIELD_2D& input)
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-FIELD_2D& FIELD_2D::operator=(const REAL& alpha)
-{
+FIELD_2D &FIELD_2D::operator=(const REAL &alpha) {
   for (int x = 0; x < _totalCells; x++)
     _data[x] = alpha;
 
@@ -384,8 +352,7 @@ FIELD_2D& FIELD_2D::operator=(const REAL& alpha)
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-FIELD_2D& FIELD_2D::operator*=(const REAL& alpha)
-{
+FIELD_2D &FIELD_2D::operator*=(const REAL &alpha) {
   for (int x = 0; x < _totalCells; x++)
     _data[x] *= alpha;
 
@@ -394,8 +361,7 @@ FIELD_2D& FIELD_2D::operator*=(const REAL& alpha)
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-FIELD_2D& FIELD_2D::operator/=(const REAL& alpha)
-{
+FIELD_2D &FIELD_2D::operator/=(const REAL &alpha) {
   for (int x = 0; x < _totalCells; x++)
     _data[x] /= alpha;
 
@@ -404,8 +370,7 @@ FIELD_2D& FIELD_2D::operator/=(const REAL& alpha)
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-FIELD_2D& FIELD_2D::operator+=(const REAL& alpha)
-{
+FIELD_2D &FIELD_2D::operator+=(const REAL &alpha) {
   for (int x = 0; x < _totalCells; x++)
     _data[x] += alpha;
 
@@ -414,8 +379,7 @@ FIELD_2D& FIELD_2D::operator+=(const REAL& alpha)
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-FIELD_2D& FIELD_2D::operator-=(const FIELD_2D& input)
-{
+FIELD_2D &FIELD_2D::operator-=(const FIELD_2D &input) {
   assert(input.xRes() == _xRes);
   assert(input.yRes() == _yRes);
   for (int x = 0; x < _totalCells; x++)
@@ -426,8 +390,7 @@ FIELD_2D& FIELD_2D::operator-=(const FIELD_2D& input)
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-FIELD_2D& FIELD_2D::operator+=(const FIELD_2D& input)
-{
+FIELD_2D &FIELD_2D::operator+=(const FIELD_2D &input) {
   assert(input.xRes() == _xRes);
   assert(input.yRes() == _yRes);
   for (int x = 0; x < _totalCells; x++)
@@ -438,8 +401,7 @@ FIELD_2D& FIELD_2D::operator+=(const FIELD_2D& input)
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-FIELD_2D& FIELD_2D::operator*=(const FIELD_2D& input)
-{
+FIELD_2D &FIELD_2D::operator*=(const FIELD_2D &input) {
   assert(input.xRes() == _xRes);
   assert(input.yRes() == _yRes);
 
@@ -451,8 +413,7 @@ FIELD_2D& FIELD_2D::operator*=(const FIELD_2D& input)
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-FIELD_2D& FIELD_2D::operator/=(const FIELD_2D& input)
-{
+FIELD_2D &FIELD_2D::operator/=(const FIELD_2D &input) {
   assert(input.xRes() == _xRes);
   assert(input.yRes() == _yRes);
 
@@ -467,8 +428,7 @@ FIELD_2D& FIELD_2D::operator/=(const FIELD_2D& input)
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-FIELD_2D operator*(const FIELD_2D& A, const REAL alpha)
-{
+FIELD_2D operator*(const FIELD_2D &A, const REAL alpha) {
   FIELD_2D result(A);
   result *= alpha;
   return result;
@@ -476,8 +436,7 @@ FIELD_2D operator*(const FIELD_2D& A, const REAL alpha)
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-FIELD_2D operator/(const FIELD_2D& A, const REAL alpha)
-{
+FIELD_2D operator/(const FIELD_2D &A, const REAL alpha) {
   FIELD_2D result(A);
   result /= alpha;
   return result;
@@ -485,8 +444,7 @@ FIELD_2D operator/(const FIELD_2D& A, const REAL alpha)
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-FIELD_2D operator+(const FIELD_2D& A, const FIELD_2D& B)
-{
+FIELD_2D operator+(const FIELD_2D &A, const FIELD_2D &B) {
   FIELD_2D result(A);
   result += B;
   return result;
@@ -494,8 +452,7 @@ FIELD_2D operator+(const FIELD_2D& A, const FIELD_2D& B)
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-FIELD_2D operator-(const FIELD_2D& A, const FIELD_2D& B)
-{
+FIELD_2D operator-(const FIELD_2D &A, const FIELD_2D &B) {
   FIELD_2D result(A);
   result -= B;
   return result;
@@ -503,8 +460,7 @@ FIELD_2D operator-(const FIELD_2D& A, const FIELD_2D& B)
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-FIELD_2D operator+(const FIELD_2D& A, const REAL alpha)
-{
+FIELD_2D operator+(const FIELD_2D &A, const REAL alpha) {
   FIELD_2D result(A);
   result += alpha;
   return result;
@@ -512,22 +468,15 @@ FIELD_2D operator+(const FIELD_2D& A, const REAL alpha)
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-FIELD_2D operator*(const REAL alpha, const FIELD_2D& A)
-{
-  return A * alpha;
-}
+FIELD_2D operator*(const REAL alpha, const FIELD_2D &A) { return A * alpha; }
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-FIELD_2D operator+(const REAL alpha, const FIELD_2D& A)
-{
-  return A + alpha;
-}
+FIELD_2D operator+(const REAL alpha, const FIELD_2D &A) { return A + alpha; }
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-FIELD_2D& FIELD_2D::operator=(const FIELD_2D& A)
-{
+FIELD_2D &FIELD_2D::operator=(const FIELD_2D &A) {
   resizeAndWipe(A.xRes(), A.yRes());
 
   for (int x = 0; x < _totalCells; x++)
@@ -539,8 +488,7 @@ FIELD_2D& FIELD_2D::operator=(const FIELD_2D& A)
 ///////////////////////////////////////////////////////////////////////
 // sum of all entries
 ///////////////////////////////////////////////////////////////////////
-REAL FIELD_2D::sum()
-{
+REAL FIELD_2D::sum() {
   REAL total = 0;
   for (int x = 0; x < _totalCells; x++)
     total += _data[x];
@@ -551,8 +499,7 @@ REAL FIELD_2D::sum()
 ///////////////////////////////////////////////////////////////////////
 // take the log
 ///////////////////////////////////////////////////////////////////////
-void FIELD_2D::log(REAL base)
-{
+void FIELD_2D::log(REAL base) {
   REAL scale = 1.0 / std::log(base);
   for (int x = 0; x < _totalCells; x++)
     _data[x] = std::log(_data[x]) * scale;
@@ -561,8 +508,8 @@ void FIELD_2D::log(REAL base)
 ///////////////////////////////////////////////////////////////////////
 // Compute the elements of the vertical derivative convolution kernel
 ///////////////////////////////////////////////////////////////////////
-void FIELD_2D::verticalDerivativeKernel(double kMax, double dk, double sigma, double L)
-{
+void FIELD_2D::verticalDerivativeKernel(double kMax, double dk, double sigma,
+                                        double L) {
   assert(_xRes % 2);
   assert(_xRes == _yRes);
 
@@ -574,8 +521,7 @@ void FIELD_2D::verticalDerivativeKernel(double kMax, double dk, double sigma, do
   int halfWidth = _xRes / 2;
 
   for (int i = -halfWidth; i <= halfWidth; i++)
-    for (int j = -halfWidth; j <= halfWidth; j++)
-    {
+    for (int j = -halfWidth; j <= halfWidth; j++) {
       double r = sqrt((float)(i * i + j * j));
       double kern = 0;
       for (double k = 0; k < kMax; k += dk)
@@ -588,8 +534,7 @@ void FIELD_2D::verticalDerivativeKernel(double kMax, double dk, double sigma, do
 ///////////////////////////////////////////////////////////////////////
 // Compute a radial Bessel function
 ///////////////////////////////////////////////////////////////////////
-void FIELD_2D::radialBessel()
-{
+void FIELD_2D::radialBessel() {
   assert(_xRes % 2);
   assert(_xRes == _yRes);
 
@@ -599,8 +544,7 @@ void FIELD_2D::radialBessel()
   double dk = 0.01;
 
   for (int i = -halfWidth; i <= halfWidth; i++)
-    for (int j = -halfWidth; j <= halfWidth; j++)
-    {
+    for (int j = -halfWidth; j <= halfWidth; j++) {
       double r = sqrt((float)(i * i + j * j)) / (float)_xRes * 20;
       double kern = 0.0;
       for (double k = kMin; k < kMax; k += dk)
@@ -613,16 +557,14 @@ void FIELD_2D::radialBessel()
 ///////////////////////////////////////////////////////////////////////
 // set to a bessel function
 ///////////////////////////////////////////////////////////////////////
-void FIELD_2D::setToBessel(float k)
-{
+void FIELD_2D::setToBessel(float k) {
   assert(_xRes % 2);
   assert(_xRes == _yRes);
 
   int halfWidth = _xRes / 2;
 
   for (int i = -halfWidth; i <= halfWidth; i++)
-    for (int j = -halfWidth; j <= halfWidth; j++)
-    {
+    for (int j = -halfWidth; j <= halfWidth; j++) {
       double r = sqrt((float)(i * i + j * j)) / (float)_xRes * 20;
       double kern = 0.0;
       kern += j0(r * k);
@@ -634,14 +576,12 @@ void FIELD_2D::setToBessel(float k)
 ///////////////////////////////////////////////////////////////////////
 // upsample the texture by a certain factor
 ///////////////////////////////////////////////////////////////////////
-FIELD_2D FIELD_2D::nearestNeighborUpsample(int factor)
-{
+FIELD_2D FIELD_2D::nearestNeighborUpsample(int factor) {
   FIELD_2D result(_xRes * factor, _yRes * factor);
 
   for (int y = 0; y < _yRes; y++)
-    for (int x = 0; x < _xRes; x++)
-    {
-      double value = (*this)(x,y);
+    for (int x = 0; x < _xRes; x++) {
+      double value = (*this)(x, y);
       for (int i = 0; i < factor; i++)
         for (int j = 0; j < factor; j++)
           result(factor * x + i, factor * y + j) = value;
@@ -652,8 +592,7 @@ FIELD_2D FIELD_2D::nearestNeighborUpsample(int factor)
 ///////////////////////////////////////////////////////////////////////
 // get the min of the field
 ///////////////////////////////////////////////////////////////////////
-REAL FIELD_2D::min()
-{
+REAL FIELD_2D::min() {
   assert(_xRes > 0);
   assert(_yRes > 0);
   REAL result = _data[0];
@@ -667,8 +606,7 @@ REAL FIELD_2D::min()
 ///////////////////////////////////////////////////////////////////////
 // get the max of the field
 ///////////////////////////////////////////////////////////////////////
-REAL FIELD_2D::max()
-{
+REAL FIELD_2D::max() {
   assert(_xRes > 0);
   assert(_yRes > 0);
   REAL result = _data[0];
@@ -682,12 +620,10 @@ REAL FIELD_2D::max()
 ///////////////////////////////////////////////////////////////////////
 // set to a checkboard for debugging
 ///////////////////////////////////////////////////////////////////////
-void FIELD_2D::setToCheckerboard(int xChecks, int yChecks)
-{
+void FIELD_2D::setToCheckerboard(int xChecks, int yChecks) {
   int index = 0;
   for (int x = 0; x < _xRes; x++)
-    for (int y = 0; y < _yRes; y++, index++)
-    {
+    for (int y = 0; y < _yRes; y++, index++) {
       int xMod = (x / (_xRes / xChecks)) % 2;
       int yMod = (y / (_yRes / yChecks)) % 2;
 
@@ -699,12 +635,10 @@ void FIELD_2D::setToCheckerboard(int xChecks, int yChecks)
 ///////////////////////////////////////////////////////////////////////
 // set to a checkboard for debugging
 ///////////////////////////////////////////////////////////////////////
-void FIELD_2D::setToRampedCheckerboard(int xChecks, int yChecks)
-{
+void FIELD_2D::setToRampedCheckerboard(int xChecks, int yChecks) {
   int index = 0;
   for (int y = 0; y < _yRes; y++)
-    for (int x = 0; x < _xRes; x++, index++)
-    {
+    for (int x = 0; x < _xRes; x++, index++) {
       int xMod = (x / (_xRes / xChecks)) % 2;
       int yMod = (y / (_yRes / yChecks)) % 2;
 
@@ -716,8 +650,7 @@ void FIELD_2D::setToRampedCheckerboard(int xChecks, int yChecks)
 ///////////////////////////////////////////////////////////////////////
 // pass a field to fieldViewer2D
 ///////////////////////////////////////////////////////////////////////
-void FIELD_2D::fieldViewer(const FIELD_2D& field, string name)
-{
+void FIELD_2D::fieldViewer(const FIELD_2D &field, string name) {
   field.write("temp.field");
   string execute("./bin/fieldViewer temp.field \"");
   execute = execute + name + string("\" &");
@@ -728,8 +661,7 @@ void FIELD_2D::fieldViewer(const FIELD_2D& field, string name)
 ///////////////////////////////////////////////////////////////////////
 // set to a ramp for debugging
 ///////////////////////////////////////////////////////////////////////
-void FIELD_2D::setToRampX()
-{
+void FIELD_2D::setToRampX() {
   int index = 0;
   for (int x = 0; x < _xRes; x++)
     for (int y = 0; y < _yRes; y++, index++)
@@ -739,8 +671,7 @@ void FIELD_2D::setToRampX()
 ///////////////////////////////////////////////////////////////////////
 // set to a ramp for debugging
 ///////////////////////////////////////////////////////////////////////
-void FIELD_2D::setToRampY()
-{
+void FIELD_2D::setToRampY() {
   int index = 0;
   for (int x = 0; x < _xRes; x++)
     for (int y = 0; y < _yRes; y++, index++)
@@ -750,8 +681,7 @@ void FIELD_2D::setToRampY()
 ///////////////////////////////////////////////////////////////////////
 // get the projection of the field in the x direction
 ///////////////////////////////////////////////////////////////////////
-VECTOR FIELD_2D::projectionX()
-{
+VECTOR FIELD_2D::projectionX() {
   VECTOR result(_yRes);
 
   int index = 0;
@@ -759,14 +689,13 @@ VECTOR FIELD_2D::projectionX()
     for (int y = 0; y < _yRes; y++, index++)
       result[y] += _data[index];
 
-  return result; 
+  return result;
 }
 
 ///////////////////////////////////////////////////////////////////////
 // return a field for the Laplacian of this field
 ///////////////////////////////////////////////////////////////////////
-FIELD_2D FIELD_2D::laplacian()
-{
+FIELD_2D FIELD_2D::laplacian() {
   FIELD_2D result(_xRes, _yRes);
 
   // assume a unit field
@@ -776,14 +705,14 @@ FIELD_2D FIELD_2D::laplacian()
   REAL dy2 = dy * dy;
 
   for (int y = 0; y < _yRes; y++)
-    for (int x = 0; x < _xRes; x++)
-    {
-      REAL yPlus  = safe(x, y+1); 
-      REAL yMinus = safe(x, y-1); 
-      REAL xPlus  = safe(x+1, y); 
-      REAL xMinus = safe(x-1, y);
+    for (int x = 0; x < _xRes; x++) {
+      REAL yPlus = safe(x, y + 1);
+      REAL yMinus = safe(x, y - 1);
+      REAL xPlus = safe(x + 1, y);
+      REAL xMinus = safe(x - 1, y);
 
-      result(x,y) = (-2.0 * (*this)(x,y) + xPlus + xMinus) / dx2 + (-2.0 * (*this)(x,y) + yPlus + yMinus) / dy2; 
+      result(x, y) = (-2.0 * (*this)(x, y) + xPlus + xMinus) / dx2 +
+                     (-2.0 * (*this)(x, y) + yPlus + yMinus) / dy2;
     }
   return result;
 }
@@ -791,8 +720,7 @@ FIELD_2D FIELD_2D::laplacian()
 ///////////////////////////////////////////////////////////////////////
 // return a field for the Laplacian of this field
 ///////////////////////////////////////////////////////////////////////
-FIELD_2D FIELD_2D::laplacian4th()
-{
+FIELD_2D FIELD_2D::laplacian4th() {
   FIELD_2D result(_xRes, _yRes);
 
   // assume a unit field
@@ -802,19 +730,24 @@ FIELD_2D FIELD_2D::laplacian4th()
   REAL dy2 = dy * dy;
 
   for (int y = 0; y < _yRes; y++)
-    for (int x = 0; x < _xRes; x++)
-    {
-      REAL yPlus  = safe(x, y+1); 
-      REAL yPlusPlus  = safe(x, y+2); 
-      REAL yMinus = safe(x, y-1); 
-      REAL yMinusMinus = safe(x, y-2); 
-      REAL xPlus  = safe(x+1, y); 
-      REAL xPlusPlus  = safe(x+2, y); 
-      REAL xMinus = safe(x-1, y);
-      REAL xMinusMinus = safe(x-2, y);
+    for (int x = 0; x < _xRes; x++) {
+      REAL yPlus = safe(x, y + 1);
+      REAL yPlusPlus = safe(x, y + 2);
+      REAL yMinus = safe(x, y - 1);
+      REAL yMinusMinus = safe(x, y - 2);
+      REAL xPlus = safe(x + 1, y);
+      REAL xPlusPlus = safe(x + 2, y);
+      REAL xMinus = safe(x - 1, y);
+      REAL xMinusMinus = safe(x - 2, y);
 
-      result(x,y) = ((-1.0 / 12.0) * xMinusMinus + (4.0 / 3.0) * xMinus + (-5.0 / 2.0) * (*this)(x,y) + (4.0 / 3.0) * xPlus + (-1.0 / 12.0) * xPlusPlus) / dx2;
-      result(x,y) += ((-1.0 / 12.0) * yMinusMinus + (4.0 / 3.0) * yMinus + (-5.0 / 2.0) * (*this)(x,y) + (4.0 / 3.0) * yPlus + (-1.0 / 12.0) * yPlusPlus) / dy2;
+      result(x, y) = ((-1.0 / 12.0) * xMinusMinus + (4.0 / 3.0) * xMinus +
+                      (-5.0 / 2.0) * (*this)(x, y) + (4.0 / 3.0) * xPlus +
+                      (-1.0 / 12.0) * xPlusPlus) /
+                     dx2;
+      result(x, y) += ((-1.0 / 12.0) * yMinusMinus + (4.0 / 3.0) * yMinus +
+                       (-5.0 / 2.0) * (*this)(x, y) + (4.0 / 3.0) * yPlus +
+                       (-1.0 / 12.0) * yPlusPlus) /
+                      dy2;
     }
   return result;
 }
@@ -822,8 +755,7 @@ FIELD_2D FIELD_2D::laplacian4th()
 ///////////////////////////////////////////////////////////////////////
 // a safe, toroidal data accessor -- does all bounds checking for you
 ///////////////////////////////////////////////////////////////////////
-REAL FIELD_2D::safe(int x, int y)
-{
+REAL FIELD_2D::safe(int x, int y) {
   while (x < 0)
     x += _xRes;
   while (y < 0)
@@ -834,14 +766,13 @@ REAL FIELD_2D::safe(int x, int y)
   while (y > _yRes - 1)
     y -= _yRes;
 
-  return (*this)(x,y);
+  return (*this)(x, y);
 }
 
 ///////////////////////////////////////////////////////////////////////
 // return a field for the gradient of this field
 ///////////////////////////////////////////////////////////////////////
-FIELD_2D FIELD_2D::gradient()
-{
+FIELD_2D FIELD_2D::gradient() {
   FIELD_2D result(_xRes, _yRes);
 
   // assume a unit field
@@ -849,14 +780,13 @@ FIELD_2D FIELD_2D::gradient()
   REAL dy = 1.0 / _yRes;
 
   for (int y = 0; y < _yRes; y++)
-    for (int x = 0; x < _xRes; x++)
-    {
-      REAL yPlus  = safe(x, y+1); 
-      REAL yMinus = safe(x, y-1); 
-      REAL xPlus  = safe(x+1, y); 
-      REAL xMinus = safe(x-1, y);
+    for (int x = 0; x < _xRes; x++) {
+      REAL yPlus = safe(x, y + 1);
+      REAL yMinus = safe(x, y - 1);
+      REAL xPlus = safe(x + 1, y);
+      REAL xMinus = safe(x - 1, y);
 
-      result(x,y) = (xPlus - xMinus) / dx + (yPlus - yMinus) / dy;
+      result(x, y) = (xPlus - xMinus) / dx + (yPlus - yMinus) / dy;
     }
   return result;
 }
@@ -864,29 +794,26 @@ FIELD_2D FIELD_2D::gradient()
 ///////////////////////////////////////////////////////////////////////
 // return the transpose (flip x and y)
 ///////////////////////////////////////////////////////////////////////
-FIELD_2D FIELD_2D::transpose() const
-{
+FIELD_2D FIELD_2D::transpose() const {
   FIELD_2D result(_yRes, _xRes);
 
   for (int y = 0; y < _yRes; y++)
     for (int x = 0; x < _xRes; x++)
-      result(y,x) = (*this)(x,y);
+      result(y, x) = (*this)(x, y);
 
   return result;
 }
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-VECTOR3 FIELD_2D::maxIndex()
-{
+VECTOR3 FIELD_2D::maxIndex() {
   REAL maxFound = _data[0];
 
   VECTOR3 maxFoundIndex;
   int index = 0;
   for (int y = 0; y < _yRes; y++)
     for (int x = 0; x < _xRes; x++, index++)
-      if (_data[index] > maxFound)
-      {
+      if (_data[index] > maxFound) {
         maxFound = _data[index];
 
         maxFoundIndex[0] = x;
@@ -898,16 +825,14 @@ VECTOR3 FIELD_2D::maxIndex()
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-VECTOR3 FIELD_2D::minIndex()
-{
+VECTOR3 FIELD_2D::minIndex() {
   REAL minFound = _data[0];
 
   VECTOR3 minFoundIndex;
   int index = 0;
   for (int y = 0; y < _yRes; y++)
     for (int x = 0; x < _xRes; x++, index++)
-      if (_data[index] < minFound)
-      {
+      if (_data[index] < minFound) {
         minFound = _data[index];
 
         minFoundIndex[0] = x;
@@ -917,4 +842,4 @@ VECTOR3 FIELD_2D::minIndex()
   return minFoundIndex;
 }
 
-} // ANGLE
+} // namespace HOBAK

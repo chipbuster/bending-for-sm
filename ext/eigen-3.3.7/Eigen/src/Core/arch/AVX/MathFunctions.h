@@ -18,8 +18,7 @@ namespace Eigen {
 
 namespace internal {
 
-inline Packet8i pshiftleft(Packet8i v, int n)
-{
+inline Packet8i pshiftleft(Packet8i v, int n) {
 #ifdef EIGEN_VECTORIZE_AVX2
   return _mm256_slli_epi32(v, n);
 #else
@@ -29,14 +28,16 @@ inline Packet8i pshiftleft(Packet8i v, int n)
 #endif
 }
 
-inline Packet8f pshiftright(Packet8f v, int n)
-{
+inline Packet8f pshiftright(Packet8f v, int n) {
 #ifdef EIGEN_VECTORIZE_AVX2
   return _mm256_cvtepi32_ps(_mm256_srli_epi32(_mm256_castps_si256(v), n));
 #else
-  __m128i lo = _mm_srli_epi32(_mm256_extractf128_si256(_mm256_castps_si256(v), 0), n);
-  __m128i hi = _mm_srli_epi32(_mm256_extractf128_si256(_mm256_castps_si256(v), 1), n);
-  return _mm256_cvtepi32_ps(_mm256_insertf128_si256(_mm256_castsi128_si256(lo), (hi), 1));
+  __m128i lo =
+      _mm_srli_epi32(_mm256_extractf128_si256(_mm256_castps_si256(v), 0), n);
+  __m128i hi =
+      _mm_srli_epi32(_mm256_extractf128_si256(_mm256_castps_si256(v), 1), n);
+  return _mm256_cvtepi32_ps(
+      _mm256_insertf128_si256(_mm256_castsi128_si256(lo), (hi), 1));
 #endif
 }
 
@@ -46,7 +47,7 @@ inline Packet8f pshiftright(Packet8f v, int n)
 // are (anti-)symmetric and thus have only odd/even coefficients
 template <>
 EIGEN_DEFINE_FUNCTION_ALLOWING_MULTIPLE_DEFINITIONS EIGEN_UNUSED Packet8f
-psin<Packet8f>(const Packet8f& _x) {
+psin<Packet8f>(const Packet8f &_x) {
   Packet8f x = _x;
 
   // Some useful values.
@@ -71,7 +72,8 @@ psin<Packet8f>(const Packet8f& _x) {
   // Make a mask for the entries that need flipping, i.e. wherever the shift
   // is odd.
   Packet8i shift_ints = _mm256_cvtps_epi32(shift);
-  Packet8i shift_isodd = _mm256_castps_si256(_mm256_and_ps(_mm256_castsi256_ps(shift_ints), _mm256_castsi256_ps(p8i_one)));
+  Packet8i shift_isodd = _mm256_castps_si256(_mm256_and_ps(
+      _mm256_castsi256_ps(shift_ints), _mm256_castsi256_ps(p8i_one)));
   Packet8i sign_flip_mask = pshiftleft(shift_isodd, 31);
 
   // Create a mask for which interpolant to use, i.e. if z > 1, then the mask
@@ -118,7 +120,7 @@ psin<Packet8f>(const Packet8f& _x) {
 //               polynomial interpolants -> ... -> profit!
 template <>
 EIGEN_DEFINE_FUNCTION_ALLOWING_MULTIPLE_DEFINITIONS EIGEN_UNUSED Packet8f
-plog<Packet8f>(const Packet8f& _x) {
+plog<Packet8f>(const Packet8f &_x) {
   Packet8f x = _x;
   _EIGEN_DECLARE_CONST_Packet8f(1, 1.0f);
   _EIGEN_DECLARE_CONST_Packet8f(half, 0.5f);
@@ -144,13 +146,15 @@ plog<Packet8f>(const Packet8f& _x) {
   _EIGEN_DECLARE_CONST_Packet8f(cephes_log_q1, -2.12194440e-4f);
   _EIGEN_DECLARE_CONST_Packet8f(cephes_log_q2, 0.693359375f);
 
-  Packet8f invalid_mask = _mm256_cmp_ps(x, _mm256_setzero_ps(), _CMP_NGE_UQ); // not greater equal is true if x is NaN
+  Packet8f invalid_mask =
+      _mm256_cmp_ps(x, _mm256_setzero_ps(),
+                    _CMP_NGE_UQ); // not greater equal is true if x is NaN
   Packet8f iszero_mask = _mm256_cmp_ps(x, _mm256_setzero_ps(), _CMP_EQ_OQ);
 
   // Truncate input values to the minimum positive normal.
   x = pmax(x, p8f_min_norm_pos);
 
-  Packet8f emm0 = pshiftright(x,23);
+  Packet8f emm0 = pshiftright(x, 23);
   Packet8f e = _mm256_sub_ps(emm0, p8f_126f);
 
   // Set the exponents to -1, i.e. x are in the range [0.5,1).
@@ -206,7 +210,7 @@ plog<Packet8f>(const Packet8f& _x) {
 // "exp(x) = 2^m*exp(r)" where exp(r) is in the range [-1,1).
 template <>
 EIGEN_DEFINE_FUNCTION_ALLOWING_MULTIPLE_DEFINITIONS EIGEN_UNUSED Packet8f
-pexp<Packet8f>(const Packet8f& _x) {
+pexp<Packet8f>(const Packet8f &_x) {
   _EIGEN_DECLARE_CONST_Packet8f(1, 1.0f);
   _EIGEN_DECLARE_CONST_Packet8f(half, 0.5f);
   _EIGEN_DECLARE_CONST_Packet8f(127, 127.0f);
@@ -268,13 +272,13 @@ pexp<Packet8f>(const Packet8f& _x) {
 // Hyperbolic Tangent function.
 template <>
 EIGEN_DEFINE_FUNCTION_ALLOWING_MULTIPLE_DEFINITIONS EIGEN_UNUSED Packet8f
-ptanh<Packet8f>(const Packet8f& x) {
+ptanh<Packet8f>(const Packet8f &x) {
   return internal::generic_fast_tanh_float(x);
 }
 
 template <>
 EIGEN_DEFINE_FUNCTION_ALLOWING_MULTIPLE_DEFINITIONS EIGEN_UNUSED Packet4d
-pexp<Packet4d>(const Packet4d& _x) {
+pexp<Packet4d>(const Packet4d &_x) {
   Packet4d x = _x;
 
   _EIGEN_DECLARE_CONST_Packet4d(1, 1.0);
@@ -363,7 +367,7 @@ pexp<Packet4d>(const Packet4d& _x) {
 #if EIGEN_FAST_MATH
 template <>
 EIGEN_DEFINE_FUNCTION_ALLOWING_MULTIPLE_DEFINITIONS EIGEN_UNUSED Packet8f
-psqrt<Packet8f>(const Packet8f& _x) {
+psqrt<Packet8f>(const Packet8f &_x) {
   Packet8f half = pmul(_x, pset1<Packet8f>(.5f));
   Packet8f denormal_mask = _mm256_and_ps(
       _mm256_cmp_ps(_x, pset1<Packet8f>((std::numeric_limits<float>::min)()),
@@ -373,24 +377,27 @@ psqrt<Packet8f>(const Packet8f& _x) {
   // Compute approximate reciprocal sqrt.
   Packet8f x = _mm256_rsqrt_ps(_x);
   // Do a single step of Newton's iteration.
-  x = pmul(x, psub(pset1<Packet8f>(1.5f), pmul(half, pmul(x,x))));
+  x = pmul(x, psub(pset1<Packet8f>(1.5f), pmul(half, pmul(x, x))));
   // Flush results for denormals to zero.
-  return _mm256_andnot_ps(denormal_mask, pmul(_x,x));
+  return _mm256_andnot_ps(denormal_mask, pmul(_x, x));
 }
 #else
-template <> EIGEN_DEFINE_FUNCTION_ALLOWING_MULTIPLE_DEFINITIONS EIGEN_UNUSED
-Packet8f psqrt<Packet8f>(const Packet8f& x) {
+template <>
+EIGEN_DEFINE_FUNCTION_ALLOWING_MULTIPLE_DEFINITIONS EIGEN_UNUSED Packet8f
+psqrt<Packet8f>(const Packet8f &x) {
   return _mm256_sqrt_ps(x);
 }
 #endif
-template <> EIGEN_DEFINE_FUNCTION_ALLOWING_MULTIPLE_DEFINITIONS EIGEN_UNUSED
-Packet4d psqrt<Packet4d>(const Packet4d& x) {
+template <>
+EIGEN_DEFINE_FUNCTION_ALLOWING_MULTIPLE_DEFINITIONS EIGEN_UNUSED Packet4d
+psqrt<Packet4d>(const Packet4d &x) {
   return _mm256_sqrt_pd(x);
 }
 #if EIGEN_FAST_MATH
 
-template<> EIGEN_DEFINE_FUNCTION_ALLOWING_MULTIPLE_DEFINITIONS EIGEN_UNUSED
-Packet8f prsqrt<Packet8f>(const Packet8f& _x) {
+template <>
+EIGEN_DEFINE_FUNCTION_ALLOWING_MULTIPLE_DEFINITIONS EIGEN_UNUSED Packet8f
+prsqrt<Packet8f>(const Packet8f &_x) {
   _EIGEN_DECLARE_CONST_Packet8f_FROM_INT(inf, 0x7f800000);
   _EIGEN_DECLARE_CONST_Packet8f_FROM_INT(nan, 0x7fc00000);
   _EIGEN_DECLARE_CONST_Packet8f(one_point_five, 1.5f);
@@ -418,22 +425,23 @@ Packet8f prsqrt<Packet8f>(const Packet8f& _x) {
 }
 
 #else
-template <> EIGEN_DEFINE_FUNCTION_ALLOWING_MULTIPLE_DEFINITIONS EIGEN_UNUSED
-Packet8f prsqrt<Packet8f>(const Packet8f& x) {
+template <>
+EIGEN_DEFINE_FUNCTION_ALLOWING_MULTIPLE_DEFINITIONS EIGEN_UNUSED Packet8f
+prsqrt<Packet8f>(const Packet8f &x) {
   _EIGEN_DECLARE_CONST_Packet8f(one, 1.0f);
   return _mm256_div_ps(p8f_one, _mm256_sqrt_ps(x));
 }
 #endif
 
-template <> EIGEN_DEFINE_FUNCTION_ALLOWING_MULTIPLE_DEFINITIONS EIGEN_UNUSED
-Packet4d prsqrt<Packet4d>(const Packet4d& x) {
+template <>
+EIGEN_DEFINE_FUNCTION_ALLOWING_MULTIPLE_DEFINITIONS EIGEN_UNUSED Packet4d
+prsqrt<Packet4d>(const Packet4d &x) {
   _EIGEN_DECLARE_CONST_Packet4d(one, 1.0);
   return _mm256_div_pd(p4d_one, _mm256_sqrt_pd(x));
 }
 
+} // end namespace internal
 
-}  // end namespace internal
+} // end namespace Eigen
 
-}  // end namespace Eigen
-
-#endif  // EIGEN_MATH_FUNCTIONS_AVX_H
+#endif // EIGEN_MATH_FUNCTIONS_AVX_H

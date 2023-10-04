@@ -9,28 +9,25 @@
 
 namespace Spectra {
 
-
 ///
 /// \ingroup Enumerations
 ///
 /// The enumeration to report the status of computation.
 ///
-enum COMPUTATION_INFO
-{
-    SUCCESSFUL = 0,    ///< Computation was successful.
+enum COMPUTATION_INFO {
+  SUCCESSFUL = 0, ///< Computation was successful.
 
-    NOT_COMPUTED,      ///< Used in eigen solvers, indicating that computation
-                       ///< has not been conducted. Users should call
-                       ///< the `compute()` member function of solvers.
+  NOT_COMPUTED, ///< Used in eigen solvers, indicating that computation
+                ///< has not been conducted. Users should call
+                ///< the `compute()` member function of solvers.
 
-    NOT_CONVERGING,    ///< Used in eigen solvers, indicating that some eigenvalues
-                       ///< did not converge. The `compute()`
-                       ///< function returns the number of converged eigenvalues.
+  NOT_CONVERGING, ///< Used in eigen solvers, indicating that some eigenvalues
+                  ///< did not converge. The `compute()`
+                  ///< function returns the number of converged eigenvalues.
 
-    NUMERICAL_ISSUE    ///< Used in Cholesky decomposition, indicating that the
-                       ///< matrix is not positive definite.
+  NUMERICAL_ISSUE ///< Used in Cholesky decomposition, indicating that the
+                  ///< matrix is not positive definite.
 };
-
 
 } // namespace Spectra
 

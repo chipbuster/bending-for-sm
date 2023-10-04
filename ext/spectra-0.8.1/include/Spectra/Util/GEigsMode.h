@@ -9,25 +9,26 @@
 
 namespace Spectra {
 
-
 ///
 /// \ingroup Enumerations
 ///
 /// The enumeration to specify the mode of generalized eigenvalue solver.
 ///
-enum GEIGS_MODE
-{
-    GEIGS_CHOLESKY = 0,     ///< Using Cholesky decomposition to solve generalized eigenvalues.
+enum GEIGS_MODE {
+  GEIGS_CHOLESKY =
+      0, ///< Using Cholesky decomposition to solve generalized eigenvalues.
 
-    GEIGS_REGULAR_INVERSE,  ///< Regular inverse mode for generalized eigenvalue solver.
+  GEIGS_REGULAR_INVERSE, ///< Regular inverse mode for generalized eigenvalue
+                         ///< solver.
 
-    GEIGS_SHIFT_INVERT,     ///< Shift-and-invert mode for generalized eigenvalue solver.
+  GEIGS_SHIFT_INVERT, ///< Shift-and-invert mode for generalized eigenvalue
+                      ///< solver.
 
-    GEIGS_BUCKLING,         ///< Buckling mode for generalized eigenvalue solver.
+  GEIGS_BUCKLING, ///< Buckling mode for generalized eigenvalue solver.
 
-    GEIGS_CAYLEY            ///< Cayley transformation mode for generalized eigenvalue solver.
+  GEIGS_CAYLEY ///< Cayley transformation mode for generalized eigenvalue
+               ///< solver.
 };
-
 
 } // namespace Spectra
 

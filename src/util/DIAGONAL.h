@@ -3,11 +3,10 @@
 
 #include "SETTINGS.h"
 
-class DIAGONAL
-{
+class DIAGONAL {
 public:
-  DIAGONAL(const SPARSE_MATRIX& A);
-  virtual VECTOR apply(const VECTOR& rhs) const;
+  DIAGONAL(const SPARSE_MATRIX &A);
+  virtual VECTOR apply(const VECTOR &rhs) const;
 
 protected:
   VECTOR _invDiag;

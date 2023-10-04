@@ -15,7 +15,6 @@
 
 namespace Spectra {
 
-
 ///
 /// \ingroup EigenSolver
 ///
@@ -42,20 +41,23 @@ namespace Spectra {
 /// wrapper class SparseSymMatProd can be used similarly.
 ///
 /// If the users need to define their own matrix-vector multiplication operation
-/// class, it should implement all the public member functions as in DenseSymMatProd.
+/// class, it should implement all the public member functions as in
+/// DenseSymMatProd.
 ///
 /// \tparam Scalar        The element type of the matrix.
-///                       Currently supported types are `float`, `double` and `long double`.
+///                       Currently supported types are `float`, `double` and
+///                       `long double`.
 /// \tparam SelectionRule An enumeration value indicating the selection rule of
 ///                       the requested eigenvalues, for example `LARGEST_MAGN`
 ///                       to retrieve eigenvalues with the largest magnitude.
 ///                       The full list of enumeration values can be found in
 ///                       \ref Enumerations.
-/// \tparam OpType        The name of the matrix operation class. Users could either
+/// \tparam OpType        The name of the matrix operation class. Users could
+/// either
 ///                       use the wrapper classes such as DenseSymMatProd and
 ///                       SparseSymMatProd, or define their
-///                       own that implements all the public member functions as in
-///                       DenseSymMatProd.
+///                       own that implements all the public member functions as
+///                       in DenseSymMatProd.
 ///
 /// Below is an example that demonstrates the usage of this class.
 ///
@@ -73,11 +75,12 @@ namespace Spectra {
 ///     Eigen::MatrixXd A = Eigen::MatrixXd::Random(10, 10);
 ///     Eigen::MatrixXd M = A + A.transpose();
 ///
-///     // Construct matrix operation object using the wrapper class DenseSymMatProd
-///     DenseSymMatProd<double> op(M);
+///     // Construct matrix operation object using the wrapper class
+///     DenseSymMatProd DenseSymMatProd<double> op(M);
 ///
-///     // Construct eigen solver object, requesting the largest three eigenvalues
-///     SymEigsSolver< double, LARGEST_ALGE, DenseSymMatProd<double> > eigs(&op, 3, 6);
+///     // Construct eigen solver object, requesting the largest three
+///     eigenvalues SymEigsSolver< double, LARGEST_ALGE, DenseSymMatProd<double>
+///     > eigs(&op, 3, 6);
 ///
 ///     // Initialize and compute
 ///     eigs.init();
@@ -136,38 +139,37 @@ namespace Spectra {
 /// }
 /// \endcode
 ///
-template < typename Scalar = double,
-           int SelectionRule = LARGEST_MAGN,
-           typename OpType = DenseSymMatProd<double> >
-class SymEigsSolver: public SymEigsBase<Scalar, SelectionRule, OpType, IdentityBOp>
-{
+template <typename Scalar = double, int SelectionRule = LARGEST_MAGN,
+          typename OpType = DenseSymMatProd<double>>
+class SymEigsSolver
+    : public SymEigsBase<Scalar, SelectionRule, OpType, IdentityBOp> {
 private:
-    typedef Eigen::Index Index;
+  typedef Eigen::Index Index;
 
 public:
-    ///
-    /// Constructor to create a solver object.
-    ///
-    /// \param op   Pointer to the matrix operation object, which should implement
-    ///             the matrix-vector multiplication operation of \f$A\f$:
-    ///             calculating \f$Av\f$ for any vector \f$v\f$. Users could either
-    ///             create the object from the wrapper class such as DenseSymMatProd, or
-    ///             define their own that implements all the public member functions
-    ///             as in DenseSymMatProd.
-    /// \param nev  Number of eigenvalues requested. This should satisfy \f$1\le nev \le n-1\f$,
-    ///             where \f$n\f$ is the size of matrix.
-    /// \param ncv  Parameter that controls the convergence speed of the algorithm.
-    ///             Typically a larger `ncv` means faster convergence, but it may
-    ///             also result in greater memory use and more matrix operations
-    ///             in each iteration. This parameter must satisfy \f$nev < ncv \le n\f$,
-    ///             and is advised to take \f$ncv \ge 2\cdot nev\f$.
-    ///
-    SymEigsSolver(OpType* op, Index nev, Index ncv) :
-        SymEigsBase<Scalar, SelectionRule, OpType, IdentityBOp>(op, NULL, nev, ncv)
-    {}
-
+  ///
+  /// Constructor to create a solver object.
+  ///
+  /// \param op   Pointer to the matrix operation object, which should implement
+  ///             the matrix-vector multiplication operation of \f$A\f$:
+  ///             calculating \f$Av\f$ for any vector \f$v\f$. Users could
+  ///             either create the object from the wrapper class such as
+  ///             DenseSymMatProd, or define their own that implements all the
+  ///             public member functions as in DenseSymMatProd.
+  /// \param nev  Number of eigenvalues requested. This should satisfy \f$1\le
+  /// nev \le n-1\f$,
+  ///             where \f$n\f$ is the size of matrix.
+  /// \param ncv  Parameter that controls the convergence speed of the
+  /// algorithm.
+  ///             Typically a larger `ncv` means faster convergence, but it may
+  ///             also result in greater memory use and more matrix operations
+  ///             in each iteration. This parameter must satisfy \f$nev < ncv
+  ///             \le n\f$, and is advised to take \f$ncv \ge 2\cdot nev\f$.
+  ///
+  SymEigsSolver(OpType *op, Index nev, Index ncv)
+      : SymEigsBase<Scalar, SelectionRule, OpType, IdentityBOp>(op, NULL, nev,
+                                                                ncv) {}
 };
-
 
 } // namespace Spectra
 

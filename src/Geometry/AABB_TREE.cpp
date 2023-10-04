@@ -1,16 +1,16 @@
 /*
 This file is part of HOBAK.
 
-HOBAK is free software: you can redistribute it and/or modify it under the terms of 
-the GNU General Public License as published by the Free Software Foundation, either 
-version 3 of the License, or (at your option) any later version.
+HOBAK is free software: you can redistribute it and/or modify it under the terms
+of the GNU General Public License as published by the Free Software Foundation,
+either version 3 of the License, or (at your option) any later version.
 
-HOBAK is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; 
-without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
-PURPOSE. See the GNU General Public License for more details.
+HOBAK is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along with HOBAK. 
-If not, see <https://www.gnu.org/licenses/>.
+You should have received a copy of the GNU General Public License along with
+HOBAK. If not, see <https://www.gnu.org/licenses/>.
 */
 #include "AABB_TREE.h"
 #include "util/TIMER.h"
@@ -22,11 +22,10 @@ namespace HOBAK {
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-AABB_TREE::AABB_TREE(const vector<VECTOR3>& vertices, 
-                     const vector<VECTOR3I>* surfaceTriangles) :
-  _vertices(vertices), _surfaceTriangles(surfaceTriangles),
-  _surfaceEdges(NULL)
-{
+AABB_TREE::AABB_TREE(const vector<VECTOR3> &vertices,
+                     const vector<VECTOR3I> *surfaceTriangles)
+    : _vertices(vertices), _surfaceTriangles(surfaceTriangles),
+      _surfaceEdges(NULL) {
   // we're looking at a non-degenerate mesh, right?
   assert(_vertices.size() > 0);
   assert(_surfaceTriangles->size() > 0);
@@ -37,11 +36,10 @@ AABB_TREE::AABB_TREE(const vector<VECTOR3>& vertices,
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-AABB_TREE::AABB_TREE(const vector<VECTOR3>& vertices, 
-                     const vector<VECTOR2I>* surfaceEdges) :
-  _vertices(vertices), _surfaceTriangles(NULL),
-  _surfaceEdges(surfaceEdges)
-{
+AABB_TREE::AABB_TREE(const vector<VECTOR3> &vertices,
+                     const vector<VECTOR2I> *surfaceEdges)
+    : _vertices(vertices), _surfaceTriangles(NULL),
+      _surfaceEdges(surfaceEdges) {
   // we're looking at a non-degenerate mesh, right?
   assert(_vertices.size() > 0);
   assert(_surfaceEdges->size() > 0);
@@ -50,16 +48,12 @@ AABB_TREE::AABB_TREE(const vector<VECTOR3>& vertices,
   buildEdgeRoot();
 }
 
-AABB_TREE::~AABB_TREE()
-{
-  deleteTree(_root);
-}
+AABB_TREE::~AABB_TREE() { deleteTree(_root); }
 
 ///////////////////////////////////////////////////////////////////////
 // let's clean up after ourselves!
 ///////////////////////////////////////////////////////////////////////
-void AABB_TREE::deleteTree(AABB_NODE* node)
-{
+void AABB_TREE::deleteTree(AABB_NODE *node) {
   if (node->child[0] != NULL)
     deleteTree(node->child[0]);
   if (node->child[1] != NULL)
@@ -70,8 +64,7 @@ void AABB_TREE::deleteTree(AABB_NODE* node)
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-void AABB_TREE::buildTriangleRoot()
-{
+void AABB_TREE::buildTriangleRoot() {
   TIMER functionTimer(__FUNCTION__);
   // make an index list of the enclosed triangles
   vector<int> triangleIndices;
@@ -91,10 +84,9 @@ void AABB_TREE::buildTriangleRoot()
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-void AABB_TREE::buildEdgeRoot()
-{
-  //TIMER functionTimer(__FUNCTION__);
-  // make an index list of the enclosed edges
+void AABB_TREE::buildEdgeRoot() {
+  // TIMER functionTimer(__FUNCTION__);
+  //  make an index list of the enclosed edges
   vector<int> edgeIndices;
   for (unsigned int x = 0; x < _surfaceEdges->size(); x++)
     edgeIndices.push_back(x);
@@ -113,8 +105,7 @@ void AABB_TREE::buildEdgeRoot()
 ///////////////////////////////////////////////////////////////////////
 // given en edge node, let's build it's children
 ///////////////////////////////////////////////////////////////////////
-void AABB_TREE::buildEdgeChildren(AABB_NODE* node, const int depth)
-{
+void AABB_TREE::buildEdgeChildren(AABB_NODE *node, const int depth) {
   // it's not empty, right?
   assert(node->primitiveIndices.size() > 0);
 
@@ -127,8 +118,7 @@ void AABB_TREE::buildEdgeChildren(AABB_NODE* node, const int depth)
   REAL maxLength = interval[0];
   int maxAxis = 0;
   for (unsigned int x = 1; x < 3; x++)
-    if (interval[x] > maxLength)
-    {
+    if (interval[x] > maxLength) {
       maxLength = interval[x];
       maxAxis = x;
     }
@@ -139,10 +129,10 @@ void AABB_TREE::buildEdgeChildren(AABB_NODE* node, const int depth)
   // build the child node triangle lists
   vector<int> childList0;
   vector<int> childList1;
-  buildEdgeChildLists(cuttingPlane, maxAxis, node->primitiveIndices,
-                      childList0, childList1);
+  buildEdgeChildLists(cuttingPlane, maxAxis, node->primitiveIndices, childList0,
+                      childList1);
 
-  // if either size is empty, give up (probably something a little nicer is 
+  // if either size is empty, give up (probably something a little nicer is
   // possible here, but let's leave it for now)
   //
   // this will implcitly make this a leaf node, because primitiveIndices
@@ -154,11 +144,11 @@ void AABB_TREE::buildEdgeChildren(AABB_NODE* node, const int depth)
   VECTOR3 mins0, maxs0;
   findEdgeBoundingBox(childList0, mins0, maxs0);
   node->child[0] = new AABB_NODE(childList0, mins0, maxs0, depth);
-  
+
   VECTOR3 mins1, maxs1;
   findEdgeBoundingBox(childList1, mins1, maxs1);
   node->child[1] = new AABB_NODE(childList1, mins1, maxs1, depth);
-  
+
   buildEdgeChildren(node->child[0], depth + 1);
   buildEdgeChildren(node->child[1], depth + 1);
 
@@ -171,8 +161,7 @@ void AABB_TREE::buildEdgeChildren(AABB_NODE* node, const int depth)
 ///////////////////////////////////////////////////////////////////////
 // given a triangle node, let's build it's children
 ///////////////////////////////////////////////////////////////////////
-void AABB_TREE::buildTriangleChildren(AABB_NODE* node, const int depth)
-{
+void AABB_TREE::buildTriangleChildren(AABB_NODE *node, const int depth) {
   // it's not empty, right?
   assert(node->primitiveIndices.size() > 0);
 
@@ -185,8 +174,7 @@ void AABB_TREE::buildTriangleChildren(AABB_NODE* node, const int depth)
   REAL maxLength = interval[0];
   int maxAxis = 0;
   for (unsigned int x = 1; x < 3; x++)
-    if (interval[x] > maxLength)
-    {
+    if (interval[x] > maxLength) {
       maxLength = interval[x];
       maxAxis = x;
     }
@@ -200,7 +188,7 @@ void AABB_TREE::buildTriangleChildren(AABB_NODE* node, const int depth)
   buildTriangleChildLists(cuttingPlane, maxAxis, node->primitiveIndices,
                           childList0, childList1);
 
-  // if either size is empty, give up (probably something a little nicer is 
+  // if either size is empty, give up (probably something a little nicer is
   // possible here, but let's leave it for now)
   //
   // this will implcitly make this a leaf node, because primitiveIndices
@@ -212,11 +200,11 @@ void AABB_TREE::buildTriangleChildren(AABB_NODE* node, const int depth)
   VECTOR3 mins0, maxs0;
   findTriangleBoundingBox(childList0, mins0, maxs0);
   node->child[0] = new AABB_NODE(childList0, mins0, maxs0, depth);
-  
+
   VECTOR3 mins1, maxs1;
   findTriangleBoundingBox(childList1, mins1, maxs1);
   node->child[1] = new AABB_NODE(childList1, mins1, maxs1, depth);
-  
+
   buildTriangleChildren(node->child[0], depth + 1);
   buildTriangleChildren(node->child[1], depth + 1);
 
@@ -229,15 +217,15 @@ void AABB_TREE::buildTriangleChildren(AABB_NODE* node, const int depth)
 ///////////////////////////////////////////////////////////////////////
 // cut the a list of triangles into two child lists
 ///////////////////////////////////////////////////////////////////////
-void AABB_TREE::buildTriangleChildLists(const REAL& cuttingPlane, const int& axis,
-                                        const vector<int>& triangleIndices,
-                                        vector<int>& childList0, vector<int>& childList1)
-{
-  for (unsigned int x = 0; x < triangleIndices.size(); x++)
-  {
+void AABB_TREE::buildTriangleChildLists(const REAL &cuttingPlane,
+                                        const int &axis,
+                                        const vector<int> &triangleIndices,
+                                        vector<int> &childList0,
+                                        vector<int> &childList1) {
+  for (unsigned int x = 0; x < triangleIndices.size(); x++) {
     // compute the triangle center
     const int index = triangleIndices[x];
-    const VECTOR3I& triangle = (*_surfaceTriangles)[index];
+    const VECTOR3I &triangle = (*_surfaceTriangles)[index];
 
     VECTOR3 mean = _vertices[triangle[0]];
     mean += _vertices[triangle[1]];
@@ -254,15 +242,14 @@ void AABB_TREE::buildTriangleChildLists(const REAL& cuttingPlane, const int& axi
 ///////////////////////////////////////////////////////////////////////
 // cut the a list of edges into two child lists
 ///////////////////////////////////////////////////////////////////////
-void AABB_TREE::buildEdgeChildLists(const REAL& cuttingPlane, const int& axis,
-                                    const vector<int>& edgeIndices,
-                                    vector<int>& childList0, vector<int>& childList1)
-{
-  for (unsigned int x = 0; x < edgeIndices.size(); x++)
-  {
+void AABB_TREE::buildEdgeChildLists(const REAL &cuttingPlane, const int &axis,
+                                    const vector<int> &edgeIndices,
+                                    vector<int> &childList0,
+                                    vector<int> &childList1) {
+  for (unsigned int x = 0; x < edgeIndices.size(); x++) {
     // compute the triangle center
     const int index = edgeIndices[x];
-    const VECTOR2I& edge = (*_surfaceEdges)[index];
+    const VECTOR2I &edge = (*_surfaceEdges)[index];
 
     VECTOR3 mean = _vertices[edge[0]];
     mean += _vertices[edge[1]];
@@ -276,28 +263,25 @@ void AABB_TREE::buildEdgeChildLists(const REAL& cuttingPlane, const int& axis,
 }
 
 ///////////////////////////////////////////////////////////////////////
-// given a list of indices into _surfaceTriangles, find the 
+// given a list of indices into _surfaceTriangles, find the
 // bounding box
 ///////////////////////////////////////////////////////////////////////
-void AABB_TREE::findTriangleBoundingBox(const vector<int>& triangleIndices,
-                                        VECTOR3& mins, VECTOR3& maxs) const
-{
-  const VECTOR3I& triangle0 = (*_surfaceTriangles)[triangleIndices[0]];
+void AABB_TREE::findTriangleBoundingBox(const vector<int> &triangleIndices,
+                                        VECTOR3 &mins, VECTOR3 &maxs) const {
+  const VECTOR3I &triangle0 = (*_surfaceTriangles)[triangleIndices[0]];
 
   mins = _vertices[triangle0[0]];
   maxs = _vertices[triangle0[0]];
 
-  for (unsigned int x = 0; x < triangleIndices.size(); x++)
-  {
-    const VECTOR3I& triangle = (*_surfaceTriangles)[triangleIndices[x]];
-    for (unsigned int y = 0; y < 3; y++)
-    {
-      const VECTOR3& v = _vertices[triangle[y]];
+  for (unsigned int x = 0; x < triangleIndices.size(); x++) {
+    const VECTOR3I &triangle = (*_surfaceTriangles)[triangleIndices[x]];
+    for (unsigned int y = 0; y < 3; y++) {
+      const VECTOR3 &v = _vertices[triangle[y]];
 
       mins[0] = (v[0] > mins[0]) ? mins[0] : v[0];
       mins[1] = (v[1] > mins[1]) ? mins[1] : v[1];
       mins[2] = (v[2] > mins[2]) ? mins[2] : v[2];
-      
+
       maxs[0] = (v[0] < maxs[0]) ? maxs[0] : v[0];
       maxs[1] = (v[1] < maxs[1]) ? maxs[1] : v[1];
       maxs[2] = (v[2] < maxs[2]) ? maxs[2] : v[2];
@@ -308,25 +292,22 @@ void AABB_TREE::findTriangleBoundingBox(const vector<int>& triangleIndices,
 ///////////////////////////////////////////////////////////////////////
 // given a list of indices into _surfaceEdges, find the bounding box
 ///////////////////////////////////////////////////////////////////////
-void AABB_TREE::findEdgeBoundingBox(const vector<int>& edgeIndices,
-                                    VECTOR3& mins, VECTOR3& maxs) const
-{
-  const VECTOR2I& edge0 = (*_surfaceEdges)[edgeIndices[0]];
+void AABB_TREE::findEdgeBoundingBox(const vector<int> &edgeIndices,
+                                    VECTOR3 &mins, VECTOR3 &maxs) const {
+  const VECTOR2I &edge0 = (*_surfaceEdges)[edgeIndices[0]];
 
   mins = _vertices[edge0[0]];
   maxs = _vertices[edge0[0]];
 
-  for (unsigned int x = 0; x < edgeIndices.size(); x++)
-  {
-    const VECTOR2I& edge = (*_surfaceEdges)[edgeIndices[x]];
-    for (unsigned int y = 0; y < 2; y++)
-    {
-      const VECTOR3& v = _vertices[edge[y]];
+  for (unsigned int x = 0; x < edgeIndices.size(); x++) {
+    const VECTOR2I &edge = (*_surfaceEdges)[edgeIndices[x]];
+    for (unsigned int y = 0; y < 2; y++) {
+      const VECTOR3 &v = _vertices[edge[y]];
 
       mins[0] = (v[0] > mins[0]) ? mins[0] : v[0];
       mins[1] = (v[1] > mins[1]) ? mins[1] : v[1];
       mins[2] = (v[2] > mins[2]) ? mins[2] : v[2];
-      
+
       maxs[0] = (v[0] < maxs[0]) ? maxs[0] : v[0];
       maxs[1] = (v[1] < maxs[1]) ? maxs[1] : v[1];
       maxs[2] = (v[2] < maxs[2]) ? maxs[2] : v[2];
@@ -337,8 +318,7 @@ void AABB_TREE::findEdgeBoundingBox(const vector<int>& edgeIndices,
 ///////////////////////////////////////////////////////////////////////
 // refit the bounding boxes, presumably because the vertices moved
 ///////////////////////////////////////////////////////////////////////
-void AABB_TREE::refit()
-{
+void AABB_TREE::refit() {
   TIMER functionTimer(__FUNCTION__);
   // one of these exists, right?
   assert(_surfaceTriangles || _surfaceEdges);
@@ -353,30 +333,26 @@ void AABB_TREE::refit()
 ///////////////////////////////////////////////////////////////////////
 // recursively refit existing bounding boxes
 ///////////////////////////////////////////////////////////////////////
-void AABB_TREE::refitEdges(AABB_NODE* node)
-{
-  //TIMER functionTimer(__FUNCTION__);
-  // we hit bottom, compute on edges
-  if (node->child[0] == NULL || node->child[1] == NULL)
-  {
+void AABB_TREE::refitEdges(AABB_NODE *node) {
+  // TIMER functionTimer(__FUNCTION__);
+  //  we hit bottom, compute on edges
+  if (node->child[0] == NULL || node->child[1] == NULL) {
     findEdgeBoundingBox(node->primitiveIndices, node->mins, node->maxs);
     return;
   }
-  
+
   // otherwise, recurse
   refitEdges(node->child[0]);
   refitEdges(node->child[1]);
 
   // refit based on the boxes below
-  for (int x = 0; x < 3; x++)
-  {
-    const REAL left  = node->child[0]->mins[x];
+  for (int x = 0; x < 3; x++) {
+    const REAL left = node->child[0]->mins[x];
     const REAL right = node->child[1]->mins[x];
     node->mins[x] = (left < right) ? left : right;
   }
-  for (int x = 0; x < 3; x++)
-  {
-    const REAL left  = node->child[0]->maxs[x];
+  for (int x = 0; x < 3; x++) {
+    const REAL left = node->child[0]->maxs[x];
     const REAL right = node->child[1]->maxs[x];
     node->maxs[x] = (left > right) ? left : right;
   }
@@ -385,30 +361,26 @@ void AABB_TREE::refitEdges(AABB_NODE* node)
 ///////////////////////////////////////////////////////////////////////
 // recursively refit existing bounding boxes
 ///////////////////////////////////////////////////////////////////////
-void AABB_TREE::refitTriangles(AABB_NODE* node)
-{
-  //TIMER functionTimer(__FUNCTION__);
-  // we hit bottom, compute on triangles
-  if (node->child[0] == NULL || node->child[1] == NULL)
-  {
+void AABB_TREE::refitTriangles(AABB_NODE *node) {
+  // TIMER functionTimer(__FUNCTION__);
+  //  we hit bottom, compute on triangles
+  if (node->child[0] == NULL || node->child[1] == NULL) {
     findTriangleBoundingBox(node->primitiveIndices, node->mins, node->maxs);
     return;
   }
-  
+
   // otherwise, recurse
   refitTriangles(node->child[0]);
   refitTriangles(node->child[1]);
 
   // refit based on the boxes below
-  for (int x = 0; x < 3; x++)
-  {
-    const REAL left  = node->child[0]->mins[x];
+  for (int x = 0; x < 3; x++) {
+    const REAL left = node->child[0]->mins[x];
     const REAL right = node->child[1]->mins[x];
     node->mins[x] = (left < right) ? left : right;
   }
-  for (int x = 0; x < 3; x++)
-  {
-    const REAL left  = node->child[0]->maxs[x];
+  for (int x = 0; x < 3; x++) {
+    const REAL left = node->child[0]->maxs[x];
     const REAL right = node->child[1]->maxs[x];
     node->maxs[x] = (left > right) ? left : right;
   }
@@ -417,19 +389,17 @@ void AABB_TREE::refitTriangles(AABB_NODE* node)
 ///////////////////////////////////////////////////////////////////////
 // are these two AABBs overlapping, subject to the distance eps?
 ///////////////////////////////////////////////////////////////////////
-bool AABB_TREE::overlappingAABBs(const AABB_NODE* node, 
-                                 const VECTOR2I& edge, 
-                                 const REAL& eps) const
-{
+bool AABB_TREE::overlappingAABBs(const AABB_NODE *node, const VECTOR2I &edge,
+                                 const REAL &eps) const {
   VECTOR3 mins, maxs;
   mins = _vertices[edge[0]];
   maxs = _vertices[edge[0]];
 
-  const VECTOR3& v1 = _vertices[edge[1]];
+  const VECTOR3 &v1 = _vertices[edge[1]];
   mins[0] = (mins[0] < v1[0]) ? mins[0] : v1[0];
   mins[1] = (mins[1] < v1[1]) ? mins[1] : v1[1];
   mins[2] = (mins[2] < v1[2]) ? mins[2] : v1[2];
-  
+
   maxs[0] = (maxs[0] > v1[0]) ? maxs[0] : v1[0];
   maxs[1] = (maxs[1] > v1[1]) ? maxs[1] : v1[1];
   maxs[2] = (maxs[2] > v1[2]) ? maxs[2] : v1[2];
@@ -440,11 +410,8 @@ bool AABB_TREE::overlappingAABBs(const AABB_NODE* node,
 ///////////////////////////////////////////////////////////////////////
 // are these two AABBs overlapping, subject to the distance eps?
 ///////////////////////////////////////////////////////////////////////
-bool AABB_TREE::overlappingAABBs(const AABB_NODE* node, 
-                                 const VECTOR3& mins, 
-                                 const VECTOR3& maxs, 
-                                 const REAL& eps) const
-{
+bool AABB_TREE::overlappingAABBs(const AABB_NODE *node, const VECTOR3 &mins,
+                                 const VECTOR3 &maxs, const REAL &eps) const {
   const VECTOR3 inflatedMins = node->mins - VECTOR3::Constant(eps);
   const VECTOR3 inflatedMaxs = node->maxs + VECTOR3::Constant(eps);
 
@@ -458,9 +425,8 @@ bool AABB_TREE::overlappingAABBs(const AABB_NODE* node,
 ///////////////////////////////////////////////////////////////////////
 // are we inside this AABB, subject to the distance eps?
 ///////////////////////////////////////////////////////////////////////
-bool AABB_TREE::insideAABB(const AABB_NODE* node, 
-                           const VECTOR3& vertex, const REAL& eps) const
-{
+bool AABB_TREE::insideAABB(const AABB_NODE *node, const VECTOR3 &vertex,
+                           const REAL &eps) const {
   const VECTOR3 mins = node->mins - VECTOR3::Constant(eps);
   const VECTOR3 maxs = node->maxs + VECTOR3::Constant(eps);
 
@@ -471,16 +437,16 @@ bool AABB_TREE::insideAABB(const AABB_NODE* node,
 }
 
 ///////////////////////////////////////////////////////////////////////
-// return a list of potential triangles nearby a box specified by min 
+// return a list of potential triangles nearby a box specified by min
 // and max, subject to a distance threshold
 ///////////////////////////////////////////////////////////////////////
-void AABB_TREE::nearbyTriangles(const AABB_NODE* node, const VECTOR3& mins,
-                                const VECTOR3& maxs, const REAL& eps, 
-                                vector<int>& faces) const
-{
+void AABB_TREE::nearbyTriangles(const AABB_NODE *node, const VECTOR3 &mins,
+                                const VECTOR3 &maxs, const REAL &eps,
+                                vector<int> &faces) const {
   const bool overlap = overlappingAABBs(node, mins, maxs, eps);
 
-  if (!overlap) return;
+  if (!overlap)
+    return;
 
   // if we're internal, recurse
   if (node->child[0] != NULL)
@@ -494,7 +460,7 @@ void AABB_TREE::nearbyTriangles(const AABB_NODE* node, const VECTOR3& mins,
 
   // if there are triangle indices here, add to the list to test
   assert(node->primitiveIndices.size() > 0);
-  const vector<int>& triangles = node->primitiveIndices;
+  const vector<int> &triangles = node->primitiveIndices;
   for (unsigned int x = 0; x < triangles.size(); x++)
     faces.push_back(triangles[x]);
 }
@@ -503,12 +469,12 @@ void AABB_TREE::nearbyTriangles(const AABB_NODE* node, const VECTOR3& mins,
 // return a list of edges nearby an edge
 // subject to a distance threshold, the actual recursive call
 ///////////////////////////////////////////////////////////////////////
-void AABB_TREE::nearbyEdges(const AABB_NODE* node, const VECTOR2I& edge, 
-                            const REAL& eps, vector<int>& edges) const
-{
+void AABB_TREE::nearbyEdges(const AABB_NODE *node, const VECTOR2I &edge,
+                            const REAL &eps, vector<int> &edges) const {
   const bool overlap = overlappingAABBs(node, edge, eps);
 
-  if (!overlap) return;
+  if (!overlap)
+    return;
 
   // if we're internal, recurse
   if (node->child[0] != NULL)
@@ -522,7 +488,7 @@ void AABB_TREE::nearbyEdges(const AABB_NODE* node, const VECTOR2I& edge,
 
   // if there are triangle indices here, add to the list to test
   assert(node->primitiveIndices.size() > 0);
-  const vector<int>& edgeIndices = node->primitiveIndices;
+  const vector<int> &edgeIndices = node->primitiveIndices;
   for (unsigned int x = 0; x < edgeIndices.size(); x++)
     edges.push_back(edgeIndices[x]);
 }
@@ -531,12 +497,12 @@ void AABB_TREE::nearbyEdges(const AABB_NODE* node, const VECTOR2I& edge,
 // return a list of triangles nearby a vertex
 // subject to a distance threshold, the actual recursive call
 ///////////////////////////////////////////////////////////////////////
-void AABB_TREE::nearbyTriangles(const AABB_NODE* node, const VECTOR3& vertex, 
-                                const REAL& eps, vector<int>& faces) const
-{
+void AABB_TREE::nearbyTriangles(const AABB_NODE *node, const VECTOR3 &vertex,
+                                const REAL &eps, vector<int> &faces) const {
   const bool inside = insideAABB(node, vertex, eps);
 
-  if (!inside) return;
+  if (!inside)
+    return;
 
   // if we're internal, recurse
   if (node->child[0] != NULL)
@@ -550,19 +516,18 @@ void AABB_TREE::nearbyTriangles(const AABB_NODE* node, const VECTOR3& vertex,
 
   // if there are triangle indices here, add to the list to test
   assert(node->primitiveIndices.size() > 0);
-  const vector<int>& triangles = node->primitiveIndices;
+  const vector<int> &triangles = node->primitiveIndices;
   for (unsigned int x = 0; x < triangles.size(); x++)
     faces.push_back(triangles[x]);
 }
 
 ///////////////////////////////////////////////////////////////////////
-// return a list of potential triangles nearby a vertex, 
+// return a list of potential triangles nearby a vertex,
 // subject to a distance threshold
 ///////////////////////////////////////////////////////////////////////
-void AABB_TREE::nearbyTriangles(const VECTOR3& vertex, const REAL& eps, 
-                                vector<int>& faces) const
-{
-  //TIMER functionTimer(__FUNCTION__);
+void AABB_TREE::nearbyTriangles(const VECTOR3 &vertex, const REAL &eps,
+                                vector<int> &faces) const {
+  // TIMER functionTimer(__FUNCTION__);
   assert(_surfaceTriangles != NULL);
 
   // make sure we don't keep old stuff around by mistake
@@ -573,13 +538,12 @@ void AABB_TREE::nearbyTriangles(const VECTOR3& vertex, const REAL& eps,
 }
 
 ///////////////////////////////////////////////////////////////////////
-// return a list of potential edges nearby a edge, 
+// return a list of potential edges nearby a edge,
 // subject to a distance threshold
 ///////////////////////////////////////////////////////////////////////
-void AABB_TREE::nearbyEdges(const VECTOR2I& edge, const REAL& eps, 
-                            vector<int>& edges) const
-{
-  //TIMER functionTimer(__FUNCTION__);
+void AABB_TREE::nearbyEdges(const VECTOR2I &edge, const REAL &eps,
+                            vector<int> &edges) const {
+  // TIMER functionTimer(__FUNCTION__);
   assert(_surfaceEdges != NULL);
 
   // make sure we don't keep old stuff around by mistake
@@ -590,13 +554,12 @@ void AABB_TREE::nearbyEdges(const VECTOR2I& edge, const REAL& eps,
 }
 
 ///////////////////////////////////////////////////////////////////////
-// return a list of potential triangles nearby a box specified by min and max, 
+// return a list of potential triangles nearby a box specified by min and max,
 // subject to a distance threshold
 ///////////////////////////////////////////////////////////////////////
-void AABB_TREE::nearbyTriangles(const VECTOR2I& edge, const REAL& eps, 
-                                vector<int>& faces) const
-{
-  //TIMER functionTimer(__FUNCTION__);
+void AABB_TREE::nearbyTriangles(const VECTOR2I &edge, const REAL &eps,
+                                vector<int> &faces) const {
+  // TIMER functionTimer(__FUNCTION__);
   assert(_surfaceTriangles != NULL);
   // make sure we don't keep old stuff around by mistake
   faces.clear();
@@ -621,10 +584,9 @@ void AABB_TREE::nearbyTriangles(const VECTOR2I& edge, const REAL& eps,
 // here for debugging purposes, similar to the edge-based one, but doesn't
 // need to reference points in _vertices
 ///////////////////////////////////////////////////////////////////////
-void AABB_TREE::nearbyTriangles(const VECTOR3& mins, const VECTOR3& maxs, 
-                                const REAL& eps, vector<int>& faces) const
-{
-  //TIMER functionTimer(__FUNCTION__);
+void AABB_TREE::nearbyTriangles(const VECTOR3 &mins, const VECTOR3 &maxs,
+                                const REAL &eps, vector<int> &faces) const {
+  // TIMER functionTimer(__FUNCTION__);
 
   // make sure we don't keep old stuff around by mistake
   faces.clear();
@@ -633,4 +595,4 @@ void AABB_TREE::nearbyTriangles(const VECTOR3& mins, const VECTOR3& maxs,
   nearbyTriangles(_root, mins, maxs, eps, faces);
 }
 
-} // ANGLE
+} // namespace HOBAK

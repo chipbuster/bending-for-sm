@@ -29,7 +29,8 @@ THE SOFTWARE.
 //                 * Support multiple search path for .mtl(v1 API).
 //                 * Support vertex weight `vw`(as an tinyobj extension)
 //                 * Support escaped whitespece in mtllib
-//                 * Add robust triangulation using Mapbox earcut(TINYOBJLOADER_USE_MAPBOX_EARCUT).
+//                 * Add robust triangulation using Mapbox
+//                 earcut(TINYOBJLOADER_USE_MAPBOX_EARCUT).
 // version 1.4.0 : Modifed ParseTextureNameAndOption API
 // version 1.3.1 : Make ParseTextureNameAndOption API public
 // version 1.3.0 : Separate warning and error message(breaking API of LoadObj)
@@ -139,10 +140,10 @@ namespace tinyobj {
 //
 
 #ifdef TINYOBJLOADER_USE_DOUBLE
-//#pragma message "using double"
+// #pragma message "using double"
 typedef double real_t;
 #else
-//#pragma message "using float"
+// #pragma message "using float"
 typedef float real_t;
 #endif
 
@@ -673,6 +674,7 @@ bool ParseTextureNameAndOption(std::string *texname, texture_option_t *texopt,
 #endif
 
 #include <array>
+
 #include "mapbox/earcut.hpp"
 
 #ifdef __clang__
@@ -972,7 +974,8 @@ static bool tryParseDouble(const char *s, const char *s_end, double *result) {
     while (end_not_reached && IS_DIGIT(*curr)) {
       // To avoid annoying MSVC's min/max macro definiton,
       // Use hardcoded int max value
-      if (exponent > (2147483647/10)) { // 2147483647 = std::numeric_limits<int>::max()
+      if (exponent >
+          (2147483647 / 10)) {  // 2147483647 = std::numeric_limits<int>::max()
         // Integer overflow
         goto fail;
       }
@@ -1653,7 +1656,6 @@ static bool exportGroupsToShape(shape_t *shape, const PrimGroup &prim_group,
 
 #else  // Built-in ear clipping triangulation
 
-
           face_t remainingFace = face;  // copy
           size_t guess_vert = 0;
           vertex_index_t ind[3];
@@ -1712,7 +1714,8 @@ static bool exportGroupsToShape(shape_t *shape, const PrimGroup &prim_group,
             // std::cout << "e0x, e0y, e1x, e1y " << e0x << ", " << e0y << ", "
             // << e1x << ", " << e1y << "\n";
 
-            real_t area = (vx[0] * vy[1] - vy[0] * vx[1]) * static_cast<real_t>(0.5);
+            real_t area =
+                (vx[0] * vy[1] - vy[0] * vx[1]) * static_cast<real_t>(0.5);
             // std::cout << "cross " << cross << ", area " << area << "\n";
             // if an internal angle
             if (cross * area < static_cast<real_t>(0.0)) {
@@ -2954,14 +2957,16 @@ bool LoadObj(attrib_t *attrib, std::vector<shape_t> *shapes,
   if (greatest_vn_idx >= static_cast<int>(vn.size() / 3)) {
     if (warn) {
       std::stringstream ss;
-      ss << "Vertex normal indices out of bounds (line " << line_num << ".)\n\n";
+      ss << "Vertex normal indices out of bounds (line " << line_num
+         << ".)\n\n";
       (*warn) += ss.str();
     }
   }
   if (greatest_vt_idx >= static_cast<int>(vt.size() / 2)) {
     if (warn) {
       std::stringstream ss;
-      ss << "Vertex texcoord indices out of bounds (line " << line_num << ".)\n\n";
+      ss << "Vertex texcoord indices out of bounds (line " << line_num
+         << ".)\n\n";
       (*warn) += ss.str();
     }
   }

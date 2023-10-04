@@ -1,16 +1,16 @@
 /*
 This file is part of ANGLE.
 
-ANGLE is free software: you can redistribute it and/or modify it under the terms of
-the GNU General Public License as published by the Free Software Foundation, either
-version 3 of the License, or (at your option) any later version.
+ANGLE is free software: you can redistribute it and/or modify it under the terms
+of the GNU General Public License as published by the Free Software Foundation,
+either version 3 of the License, or (at your option) any later version.
 
-ANGLE is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
-without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-PURPOSE. See the GNU General Public License for more details.
+ANGLE is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along with ANGLE.
-If not, see <https://www.gnu.org/licenses/>.
+You should have received a copy of the GNU General Public License along with
+ANGLE. If not, see <https://www.gnu.org/licenses/>.
 */
 #include "STRAND_MESH.h"
 #include "Hyperelastic/Strand/ISOTROPIC_BENDING.h"
@@ -34,16 +34,15 @@ using namespace std;
 
 // compute angle between u and v, but set the sign according to its
 // projection onto n
-inline REAL signedAngle(const VECTOR3& u, const VECTOR3& v, const VECTOR3& n)
-{
+inline REAL signedAngle(const VECTOR3 &u, const VECTOR3 &v, const VECTOR3 &n) {
   VECTOR3 w = u.cross(v);
   REAL angle = atan2(w.norm(), u.dot(v));
-  if (n.dot(w) < 0) return -angle;
+  if (n.dot(w) < 0)
+    return -angle;
   return angle;
 }
 
-VECTOR3 findOrthogonal(const VECTOR3& u)
-{
+VECTOR3 findOrthogonal(const VECTOR3 &u) {
   assert(u.norm() != 0);
 
   VECTOR3 v;
@@ -54,7 +53,8 @@ VECTOR3 findOrthogonal(const VECTOR3& u)
       v[i] = 1;
       return v;
     }
-    if (fabs(u[i]) > fabs(u[max])) max = i;
+    if (fabs(u[i]) > fabs(u[max]))
+      max = i;
   }
 
   int idx = (max + 1) % u.size();
@@ -68,12 +68,11 @@ VECTOR3 findOrthogonal(const VECTOR3& u)
 }
 
 // transport vector u from t1 to t2
-inline VECTOR3 parallel_transport(const VECTOR3& u,
-                                  const VECTOR3& t1,
-                                  const VECTOR3& t2)
-{
+inline VECTOR3 parallel_transport(const VECTOR3 &u, const VECTOR3 &t1,
+                                  const VECTOR3 &t2) {
   VECTOR3 b = t1.cross(t2);
-  if (b.norm() == 0) return u;
+  if (b.norm() == 0)
+    return u;
   b.normalize();
   b = (b - (b.dot(t1) * t1)).normalized();
   b = (b - (b.dot(t2) * t2)).normalized();
@@ -83,13 +82,14 @@ inline VECTOR3 parallel_transport(const VECTOR3& u,
 }
 
 // rotate vector v along axis z by angle theta
-// this is the Rodrigues formula: 
+// this is the Rodrigues formula:
 // https://en.wikipedia.org/wiki/Rodrigues%27_rotation_formula
-inline VECTOR3 rotateAxisAngle(const VECTOR3& v, const VECTOR3 z, const REAL& theta)
-{
+inline VECTOR3 rotateAxisAngle(const VECTOR3 &v, const VECTOR3 z,
+                               const REAL &theta) {
   assert(fabs(z.norm() - 1.0) < 1e-10);
 
-  if (theta == 0) return v;
+  if (theta == 0)
+    return v;
 
   REAL c = cos(theta);
   REAL s = sin(theta);
@@ -99,16 +99,13 @@ inline VECTOR3 rotateAxisAngle(const VECTOR3& v, const VECTOR3 z, const REAL& th
 ///////////////////////////////////////////////////////////////////////
 // assumes it's all just one big strand
 ///////////////////////////////////////////////////////////////////////
-STRAND_MESH::STRAND_MESH(const vector<VECTOR3>& restVertices,
-                         const REAL& E,        // Young's modulus
-                         const REAL& G,       // shear modulus
-                         const REAL& density,
-                         const REAL& radiusA,
-                         const REAL& radiusB) :
-    _vertices(restVertices),
-    _restVertices(restVertices),
-    _E(E), _G(G), _density(density), _radiusA(radiusA), _radiusB(radiusB)
-{
+STRAND_MESH::STRAND_MESH(const vector<VECTOR3> &restVertices,
+                         const REAL &E, // Young's modulus
+                         const REAL &G, // shear modulus
+                         const REAL &density, const REAL &radiusA,
+                         const REAL &radiusB)
+    : _vertices(restVertices), _restVertices(restVertices), _E(E), _G(G),
+      _density(density), _radiusA(radiusA), _radiusB(radiusB) {
   vector<int> strand;
   for (unsigned int x = 0; x < _restVertices.size(); x++)
     strand.push_back(x);
@@ -122,17 +119,14 @@ STRAND_MESH::STRAND_MESH(const vector<VECTOR3>& restVertices,
 ///////////////////////////////////////////////////////////////////////
 // assumes it's all just one big strand
 ///////////////////////////////////////////////////////////////////////
-STRAND_MESH::STRAND_MESH(const vector<VECTOR3>& restVertices,
-                         const vector<VECTOR3>& vertices,
-                         const REAL& E,        // Young's modulus
-                         const REAL& G,       // shear modulus
-                         const REAL& density,
-                         const REAL& radiusA,
-                         const REAL& radiusB) :
-    _vertices(restVertices),
-    _restVertices(restVertices),
-    _E(E), _G(G), _density(density), _radiusA(radiusA), _radiusB(radiusB)
-{
+STRAND_MESH::STRAND_MESH(const vector<VECTOR3> &restVertices,
+                         const vector<VECTOR3> &vertices,
+                         const REAL &E, // Young's modulus
+                         const REAL &G, // shear modulus
+                         const REAL &density, const REAL &radiusA,
+                         const REAL &radiusB)
+    : _vertices(restVertices), _restVertices(restVertices), _E(E), _G(G),
+      _density(density), _radiusA(radiusA), _radiusB(radiusB) {
   vector<int> strand;
   for (unsigned int x = 0; x < _restVertices.size(); x++)
     strand.push_back(x);
@@ -143,53 +137,47 @@ STRAND_MESH::STRAND_MESH(const vector<VECTOR3>& restVertices,
 
   _vertices = vertices;
   updateProperties();
-  //printState();
+  // printState();
 }
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-STRAND_MESH::STRAND_MESH(const vector<VECTOR3>& restVertices,
-                         const vector<vector<int> >& strandIndices,
-                         const REAL& E,        // Young's modulus
-                         const REAL& G,       // shear modulus
-                         const REAL& density,
-                         const REAL& radiusA,
-                         const REAL& radiusB) :
-    _vertices(restVertices),
-    _restVertices(restVertices),
-    _strandIndices(strandIndices),
-    _E(E), _G(G), _density(density), _radiusA(radiusA), _radiusB(radiusB)
-{
+STRAND_MESH::STRAND_MESH(const vector<VECTOR3> &restVertices,
+                         const vector<vector<int>> &strandIndices,
+                         const REAL &E, // Young's modulus
+                         const REAL &G, // shear modulus
+                         const REAL &density, const REAL &radiusA,
+                         const REAL &radiusB)
+    : _vertices(restVertices), _restVertices(restVertices),
+      _strandIndices(strandIndices), _E(E), _G(G), _density(density),
+      _radiusA(radiusA), _radiusB(radiusB) {
   _totalStrands = _strandIndices.size();
 
   initialize();
   updateProperties();
-  
+
   cout << " total strands: " << _totalStrands << endl;
   cout << " DOFs:          " << DOFs() << endl;
 }
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-STRAND_MESH::STRAND_MESH(const vector<VECTOR3>& restVertices,
-                         const vector<VECTOR3>& vertices,
-                         const vector<vector<int> >& strandIndices,
-                         const REAL& E,        // Young's modulus
-                         const REAL& G,       // shear modulus
-                         const REAL& density,
-                         const REAL& radiusA,
-                         const REAL& radiusB) :
-    _vertices(restVertices),
-    _restVertices(restVertices),
-    _strandIndices(strandIndices),
-    _E(E), _G(G), _density(density), _radiusA(radiusA), _radiusB(radiusB)
-{
+STRAND_MESH::STRAND_MESH(const vector<VECTOR3> &restVertices,
+                         const vector<VECTOR3> &vertices,
+                         const vector<vector<int>> &strandIndices,
+                         const REAL &E, // Young's modulus
+                         const REAL &G, // shear modulus
+                         const REAL &density, const REAL &radiusA,
+                         const REAL &radiusB)
+    : _vertices(restVertices), _restVertices(restVertices),
+      _strandIndices(strandIndices), _E(E), _G(G), _density(density),
+      _radiusA(radiusA), _radiusB(radiusB) {
   _totalStrands = _strandIndices.size();
 
   initialize();
   _vertices = vertices;
   updateProperties();
-  
+
   cout << " total strands: " << _totalStrands << endl;
   cout << " DOFs:          " << DOFs() << endl;
 }
@@ -197,8 +185,7 @@ STRAND_MESH::STRAND_MESH(const vector<VECTOR3>& restVertices,
 ///////////////////////////////////////////////////////////////////////
 // generic initialization across multiple constructors
 ///////////////////////////////////////////////////////////////////////
-void STRAND_MESH::initialize()
-{
+void STRAND_MESH::initialize() {
   /*
   // initialize the edges, assuming everything is one strand
   // TODO: this needs to be made more generic
@@ -222,9 +209,8 @@ void STRAND_MESH::initialize()
   }
   */
 
-  for (unsigned int y = 0; y < _totalStrands; y++)
-  {
-    const vector<int>& strand = _strandIndices[y];
+  for (unsigned int y = 0; y < _totalStrands; y++) {
+    const vector<int> &strand = _strandIndices[y];
 
     // need to store this up front, so we can index correctly
     // when making the _bendEdges
@@ -234,10 +220,9 @@ void STRAND_MESH::initialize()
     for (unsigned int x = 1; x < strand.size(); x++)
       _edgeIndices.push_back(VECTOR2I(strand[x - 1], strand[x]));
 
-    for (unsigned int x = 0; x < strand.size() - 2; x++)
-    {
+    for (unsigned int x = 0; x < strand.size() - 2; x++) {
       // create the per-bend vertex lists
-      const VECTOR3I vertexIndices(strand[x], strand[x+1], strand[x+2]);
+      const VECTOR3I vertexIndices(strand[x], strand[x + 1], strand[x + 2]);
       _bendVertices.push_back(vertexIndices);
 
       // create the per-bend edge lists
@@ -257,7 +242,8 @@ void STRAND_MESH::initialize()
     cout << endl;
 
     for (unsigned int x = 0; x < _edgeIndices.size(); x++)
-      cout << " edge " << x << ": " << _edgeIndices[x][0] << ", " << _edgeIndices[x][1] << endl;
+      cout << " edge " << x << ": " << _edgeIndices[x][0] << ", " <<
+  _edgeIndices[x][1] << endl;
   }
   */
 
@@ -319,11 +305,11 @@ void STRAND_MESH::initialize()
   // or in terms of shear modulus G
   //   kt = (1/4) G * (a b (a^2 + b^2)
   //   G  = (1/2) (E / (1 + nu))
-  //const REAL kt = ((1.0 / 8.0) * _E / (1.0 + _nu)) * _radiusA * _radiusB *
+  // const REAL kt = ((1.0 / 8.0) * _E / (1.0 + _nu)) * _radiusA * _radiusB *
   //                (_radiusA * _radiusA + _radiusB * _radiusB);
   //
-  // no, this formula for Poisson's ratio is giving weird results. Let's just be more
-  // direct and use the shear modulus
+  // no, this formula for Poisson's ratio is giving weird results. Let's just be
+  // more direct and use the shear modulus
   const REAL kt = (M_PI / 4.0) * _G * _radiusA * _radiusB *
                   (_radiusA * _radiusA + _radiusB * _radiusB);
   _kts.setOnes();
@@ -341,25 +327,26 @@ void STRAND_MESH::initialize()
   //_collisionEps = 1.0;
 
   // mapping from edge index pairs to _edgeIndices
-  for (unsigned int x = 0; x < _edgeIndices.size(); x++)
-  {
-    pair<int,int> edge(_edgeIndices[x][0], _edgeIndices[x][1]);
+  for (unsigned int x = 0; x < _edgeIndices.size(); x++) {
+    pair<int, int> edge(_edgeIndices[x][0], _edgeIndices[x][1]);
     _edgeHash[edge] = x;
   }
 
   // this gets overwritten by TIMESTEPPER every step, so a dummy is fine
   const REAL stiffness = 1000.0;
-  _edgeEdgeEnergy = new VOLUME::EDGE_COLLISION(stiffness, _collisionEps); // default
+  _edgeEdgeEnergy =
+      new VOLUME::EDGE_COLLISION(stiffness, _collisionEps); // default
 
   // cache for visualization
   _verticesOld = _vertices;
 
-  // filter bending forces by default, since not doing so causes things to explode
+  // filter bending forces by default, since not doing so causes things to
+  // explode
   _bendingForceFilterEnabled = true;
   //_bendingFilterThreshold = 100.0;
   _bendingFilterThreshold = 0.0;
   //_bendingFilterThreshold = 1.0;
-  
+
   // are we putting the edge information at the end?
   //_edgeEnd = true;
   _edgeEnd = false;
@@ -367,17 +354,18 @@ void STRAND_MESH::initialize()
   /*
   if (_edgeEnd)
   {
-    std::cout << __FILE__ << " " << __FUNCTION__ << " " << __LINE__ << " : " << std::endl;
-    std::cout << __FILE__ << " " << __FUNCTION__ << " " << __LINE__ << " : " << std::endl;
-    std::cout << __FILE__ << " " << __FUNCTION__ << " " << __LINE__ << " : " << std::endl;
-    cout << " Edges are PACKED ON THE END " << endl;
+    std::cout << __FILE__ << " " << __FUNCTION__ << " " << __LINE__ << " : " <<
+  std::endl; std::cout << __FILE__ << " " << __FUNCTION__ << " " << __LINE__ <<
+  " : " << std::endl; std::cout << __FILE__ << " " << __FUNCTION__ << " " <<
+  __LINE__ << " : " << std::endl; cout << " Edges are PACKED ON THE END " <<
+  endl;
   }
   else
   {
-    std::cout << __FILE__ << " " << __FUNCTION__ << " " << __LINE__ << " : " << std::endl;
-    std::cout << __FILE__ << " " << __FUNCTION__ << " " << __LINE__ << " : " << std::endl;
-    std::cout << __FILE__ << " " << __FUNCTION__ << " " << __LINE__ << " : " << std::endl;
-    cout << " Edges are INTERLEAVED" << endl;
+    std::cout << __FILE__ << " " << __FUNCTION__ << " " << __LINE__ << " : " <<
+  std::endl; std::cout << __FILE__ << " " << __FUNCTION__ << " " << __LINE__ <<
+  " : " << std::endl; std::cout << __FILE__ << " " << __FUNCTION__ << " " <<
+  __LINE__ << " : " << std::endl; cout << " Edges are INTERLEAVED" << endl;
   }
   */
 
@@ -387,8 +375,7 @@ void STRAND_MESH::initialize()
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-STRAND_MESH::~STRAND_MESH()
-{
+STRAND_MESH::~STRAND_MESH() {
   if (_edgeEdgeEnergy)
     delete _edgeEdgeEnergy;
 }
@@ -396,10 +383,8 @@ STRAND_MESH::~STRAND_MESH()
 ///////////////////////////////////////////////////////////////////////
 // set the vertex positions directly exactly
 ///////////////////////////////////////////////////////////////////////
-void STRAND_MESH::setDisplacement(const VECTOR& displacements)
-{
-  if (_edgeEnd)
-  {
+void STRAND_MESH::setDisplacement(const VECTOR &displacements) {
+  if (_edgeEnd) {
     setDisplacementEdgeEnd(displacements);
     return;
   }
@@ -410,20 +395,17 @@ void STRAND_MESH::setDisplacement(const VECTOR& displacements)
 ///////////////////////////////////////////////////////////////////////
 // set the vertex positions directly exactly
 ///////////////////////////////////////////////////////////////////////
-void STRAND_MESH::setDisplacementInterleaved(const VECTOR& displacements)
-{
+void STRAND_MESH::setDisplacementInterleaved(const VECTOR &displacements) {
   // back up old positions, for visualization
   _verticesOld = _vertices;
   _thetasOld = _thetas;
 
-  for (unsigned int x = 0; x < _totalVertices; x++)
-  {
+  for (unsigned int x = 0; x < _totalVertices; x++) {
     int index = _globalVertexIndices[x];
     for (unsigned int y = 0; y < 3; y++, index++)
       _vertices[x][y] = _restVertices[x][y] + displacements[index];
   }
-  for (unsigned int x = 0; x < _totalEdges; x++)
-  {
+  for (unsigned int x = 0; x < _totalEdges; x++) {
     const int index = _globalEdgeIndices[x];
     _thetas[x] = displacements[index];
   }
@@ -434,8 +416,7 @@ void STRAND_MESH::setDisplacementInterleaved(const VECTOR& displacements)
 ///////////////////////////////////////////////////////////////////////
 // get the vertex positions, flattened into a vector
 ///////////////////////////////////////////////////////////////////////
-const VECTOR STRAND_MESH::getDisplacement() const
-{
+const VECTOR STRAND_MESH::getDisplacement() const {
   if (_edgeEnd)
     return getDisplacementEdgeEnd();
 
@@ -445,18 +426,15 @@ const VECTOR STRAND_MESH::getDisplacement() const
 ///////////////////////////////////////////////////////////////////////
 // get the vertex positions, flattened into a vector
 ///////////////////////////////////////////////////////////////////////
-const VECTOR STRAND_MESH::getDisplacementInterleaved() const
-{
+const VECTOR STRAND_MESH::getDisplacementInterleaved() const {
   VECTOR result(_DOFs);
-  for (unsigned int x = 0; x < _totalVertices; x++)
-  {
+  for (unsigned int x = 0; x < _totalVertices; x++) {
     const int index = _globalVertexIndices[x];
-    result[index]     = _vertices[x][0] - _restVertices[x][0];
+    result[index] = _vertices[x][0] - _restVertices[x][0];
     result[index + 1] = _vertices[x][1] - _restVertices[x][1];
     result[index + 2] = _vertices[x][2] - _restVertices[x][2];
   }
-  for (unsigned int x = 0; x < _totalEdges; x++)
-  {
+  for (unsigned int x = 0; x < _totalEdges; x++) {
     const int index = _globalEdgeIndices[x];
     result[index] = _thetas[x];
   }
@@ -467,8 +445,7 @@ const VECTOR STRAND_MESH::getDisplacementInterleaved() const
 ///////////////////////////////////////////////////////////////////////
 // set the vertex positions directly exactly
 ///////////////////////////////////////////////////////////////////////
-void STRAND_MESH::setDisplacementEdgeEnd(const VECTOR& displacements)
-{
+void STRAND_MESH::setDisplacementEdgeEnd(const VECTOR &displacements) {
   assert((unsigned int)displacements.size() == _DOFs);
 
   // back up old positions, for visualization
@@ -476,8 +453,7 @@ void STRAND_MESH::setDisplacementEdgeEnd(const VECTOR& displacements)
   _thetasOld = _thetas;
 
   unsigned int index = 0;
-  for (unsigned int x = 0; x < _vertices.size(); x++)
-  {
+  for (unsigned int x = 0; x < _vertices.size(); x++) {
     for (unsigned int y = 0; y < 3; y++, index++)
       _vertices[x][y] = _restVertices[x][y] + displacements[index];
   }
@@ -491,13 +467,11 @@ void STRAND_MESH::setDisplacementEdgeEnd(const VECTOR& displacements)
 ///////////////////////////////////////////////////////////////////////
 // get the vertex positions, flattened into a vector
 ///////////////////////////////////////////////////////////////////////
-const VECTOR STRAND_MESH::getDisplacementEdgeEnd() const
-{
+const VECTOR STRAND_MESH::getDisplacementEdgeEnd() const {
   VECTOR displacements(_DOFs);
 
   int index = 0;
-  for (unsigned int x = 0; x < _vertices.size(); x++)
-  {
+  for (unsigned int x = 0; x < _vertices.size(); x++) {
     for (unsigned int y = 0; y < 3; y++, index++)
       displacements[index] = _vertices[x][y] - _restVertices[x][y];
   }
@@ -547,12 +521,10 @@ void STRAND_MESH::setState(const VECTOR& state)
 ///////////////////////////////////////////////////////////////////////
 // get a vector of the vertex positions
 ///////////////////////////////////////////////////////////////////////
-const VECTOR STRAND_MESH::getPositions() const
-{
+const VECTOR STRAND_MESH::getPositions() const {
   VECTOR positions(_vertices.size() * 3);
 
-  for (unsigned int x = 0; x < _vertices.size(); x++)
-  {
+  for (unsigned int x = 0; x < _vertices.size(); x++) {
     positions[3 * x] = _vertices[x][0];
     positions[3 * x + 1] = _vertices[x][1];
     positions[3 * x + 2] = _vertices[x][2];
@@ -605,20 +577,20 @@ void STRAND_MESH::setTwistAngles(const VECTOR& thetas)
 ///////////////////////////////////////////////////////////////////////
 // stretching energy
 ///////////////////////////////////////////////////////////////////////
-REAL STRAND_MESH::computeStretchingEnergy(const STRAND::STRETCHING& stretching) const
-{
+REAL STRAND_MESH::computeStretchingEnergy(
+    const STRAND::STRETCHING &stretching) const {
   cout << " Stretching elements: " << endl;
   REAL totalEnergy = 0;
-  for (unsigned int x = 0; x < _totalEdges; x++)
-  {
-    const VECTOR2I& edge = _edgeIndices[x];
+  for (unsigned int x = 0; x < _totalEdges; x++) {
+    const VECTOR2I &edge = _edgeIndices[x];
 
     // compute deformation gradient
     const VECTOR3 diff = (_vertices[edge[1]] - _vertices[edge[0]]);
     const VECTOR3 f = diff * _dmInvs[x];
     const REAL energy = stretching.psi(f);
 
-    cout << x << ": " << energy << " dmInv: " << _dmInvs[x] << " diff.norm() " << diff.norm() << " f.norm(): " << f.norm() << endl;
+    cout << x << ": " << energy << " dmInv: " << _dmInvs[x] << " diff.norm() "
+         << diff.norm() << " f.norm(): " << f.norm() << endl;
     totalEnergy += _restEdgeLengths[x] * energy;
   }
   return totalEnergy;
@@ -627,19 +599,20 @@ REAL STRAND_MESH::computeStretchingEnergy(const STRAND::STRETCHING& stretching) 
 ///////////////////////////////////////////////////////////////////////
 // Use the material PK1 to compute the stretching force
 ///////////////////////////////////////////////////////////////////////
-VECTOR STRAND_MESH::computeStretchingForces(const STRAND::STRETCHING& stretching) const
-{
-  //TIMER functionTimer(__FUNCTION__);
+VECTOR STRAND_MESH::computeStretchingForces(
+    const STRAND::STRETCHING &stretching) const {
+  // TIMER functionTimer(__FUNCTION__);
 
   vector<VECTOR6> perEdgeForces(_totalEdges);
-  for (unsigned int x = 0; x < _totalEdges; x++)
-  {
+  for (unsigned int x = 0; x < _totalEdges; x++) {
     const VECTOR2I edge = _edgeIndices[x];
 
     vector<VECTOR3> positions(2);
     positions[0] = _vertices[edge[0]];
     positions[1] = _vertices[edge[1]];
-    perEdgeForces[x] = -_restEdgeLengths[x] * stretching.spatialGradient(positions, 1.0 / _restEdgeLengths[x]);
+    perEdgeForces[x] =
+        -_restEdgeLengths[x] *
+        stretching.spatialGradient(positions, 1.0 / _restEdgeLengths[x]);
   }
 
   return buildPerEdgeVector(perEdgeForces);
@@ -649,20 +622,21 @@ VECTOR STRAND_MESH::computeStretchingForces(const STRAND::STRETCHING& stretching
 // Use the material Hessian to compute the force gradient
 // this is all super-slow, should be optimized
 ///////////////////////////////////////////////////////////////////////
-SPARSE_MATRIX STRAND_MESH::computeStretchingHessian(const STRAND::STRETCHING& stretching) const
-{
+SPARSE_MATRIX STRAND_MESH::computeStretchingHessian(
+    const STRAND::STRETCHING &stretching) const {
   vector<MATRIX6> perEdgeHessians(_totalEdges);
-  for (unsigned int i = 0; i < _totalEdges; i++)
-  {
+  for (unsigned int i = 0; i < _totalEdges; i++) {
     const VECTOR2I edge = _edgeIndices[i];
 
     vector<VECTOR3> positions(2);
     positions[0] = _vertices[edge[0]];
     positions[1] = _vertices[edge[1]];
-    const MATRIX6 H = _restEdgeLengths[i] * stretching.spatialHessian(positions, 1.0 / _restEdgeLengths[i]);
+    const MATRIX6 H =
+        _restEdgeLengths[i] *
+        stretching.spatialHessian(positions, 1.0 / _restEdgeLengths[i]);
     perEdgeHessians[i] = -1.0 * H;
   }
-  
+
   return buildPerEdgeMatrix(perEdgeHessians);
 }
 
@@ -670,18 +644,19 @@ SPARSE_MATRIX STRAND_MESH::computeStretchingHessian(const STRAND::STRETCHING& st
 // Use the material Hessian to compute the force gradient
 // this is all super-slow, should be optimized
 ///////////////////////////////////////////////////////////////////////
-SPARSE_MATRIX STRAND_MESH::computeStretchingClampedHessian(const STRAND::STRETCHING& stretching) const
-{
+SPARSE_MATRIX STRAND_MESH::computeStretchingClampedHessian(
+    const STRAND::STRETCHING &stretching) const {
   TIMER functionTimer(__FUNCTION__);
   vector<MATRIX6> perEdgeHessians(_totalEdges);
-  for (unsigned int i = 0; i < _totalEdges; i++)
-  {
+  for (unsigned int i = 0; i < _totalEdges; i++) {
     const VECTOR2I edge = _edgeIndices[i];
 
     vector<VECTOR3> positions(2);
     positions[0] = _vertices[edge[0]];
     positions[1] = _vertices[edge[1]];
-    const MATRIX6 H = _restEdgeLengths[i] * stretching.spatialClampedHessian(positions, 1.0 / _restEdgeLengths[i]);
+    const MATRIX6 H =
+        _restEdgeLengths[i] *
+        stretching.spatialClampedHessian(positions, 1.0 / _restEdgeLengths[i]);
     perEdgeHessians[i] = -1.0 * clampEigenvalues(H);
   }
 
@@ -728,7 +703,8 @@ REAL STRAND_MESH::computeBendingEnergy(const STRAND::ISOTROPIC_BENDING& bending)
     E.col(1) = v2 - v1;
 
     const REAL energy = bending.psi(E, _restBendAngles[x]);
-    const REAL lengthsInv = 1.0 / (_restEdgeLengths[x - 1] + _restEdgeLengths[x]);
+    const REAL lengthsInv = 1.0 / (_restEdgeLengths[x - 1] +
+_restEdgeLengths[x]);
 
     totalEnergy += energy * lengthsInv;
   }
@@ -736,23 +712,22 @@ REAL STRAND_MESH::computeBendingEnergy(const STRAND::ISOTROPIC_BENDING& bending)
 }
 */
 
-static MATRIX3 outerProd(const VECTOR3& x, const VECTOR3& y)
-{
+static MATRIX3 outerProd(const VECTOR3 &x, const VECTOR3 &y) {
   return x * y.transpose();
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-pair<MATRIX11, MATRIX11> STRAND_MESH::computeHessianKappa(const int bendIndex) const
-{
+pair<MATRIX11, MATRIX11>
+STRAND_MESH::computeHessianKappa(const int bendIndex) const {
   const VECTOR2I edgeIndices = _bendEdges[bendIndex];
   const unsigned int e0 = edgeIndices[0];
   const unsigned int e1 = edgeIndices[1];
 
   pair<MATRIX11, MATRIX11> result;
 
-  MATRIX11& DDkappa1 = result.first;
-  MATRIX11& DDkappa2 = result.second;
+  MATRIX11 &DDkappa1 = result.first;
+  MATRIX11 &DDkappa2 = result.second;
   DDkappa1.setZero();
   DDkappa2.setZero();
 
@@ -762,38 +737,38 @@ pair<MATRIX11, MATRIX11> STRAND_MESH::computeHessianKappa(const int bendIndex) c
   REAL norm2_e = norm_e * norm_e;
   REAL norm2_f = norm_f * norm_f;
 
-  const VECTOR3& te = _tangents[e0];
-  const VECTOR3& tf = _tangents[e1];
+  const VECTOR3 &te = _tangents[e0];
+  const VECTOR3 &tf = _tangents[e1];
 
-  const VECTOR3& d1e = _material1s[e0];
-  const VECTOR3& d2e = _material2s[e0];
-  const VECTOR3& d1f = _material1s[e1];
-  const VECTOR3& d2f = _material2s[e1];
+  const VECTOR3 &d1e = _material1s[e0];
+  const VECTOR3 &d2e = _material2s[e0];
+  const VECTOR3 &d1f = _material1s[e1];
+  const VECTOR3 &d2f = _material2s[e1];
 
   REAL chi = 1.0 + te.dot(tf);
   VECTOR3 tilde_t = (te + tf) / chi;
   VECTOR3 tilde_d1 = (d1e + d1f) / chi;
   VECTOR3 tilde_d2 = (d2e + d2f) / chi;
 
-  const VECTOR2& kappa = _kappas[bendIndex];
+  const VECTOR2 &kappa = _kappas[bendIndex];
   REAL kappa1 = kappa(0);
   REAL kappa2 = kappa(1);
 
-  const VECTOR3& kb = _kbs[bendIndex];
+  const VECTOR3 &kb = _kbs[bendIndex];
 
   /*
-  std::cout << __FILE__ << " " << __FUNCTION__ << " " << __LINE__ << " : " << std::endl;
-  std::cout << " BEND " << bendIndex << std::endl;
-  std::cout << " norm_e = " << norm_e << std::endl;
-  std::cout << " norm_f = " << norm_e << std::endl;
-  std::cout << " te = " << te.transpose().format(octave) << std::endl;
-  std::cout << " tf = " << tf.transpose().format(octave) << std::endl;
-  std::cout << " d1e = " << d1e.transpose().format(octave) << std::endl;
-  std::cout << " d2e = " << d2e.transpose().format(octave) << std::endl;
-  std::cout << " d1f = " << d1f.transpose().format(octave) << std::endl;
-  std::cout << " d2f = " << d2f.transpose().format(octave) << std::endl;
-  std::cout << " kappa = " << kappa.transpose().format(octave) << std::endl;
-  std::cout << " kb = " << kb.transpose().format(octave) << std::endl;
+  std::cout << __FILE__ << " " << __FUNCTION__ << " " << __LINE__ << " : " <<
+  std::endl; std::cout << " BEND " << bendIndex << std::endl; std::cout << "
+  norm_e = " << norm_e << std::endl; std::cout << " norm_f = " << norm_e <<
+  std::endl; std::cout << " te = " << te.transpose().format(octave) <<
+  std::endl; std::cout << " tf = " << tf.transpose().format(octave) <<
+  std::endl; std::cout << " d1e = " << d1e.transpose().format(octave) <<
+  std::endl; std::cout << " d2e = " << d2e.transpose().format(octave) <<
+  std::endl; std::cout << " d1f = " << d1f.transpose().format(octave) <<
+  std::endl; std::cout << " d2f = " << d2f.transpose().format(octave) <<
+  std::endl; std::cout << " kappa = " << kappa.transpose().format(octave) <<
+  std::endl; std::cout << " kb = " << kb.transpose().format(octave) <<
+  std::endl;
   */
 
   MATRIX3 tt_o_tt = outerProd(tilde_t, tilde_t);
@@ -804,24 +779,26 @@ pair<MATRIX11, MATRIX11> STRAND_MESH::computeHessianKappa(const int bendIndex) c
 
   MATRIX3 Id = MATRIX3::Identity();
 
-  MATRIX3 D2kappa1De2
-    = 1.0 / norm2_e * (2 * kappa1 * tt_o_tt - tf_c_d2t_o_tt - tt_o_tf_c_d2t)
-    - kappa1 / (chi * norm2_e) * (Id - outerProd(te, te))
-    + 1.0 / (4.0 * norm2_e) * (kb_o_d2e + d2e_o_kb);
+  MATRIX3 D2kappa1De2 =
+      1.0 / norm2_e * (2 * kappa1 * tt_o_tt - tf_c_d2t_o_tt - tt_o_tf_c_d2t) -
+      kappa1 / (chi * norm2_e) * (Id - outerProd(te, te)) +
+      1.0 / (4.0 * norm2_e) * (kb_o_d2e + d2e_o_kb);
 
   MATRIX3 te_c_d2t_o_tt = outerProd(te.cross(tilde_d2), tilde_t);
   MATRIX3 tt_o_te_c_d2t = te_c_d2t_o_tt.transpose();
   MATRIX3 kb_o_d2f = outerProd(kb, d2f);
   MATRIX3 d2f_o_kb = kb_o_d2f.transpose();
 
-  MATRIX3 D2kappa1Df2
-    = 1.0 / norm2_f * (2 * kappa1 * tt_o_tt + te_c_d2t_o_tt + tt_o_te_c_d2t)
-    - kappa1 / (chi * norm2_f) * (Id - outerProd(tf, tf))
-    + 1.0 / (4.0 * norm2_f) * (kb_o_d2f + d2f_o_kb);
+  MATRIX3 D2kappa1Df2 =
+      1.0 / norm2_f * (2 * kappa1 * tt_o_tt + te_c_d2t_o_tt + tt_o_te_c_d2t) -
+      kappa1 / (chi * norm2_f) * (Id - outerProd(tf, tf)) +
+      1.0 / (4.0 * norm2_f) * (kb_o_d2f + d2f_o_kb);
 
-  MATRIX3 D2kappa1DeDf
-    = -kappa1/(chi * norm_e * norm_f) * (Id + outerProd(te, tf))
-    + 1.0 / (norm_e*norm_f) * (2 * kappa1 * tt_o_tt - tf_c_d2t_o_tt + tt_o_te_c_d2t - crossProduct(tilde_d2));
+  MATRIX3 D2kappa1DeDf =
+      -kappa1 / (chi * norm_e * norm_f) * (Id + outerProd(te, tf)) +
+      1.0 / (norm_e * norm_f) *
+          (2 * kappa1 * tt_o_tt - tf_c_d2t_o_tt + tt_o_te_c_d2t -
+           crossProduct(tilde_d2));
   MATRIX3 D2kappa1DfDe = D2kappa1DeDf.transpose();
 
   MATRIX3 tf_c_d1t_o_tt = outerProd(tf.cross(tilde_d1), tilde_t);
@@ -829,116 +806,119 @@ pair<MATRIX11, MATRIX11> STRAND_MESH::computeHessianKappa(const int bendIndex) c
   MATRIX3 kb_o_d1e = outerProd(kb, d1e);
   MATRIX3 d1e_o_kb = kb_o_d1e.transpose();
 
-  MATRIX3 D2kappa2De2
-    = 1.0 / norm2_e * (2 * kappa2 * tt_o_tt + tf_c_d1t_o_tt + tt_o_tf_c_d1t)
-    - kappa2 / (chi * norm2_e) * (Id - outerProd(te, te))
-    - 1.0 / (4.0 * norm2_e) * (kb_o_d1e + d1e_o_kb);
+  MATRIX3 D2kappa2De2 =
+      1.0 / norm2_e * (2 * kappa2 * tt_o_tt + tf_c_d1t_o_tt + tt_o_tf_c_d1t) -
+      kappa2 / (chi * norm2_e) * (Id - outerProd(te, te)) -
+      1.0 / (4.0 * norm2_e) * (kb_o_d1e + d1e_o_kb);
 
   MATRIX3 te_c_d1t_o_tt = outerProd(te.cross(tilde_d1), tilde_t);
   MATRIX3 tt_o_te_c_d1t = te_c_d1t_o_tt.transpose();
   MATRIX3 kb_o_d1f = outerProd(kb, d1f);
-  MATRIX3 d1f_o_kb =  kb_o_d1f.transpose();
+  MATRIX3 d1f_o_kb = kb_o_d1f.transpose();
 
-  MATRIX3 D2kappa2Df2
-    = 1.0 / norm2_f * (2 * kappa2 * tt_o_tt - te_c_d1t_o_tt - tt_o_te_c_d1t)
-    - kappa2 / (chi * norm2_f) * (Id - outerProd(tf, tf))
-    - 1.0 / (4.0 * norm2_f) * (kb_o_d1f + d1f_o_kb);
+  MATRIX3 D2kappa2Df2 =
+      1.0 / norm2_f * (2 * kappa2 * tt_o_tt - te_c_d1t_o_tt - tt_o_te_c_d1t) -
+      kappa2 / (chi * norm2_f) * (Id - outerProd(tf, tf)) -
+      1.0 / (4.0 * norm2_f) * (kb_o_d1f + d1f_o_kb);
 
-  MATRIX3 D2kappa2DeDf
-    = -kappa2/(chi * norm_e * norm_f) * (Id + outerProd(te, tf))
-    + 1.0 / (norm_e*norm_f) * (2 * kappa2 * tt_o_tt + tf_c_d1t_o_tt - tt_o_te_c_d1t + crossProduct(tilde_d1));
+  MATRIX3 D2kappa2DeDf =
+      -kappa2 / (chi * norm_e * norm_f) * (Id + outerProd(te, tf)) +
+      1.0 / (norm_e * norm_f) *
+          (2 * kappa2 * tt_o_tt + tf_c_d1t_o_tt - tt_o_te_c_d1t +
+           crossProduct(tilde_d1));
   MATRIX3 D2kappa2DfDe = D2kappa2DeDf.transpose();
 
   REAL D2kappa1Dthetae2 = -0.5 * kb.dot(d2e);
   REAL D2kappa1Dthetaf2 = -0.5 * kb.dot(d2f);
-  REAL D2kappa2Dthetae2 =  0.5 * kb.dot(d1e);
-  REAL D2kappa2Dthetaf2 =  0.5 * kb.dot(d1f);
+  REAL D2kappa2Dthetae2 = 0.5 * kb.dot(d1e);
+  REAL D2kappa2Dthetaf2 = 0.5 * kb.dot(d1f);
 
-  VECTOR3 D2kappa1DeDthetae
-    = 1.0 / norm_e * (0.5 * kb.dot(d1e) * tilde_t - 1.0 / chi * tf.cross(d1e));
+  VECTOR3 D2kappa1DeDthetae =
+      1.0 / norm_e * (0.5 * kb.dot(d1e) * tilde_t - 1.0 / chi * tf.cross(d1e));
 
-  VECTOR3 D2kappa1DeDthetaf
-    = 1.0 / norm_e * (0.5 * kb.dot(d1f) * tilde_t - 1.0 / chi * tf.cross(d1f));
+  VECTOR3 D2kappa1DeDthetaf =
+      1.0 / norm_e * (0.5 * kb.dot(d1f) * tilde_t - 1.0 / chi * tf.cross(d1f));
 
-  VECTOR3 D2kappa1DfDthetae
-    = 1.0 / norm_f * (0.5 * kb.dot(d1e) * tilde_t + 1.0 / chi * te.cross(d1e));
+  VECTOR3 D2kappa1DfDthetae =
+      1.0 / norm_f * (0.5 * kb.dot(d1e) * tilde_t + 1.0 / chi * te.cross(d1e));
 
-  VECTOR3 D2kappa1DfDthetaf
-    = 1.0 / norm_f * (0.5 * kb.dot(d1f) * tilde_t + 1.0 / chi * te.cross(d1f));
+  VECTOR3 D2kappa1DfDthetaf =
+      1.0 / norm_f * (0.5 * kb.dot(d1f) * tilde_t + 1.0 / chi * te.cross(d1f));
 
-  VECTOR3 D2kappa2DeDthetae
-    = 1.0 / norm_e * (0.5 * kb.dot(d2e) * tilde_t - 1.0 / chi * tf.cross(d2e));
+  VECTOR3 D2kappa2DeDthetae =
+      1.0 / norm_e * (0.5 * kb.dot(d2e) * tilde_t - 1.0 / chi * tf.cross(d2e));
 
-  VECTOR3 D2kappa2DeDthetaf
-    = 1.0 / norm_e * (0.5 * kb.dot(d2f) * tilde_t - 1.0 / chi * tf.cross(d2f));
+  VECTOR3 D2kappa2DeDthetaf =
+      1.0 / norm_e * (0.5 * kb.dot(d2f) * tilde_t - 1.0 / chi * tf.cross(d2f));
 
-  VECTOR3 D2kappa2DfDthetae
-    = 1.0 / norm_f * (0.5 * kb.dot(d2e) * tilde_t + 1.0 / chi * te.cross(d2e));
+  VECTOR3 D2kappa2DfDthetae =
+      1.0 / norm_f * (0.5 * kb.dot(d2e) * tilde_t + 1.0 / chi * te.cross(d2e));
 
-  VECTOR3 D2kappa2DfDthetaf
-    = 1.0 / norm_f * (0.5 * kb.dot(d2f) * tilde_t + 1.0 / chi * te.cross(d2f));
+  VECTOR3 D2kappa2DfDthetaf =
+      1.0 / norm_f * (0.5 * kb.dot(d2f) * tilde_t + 1.0 / chi * te.cross(d2f));
 
-  DDkappa1.block<3,3>(0,0) =   D2kappa1De2;
-  DDkappa1.block<3,3>(0,4) = - D2kappa1De2 + D2kappa1DeDf;
-  DDkappa1.block<3,3>(0,8) =               - D2kappa1DeDf;
-  DDkappa1.block<3,3>(4,0) = - D2kappa1De2                + D2kappa1DfDe;
-  DDkappa1.block<3,3>(4,4) =   D2kappa1De2 - D2kappa1DeDf - D2kappa1DfDe + D2kappa1Df2;
-  DDkappa1.block<3,3>(4,8) =                 D2kappa1DeDf                - D2kappa1Df2;
-  DDkappa1.block<3,3>(8,0) =                              - D2kappa1DfDe;
-  DDkappa1.block<3,3>(8,4) =                                D2kappa1DfDe - D2kappa1Df2;
-  DDkappa1.block<3,3>(8,8) =                                               D2kappa1Df2;
+  DDkappa1.block<3, 3>(0, 0) = D2kappa1De2;
+  DDkappa1.block<3, 3>(0, 4) = -D2kappa1De2 + D2kappa1DeDf;
+  DDkappa1.block<3, 3>(0, 8) = -D2kappa1DeDf;
+  DDkappa1.block<3, 3>(4, 0) = -D2kappa1De2 + D2kappa1DfDe;
+  DDkappa1.block<3, 3>(4, 4) =
+      D2kappa1De2 - D2kappa1DeDf - D2kappa1DfDe + D2kappa1Df2;
+  DDkappa1.block<3, 3>(4, 8) = D2kappa1DeDf - D2kappa1Df2;
+  DDkappa1.block<3, 3>(8, 0) = -D2kappa1DfDe;
+  DDkappa1.block<3, 3>(8, 4) = D2kappa1DfDe - D2kappa1Df2;
+  DDkappa1.block<3, 3>(8, 8) = D2kappa1Df2;
 
-  DDkappa1(3,3) = D2kappa1Dthetae2;
-  DDkappa1(7,7) = D2kappa1Dthetaf2;
+  DDkappa1(3, 3) = D2kappa1Dthetae2;
+  DDkappa1(7, 7) = D2kappa1Dthetaf2;
 
-  DDkappa1.block<3,1>(0,3) = - D2kappa1DeDthetae;
-  DDkappa1.block<3,1>(4,3) =   D2kappa1DeDthetae - D2kappa1DfDthetae;
-  DDkappa1.block<3,1>(8,3) =                       D2kappa1DfDthetae;
-  DDkappa1.block<1,3>(3,0) = DDkappa1.block<3,1>(0,3).transpose();
-  DDkappa1.block<1,3>(3,4) = DDkappa1.block<3,1>(4,3).transpose();
-  DDkappa1.block<1,3>(3,8) = DDkappa1.block<3,1>(8,3).transpose();
+  DDkappa1.block<3, 1>(0, 3) = -D2kappa1DeDthetae;
+  DDkappa1.block<3, 1>(4, 3) = D2kappa1DeDthetae - D2kappa1DfDthetae;
+  DDkappa1.block<3, 1>(8, 3) = D2kappa1DfDthetae;
+  DDkappa1.block<1, 3>(3, 0) = DDkappa1.block<3, 1>(0, 3).transpose();
+  DDkappa1.block<1, 3>(3, 4) = DDkappa1.block<3, 1>(4, 3).transpose();
+  DDkappa1.block<1, 3>(3, 8) = DDkappa1.block<3, 1>(8, 3).transpose();
 
-  DDkappa1.block<3,1>(0,7) = - D2kappa1DeDthetaf;
-  DDkappa1.block<3,1>(4,7) =   D2kappa1DeDthetaf - D2kappa1DfDthetaf;
-  DDkappa1.block<3,1>(8,7) =                       D2kappa1DfDthetaf;
-  DDkappa1.block<1,3>(7,0) = DDkappa1.block<3,1>(0,7).transpose();
-  DDkappa1.block<1,3>(7,4) = DDkappa1.block<3,1>(4,7).transpose();
-  DDkappa1.block<1,3>(7,8) = DDkappa1.block<3,1>(8,7).transpose();
+  DDkappa1.block<3, 1>(0, 7) = -D2kappa1DeDthetaf;
+  DDkappa1.block<3, 1>(4, 7) = D2kappa1DeDthetaf - D2kappa1DfDthetaf;
+  DDkappa1.block<3, 1>(8, 7) = D2kappa1DfDthetaf;
+  DDkappa1.block<1, 3>(7, 0) = DDkappa1.block<3, 1>(0, 7).transpose();
+  DDkappa1.block<1, 3>(7, 4) = DDkappa1.block<3, 1>(4, 7).transpose();
+  DDkappa1.block<1, 3>(7, 8) = DDkappa1.block<3, 1>(8, 7).transpose();
 
-  DDkappa2.block<3,3>(0,0) =   D2kappa2De2;
-  DDkappa2.block<3,3>(0,4) = - D2kappa2De2 + D2kappa2DeDf;
-  DDkappa2.block<3,3>(0,8) =               - D2kappa2DeDf;
-  DDkappa2.block<3,3>(4,0) = - D2kappa2De2                + D2kappa2DfDe;
-  DDkappa2.block<3,3>(4,4) =   D2kappa2De2 - D2kappa2DeDf - D2kappa2DfDe + D2kappa2Df2;
-  DDkappa2.block<3,3>(4,8) =                 D2kappa2DeDf                - D2kappa2Df2;
-  DDkappa2.block<3,3>(8,0) =                              - D2kappa2DfDe;
-  DDkappa2.block<3,3>(8,4) =                                D2kappa2DfDe - D2kappa2Df2;
-  DDkappa2.block<3,3>(8,8) =                                               D2kappa2Df2;
+  DDkappa2.block<3, 3>(0, 0) = D2kappa2De2;
+  DDkappa2.block<3, 3>(0, 4) = -D2kappa2De2 + D2kappa2DeDf;
+  DDkappa2.block<3, 3>(0, 8) = -D2kappa2DeDf;
+  DDkappa2.block<3, 3>(4, 0) = -D2kappa2De2 + D2kappa2DfDe;
+  DDkappa2.block<3, 3>(4, 4) =
+      D2kappa2De2 - D2kappa2DeDf - D2kappa2DfDe + D2kappa2Df2;
+  DDkappa2.block<3, 3>(4, 8) = D2kappa2DeDf - D2kappa2Df2;
+  DDkappa2.block<3, 3>(8, 0) = -D2kappa2DfDe;
+  DDkappa2.block<3, 3>(8, 4) = D2kappa2DfDe - D2kappa2Df2;
+  DDkappa2.block<3, 3>(8, 8) = D2kappa2Df2;
 
-  DDkappa2(3,3) = D2kappa2Dthetae2;
-  DDkappa2(7,7) = D2kappa2Dthetaf2;
+  DDkappa2(3, 3) = D2kappa2Dthetae2;
+  DDkappa2(7, 7) = D2kappa2Dthetaf2;
 
-  DDkappa2.block<3,1>(0,3) = - D2kappa2DeDthetae;
-  DDkappa2.block<3,1>(4,3) =   D2kappa2DeDthetae - D2kappa2DfDthetae;
-  DDkappa2.block<3,1>(8,3) =                       D2kappa2DfDthetae;
-  DDkappa2.block<1,3>(3,0) = DDkappa2.block<3,1>(0,3).transpose();
-  DDkappa2.block<1,3>(3,4) = DDkappa2.block<3,1>(4,3).transpose();
-  DDkappa2.block<1,3>(3,8) = DDkappa2.block<3,1>(8,3).transpose();
+  DDkappa2.block<3, 1>(0, 3) = -D2kappa2DeDthetae;
+  DDkappa2.block<3, 1>(4, 3) = D2kappa2DeDthetae - D2kappa2DfDthetae;
+  DDkappa2.block<3, 1>(8, 3) = D2kappa2DfDthetae;
+  DDkappa2.block<1, 3>(3, 0) = DDkappa2.block<3, 1>(0, 3).transpose();
+  DDkappa2.block<1, 3>(3, 4) = DDkappa2.block<3, 1>(4, 3).transpose();
+  DDkappa2.block<1, 3>(3, 8) = DDkappa2.block<3, 1>(8, 3).transpose();
 
-  DDkappa2.block<3,1>(0,7) = - D2kappa2DeDthetaf;
-  DDkappa2.block<3,1>(4,7) =   D2kappa2DeDthetaf - D2kappa2DfDthetaf;
-  DDkappa2.block<3,1>(8,7) =                       D2kappa2DfDthetaf;
-  DDkappa2.block<1,3>(7,0) = DDkappa2.block<3,1>(0,7).transpose();
-  DDkappa2.block<1,3>(7,4) = DDkappa2.block<3,1>(4,7).transpose();
-  DDkappa2.block<1,3>(7,8) = DDkappa2.block<3,1>(8,7).transpose();
+  DDkappa2.block<3, 1>(0, 7) = -D2kappa2DeDthetaf;
+  DDkappa2.block<3, 1>(4, 7) = D2kappa2DeDthetaf - D2kappa2DfDthetaf;
+  DDkappa2.block<3, 1>(8, 7) = D2kappa2DfDthetaf;
+  DDkappa2.block<1, 3>(7, 0) = DDkappa2.block<3, 1>(0, 7).transpose();
+  DDkappa2.block<1, 3>(7, 4) = DDkappa2.block<3, 1>(4, 7).transpose();
+  DDkappa2.block<1, 3>(7, 8) = DDkappa2.block<3, 1>(8, 7).transpose();
 
   return result;
 }
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-MATRIX11x2 STRAND_MESH::computeGradKappa(const int bendIndex) const
-{
+MATRIX11x2 STRAND_MESH::computeGradKappa(const int bendIndex) const {
   const VECTOR2I edgeIndices = _bendEdges[bendIndex];
 
   const unsigned int e0 = edgeIndices[0];
@@ -947,20 +927,20 @@ MATRIX11x2 STRAND_MESH::computeGradKappa(const int bendIndex) const
   REAL norm_e = _edges[e0].norm();
   REAL norm_f = _edges[e1].norm();
 
-  const VECTOR3& te = _tangents[e0];
-  const VECTOR3& tf = _tangents[e1];
+  const VECTOR3 &te = _tangents[e0];
+  const VECTOR3 &tf = _tangents[e1];
 
-  const VECTOR3& d1e = _material1s[e0];
-  const VECTOR3& d2e = _material2s[e0];
-  const VECTOR3& d1f = _material1s[e1];
-  const VECTOR3& d2f = _material2s[e1];
+  const VECTOR3 &d1e = _material1s[e0];
+  const VECTOR3 &d2e = _material2s[e0];
+  const VECTOR3 &d1f = _material1s[e1];
+  const VECTOR3 &d2f = _material2s[e1];
 
   REAL chi = 1.0 + te.dot(tf);
   VECTOR3 tilde_t = (te + tf) / chi;
   VECTOR3 tilde_d1 = (d1e + d1f) / chi;
   VECTOR3 tilde_d2 = (d2e + d2f) / chi;
 
-  const VECTOR2& kappa = _kappas[bendIndex];
+  const VECTOR2 &kappa = _kappas[bendIndex];
   REAL kappa1 = kappa(0);
   REAL kappa2 = kappa(1);
 
@@ -974,45 +954,45 @@ MATRIX11x2 STRAND_MESH::computeGradKappa(const int bendIndex) const
   gradKappa.setZero();
 
   // position terms
-  gradKappa.block<3,1>(0,0) = -Dkappa1De;
-  gradKappa.block<3,1>(4,0) =  Dkappa1De - Dkappa1Df;
-  gradKappa.block<3,1>(8,0) =              Dkappa1Df;
+  gradKappa.block<3, 1>(0, 0) = -Dkappa1De;
+  gradKappa.block<3, 1>(4, 0) = Dkappa1De - Dkappa1Df;
+  gradKappa.block<3, 1>(8, 0) = Dkappa1Df;
 
-  gradKappa.block<3,1>(0,1) = -Dkappa2De;
-  gradKappa.block<3,1>(4,1) =  Dkappa2De - Dkappa2Df;
-  gradKappa.block<3,1>(8,1) =              Dkappa2Df;
+  gradKappa.block<3, 1>(0, 1) = -Dkappa2De;
+  gradKappa.block<3, 1>(4, 1) = Dkappa2De - Dkappa2Df;
+  gradKappa.block<3, 1>(8, 1) = Dkappa2Df;
 
   // twist terms
-  const VECTOR3& kb = _kbs[bendIndex];
+  const VECTOR3 &kb = _kbs[bendIndex];
 
-  gradKappa(3,0) = -0.5 * kb.dot(d1e);
-  gradKappa(7,0) = -0.5 * kb.dot(d1f);
-  gradKappa(3,1) = -0.5 * kb.dot(d2e);
-  gradKappa(7,1) = -0.5 * kb.dot(d2f);
+  gradKappa(3, 0) = -0.5 * kb.dot(d1e);
+  gradKappa(7, 0) = -0.5 * kb.dot(d1f);
+  gradKappa(3, 1) = -0.5 * kb.dot(d2e);
+  gradKappa(7, 1) = -0.5 * kb.dot(d2f);
 
   return gradKappa;
 }
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-REAL STRAND_MESH::computeBendingEnergy()
-{
+REAL STRAND_MESH::computeBendingEnergy() {
   assert(_Bs.size() == _totalBends);
   assert(_refVertexLengths.size() == _totalBends);
   assert(_kappas.size() == _totalBends);
   assert(_kappaBars.size() == _totalBends);
 
   REAL totalEnergy = 0;
-  for (unsigned int x = 0; x < _totalBends; x++)
-  {
-    const MATRIX2& B = _Bs[x];
-    const REAL& len = _refVertexLengths[x];
+  for (unsigned int x = 0; x < _totalBends; x++) {
+    const MATRIX2 &B = _Bs[x];
+    const REAL &len = _refVertexLengths[x];
 
-    const VECTOR2& kappa = _kappas[x];
-    const VECTOR2& kappaBar = _kappaBars[x];
+    const VECTOR2 &kappa = _kappas[x];
+    const VECTOR2 &kappaBar = _kappaBars[x];
 
-    //const REAL energy = 0.5 / len * (kappa - kappaBar).transpose() * B * (kappa - kappaBar);
-    const REAL energy = 0.5 / len * (kappa - kappaBar).transpose() * B * (kappa - kappaBar);
+    // const REAL energy = 0.5 / len * (kappa - kappaBar).transpose() * B *
+    // (kappa - kappaBar);
+    const REAL energy =
+        0.5 / len * (kappa - kappaBar).transpose() * B * (kappa - kappaBar);
     totalEnergy += energy;
   }
 
@@ -1022,8 +1002,7 @@ REAL STRAND_MESH::computeBendingEnergy()
 ///////////////////////////////////////////////////////////////////////
 // bending forces
 ///////////////////////////////////////////////////////////////////////
-VECTOR STRAND_MESH::computeBendingForces()
-{
+VECTOR STRAND_MESH::computeBendingForces() {
 #if USING_TAN_BENDING
   return computeTanBendingForces();
 #else
@@ -1031,22 +1010,20 @@ VECTOR STRAND_MESH::computeBendingForces()
 #endif
 }
 
-const MATRIX6x9 dedx()
-{
+const MATRIX6x9 dedx() {
   MATRIX6x9 result;
   result.setZero();
-  result.block<3,3>(0,0) = -MATRIX3::Identity();
-  result.block<3,3>(0,3) =  MATRIX3::Identity();
-  result.block<3,3>(3,3) = -MATRIX3::Identity();
-  result.block<3,3>(3,6) =  MATRIX3::Identity();
+  result.block<3, 3>(0, 0) = -MATRIX3::Identity();
+  result.block<3, 3>(0, 3) = MATRIX3::Identity();
+  result.block<3, 3>(3, 3) = -MATRIX3::Identity();
+  result.block<3, 3>(3, 6) = MATRIX3::Identity();
   return result;
 }
 
 ///////////////////////////////////////////////////////////////////////
 // bending forces
 ///////////////////////////////////////////////////////////////////////
-VECTOR STRAND_MESH::computeSinBendingForces()
-{
+VECTOR STRAND_MESH::computeSinBendingForces() {
   TIMER functionTimer(__FUNCTION__);
   assert(_Bs.size() == _totalBends);
   assert(_refVertexLengths.size() == _totalBends);
@@ -1054,27 +1031,26 @@ VECTOR STRAND_MESH::computeSinBendingForces()
   assert(_kappaBars.size() == _totalBends);
 
   vector<VECTOR11> perBendForces(_totalBends);
-  for (unsigned int x = 0; x < _totalBends; x++)
-  {
-    const MATRIX2& B = _Bs[x];
-    const REAL& len = _refVertexLengths[x];
+  for (unsigned int x = 0; x < _totalBends; x++) {
+    const MATRIX2 &B = _Bs[x];
+    const REAL &len = _refVertexLengths[x];
 
-    const VECTOR2& kappa = _kappas[x];
-    const VECTOR2& kappaBar = _kappaBars[x];
-    //cout << " kappa    " << x << ":" << kappa.transpose() << endl;
-    //cout << " kappaBar " << x << ":" << kappaBar.transpose() << endl;
+    const VECTOR2 &kappa = _kappas[x];
+    const VECTOR2 &kappaBar = _kappaBars[x];
+    // cout << " kappa    " << x << ":" << kappa.transpose() << endl;
+    // cout << " kappaBar " << x << ":" << kappaBar.transpose() << endl;
 
     const VECTOR2I edgeIndices = _bendEdges[x];
     const unsigned int e0 = edgeIndices[0];
     const unsigned int e1 = edgeIndices[1];
     MATRIX3x2 M;
-    M.col(0) =  0.5 * (_material2s[e0] + _material2s[e1]);
+    M.col(0) = 0.5 * (_material2s[e0] + _material2s[e1]);
     M.col(1) = -0.5 * (_material1s[e0] + _material1s[e1]);
 
     MATRIX3x2 M0;
     M0.col(0) = _material1s[e0];
     M0.col(1) = _material2s[e0];
-    
+
     MATRIX3x2 M1;
     M1.col(0) = _material1s[e1];
     M1.col(1) = _material2s[e1];
@@ -1087,7 +1063,7 @@ VECTOR STRAND_MESH::computeSinBendingForces()
     const VECTOR11 force = bending.gradient(E, B, M0, M1, M, kappa, kappaBar);
     perBendForces[x] = (-1.0 / len) * force;
 
-    //cout << " bend forces: " << endl << perBendForces[x] << endl;
+    // cout << " bend forces: " << endl << perBendForces[x] << endl;
   }
 
   return buildPerBendVector(perBendForces);
@@ -1096,8 +1072,7 @@ VECTOR STRAND_MESH::computeSinBendingForces()
 ///////////////////////////////////////////////////////////////////////
 // twisting forces
 ///////////////////////////////////////////////////////////////////////
-MATRIX STRAND_MESH::computeTwistingHessianFiniteDiff()
-{
+MATRIX STRAND_MESH::computeTwistingHessianFiniteDiff() {
   TIMER functionTimer(__FUNCTION__);
   MATRIX H(_DOFs, _DOFs);
   H.setZero();
@@ -1108,27 +1083,25 @@ MATRIX STRAND_MESH::computeTwistingHessianFiniteDiff()
 
   const REAL eps = 1e-8;
 
-  //cout << " Twists: "  << _twists.transpose() << endl;
-  //cout << " g0: " << g0.transpose() << endl;
-  // positions first
-  for (unsigned int x = 0; x < _totalVertices; x++)
-  {
-    for (unsigned int y = 0; y < 3; y++)
-    {
+  // cout << " Twists: "  << _twists.transpose() << endl;
+  // cout << " g0: " << g0.transpose() << endl;
+  //  positions first
+  for (unsigned int x = 0; x < _totalVertices; x++) {
+    for (unsigned int y = 0; y < 3; y++) {
       _vertices = verticesOriginals;
       _vertices[x][y] += eps;
       computeEdges();
       computeTangents();
       computeReferenceTwist();
-      //computeMaterialDirectors();
-      //computeCurvatureBinormals();
-      //computeKappas();
+      // computeMaterialDirectors();
+      // computeCurvatureBinormals();
+      // computeKappas();
 
       const VECTOR g = computeTwistingForces();
 
       const int index = 4 * x + y;
       H.col(index) = (g - g0) / eps;
-      //cout << " g: " << g.transpose() << endl;
+      // cout << " g: " << g.transpose() << endl;
     }
   }
 
@@ -1142,8 +1115,7 @@ MATRIX STRAND_MESH::computeTwistingHessianFiniteDiff()
 ///////////////////////////////////////////////////////////////////////
 // bending forces
 ///////////////////////////////////////////////////////////////////////
-VECTOR STRAND_MESH::computeBendingForcesFiniteDiff()
-{
+VECTOR STRAND_MESH::computeBendingForcesFiniteDiff() {
   TIMER functionTimer(__FUNCTION__);
   VECTOR forces(_DOFs);
   forces.setZero();
@@ -1155,10 +1127,8 @@ VECTOR STRAND_MESH::computeBendingForcesFiniteDiff()
   const REAL eps = 1e-8;
 
   // positions first
-  for (unsigned int x = 0; x < _totalVertices; x++)
-  {
-    for (unsigned int y = 0; y < 3; y++)
-    {
+  for (unsigned int x = 0; x < _totalVertices; x++) {
+    for (unsigned int y = 0; y < 3; y++) {
       _vertices = verticesOriginals;
       _vertices[x][y] += eps;
       computeEdges();
@@ -1178,8 +1148,7 @@ VECTOR STRAND_MESH::computeBendingForcesFiniteDiff()
   computeKappas();
 
   // twists second
-  for (unsigned int x = 0; x < _totalBends; x++)
-  {
+  for (unsigned int x = 0; x < _totalBends; x++) {
     _thetas = thetasOriginals;
     _thetas[x] += eps;
     computeReferenceTwist();
@@ -1201,8 +1170,7 @@ VECTOR STRAND_MESH::computeBendingForcesFiniteDiff()
 ///////////////////////////////////////////////////////////////////////
 // bending forces
 ///////////////////////////////////////////////////////////////////////
-VECTOR STRAND_MESH::computeTanBendingForces()
-{
+VECTOR STRAND_MESH::computeTanBendingForces() {
   TIMER functionTimer(__FUNCTION__);
   assert(_Bs.size() == _totalBends);
   assert(_refVertexLengths.size() == _totalBends);
@@ -1211,26 +1179,26 @@ VECTOR STRAND_MESH::computeTanBendingForces()
 
   vector<VECTOR11> perBendForces(_totalBends);
 
-  if (_bendingForceFilterEnabled)
-  {
-    std::cout << __FILE__ << " " << __FUNCTION__ << " " << __LINE__ << " : " << std::endl;
+  if (_bendingForceFilterEnabled) {
+    std::cout << __FILE__ << " " << __FUNCTION__ << " " << __LINE__ << " : "
+              << std::endl;
     std::cout << " BENDING FORCES FILTERED " << endl;
-    std::cout << __FILE__ << " " << __FUNCTION__ << " " << __LINE__ << " : " << std::endl;
+    std::cout << __FILE__ << " " << __FUNCTION__ << " " << __LINE__ << " : "
+              << std::endl;
   }
-  for (unsigned int x = 0; x < _totalBends; x++)
-  {
-    const MATRIX2& B = _Bs[x];
-    const REAL& len = _refVertexLengths[x];
+  for (unsigned int x = 0; x < _totalBends; x++) {
+    const MATRIX2 &B = _Bs[x];
+    const REAL &len = _refVertexLengths[x];
 
-    const VECTOR2& kappa = _kappas[x];
-    const VECTOR2& kappaBar = _kappaBars[x];
+    const VECTOR2 &kappa = _kappas[x];
+    const VECTOR2 &kappaBar = _kappaBars[x];
 
-    const VECTOR11 force = -1.0/len * computeGradKappa(x) * B * (kappa - kappaBar);
+    const VECTOR11 force =
+        -1.0 / len * computeGradKappa(x) * B * (kappa - kappaBar);
 
     perBendForces[x] = force;
 
-    if (_bendingForceFilterEnabled)
-    {
+    if (_bendingForceFilterEnabled) {
       if (kappa.norm() > _bendingFilterThreshold)
         perBendForces[x] *= 0.0;
     }
@@ -1242,8 +1210,7 @@ VECTOR STRAND_MESH::computeTanBendingForces()
 ///////////////////////////////////////////////////////////////////////
 // bending force gradients
 ///////////////////////////////////////////////////////////////////////
-SPARSE_MATRIX STRAND_MESH::computeBendingHessian()
-{
+SPARSE_MATRIX STRAND_MESH::computeBendingHessian() {
 #if USING_TAN_BENDING
   return computeTanBendingHessian();
 #else
@@ -1254,34 +1221,32 @@ SPARSE_MATRIX STRAND_MESH::computeBendingHessian()
 ///////////////////////////////////////////////////////////////////////
 // bending force gradients
 ///////////////////////////////////////////////////////////////////////
-SPARSE_MATRIX STRAND_MESH::computeTanBendingHessian()
-{
+SPARSE_MATRIX STRAND_MESH::computeTanBendingHessian() {
   TIMER functionTimer(__FUNCTION__);
-  if (_bendingForceFilterEnabled)
-  {
-    std::cout << __FILE__ << " " << __FUNCTION__ << " " << __LINE__ << " : " << std::endl;
+  if (_bendingForceFilterEnabled) {
+    std::cout << __FILE__ << " " << __FUNCTION__ << " " << __LINE__ << " : "
+              << std::endl;
     std::cout << " BENDING FORCES FILTERED " << endl;
-    std::cout << __FILE__ << " " << __FUNCTION__ << " " << __LINE__ << " : " << std::endl;
+    std::cout << __FILE__ << " " << __FUNCTION__ << " " << __LINE__ << " : "
+              << std::endl;
   }
   vector<MATRIX11> perBendHessians(_totalBends);
-  for (unsigned int x = 0; x < _totalBends; x++)
-  {
-    const MATRIX2& B = _Bs[x];
+  for (unsigned int x = 0; x < _totalBends; x++) {
+    const MATRIX2 &B = _Bs[x];
     const REAL len = _refVertexLengths[x];
 
-    const VECTOR2& kappa = _kappas[x];
-    const VECTOR2& kappaBar = _kappaBars[x];
-    const MATRIX11x2& gradKappa = computeGradKappa(x);
+    const VECTOR2 &kappa = _kappas[x];
+    const VECTOR2 &kappaBar = _kappaBars[x];
+    const MATRIX11x2 &gradKappa = computeGradKappa(x);
 
     MATRIX11 localJ = 1.0 / len * gradKappa * B * gradKappa.transpose();
 
-    const pair<MATRIX11, MATRIX11>& hessKappa = computeHessianKappa(x);
+    const pair<MATRIX11, MATRIX11> &hessKappa = computeHessianKappa(x);
     const VECTOR2 temp = 1.0 / len * (kappa - kappaBar).transpose() * B;
     localJ += temp(0) * hessKappa.first + temp(1) * hessKappa.second;
     perBendHessians[x] = -1.0 * localJ;
-  
-    if (_bendingForceFilterEnabled)
-    { 
+
+    if (_bendingForceFilterEnabled) {
       if (kappa.norm() > _bendingFilterThreshold)
         perBendHessians[x] *= 0.0;
     }
@@ -1293,30 +1258,28 @@ SPARSE_MATRIX STRAND_MESH::computeTanBendingHessian()
 ///////////////////////////////////////////////////////////////////////
 // bending force gradients
 ///////////////////////////////////////////////////////////////////////
-SPARSE_MATRIX STRAND_MESH::computeSinBendingHessian()
-{
+SPARSE_MATRIX STRAND_MESH::computeSinBendingHessian() {
   TIMER functionTimer(__FUNCTION__);
   vector<MATRIX11> perBendHessians(_totalBends);
-  for (unsigned int x = 0; x < _totalBends; x++)
-  {
-    const MATRIX2& B = _Bs[x];
+  for (unsigned int x = 0; x < _totalBends; x++) {
+    const MATRIX2 &B = _Bs[x];
     const REAL len = _refVertexLengths[x];
 
-    const VECTOR2& kappa = _kappas[x];
-    const VECTOR2& kappaBar = _kappaBars[x];
+    const VECTOR2 &kappa = _kappas[x];
+    const VECTOR2 &kappaBar = _kappaBars[x];
 
     const VECTOR2I edgeIndices = _bendEdges[x];
     const unsigned int e0 = edgeIndices[0];
     const unsigned int e1 = edgeIndices[1];
 
     MATRIX3x2 M;
-    M.col(0) =  0.5 * (_material2s[e0] + _material2s[e1]);
+    M.col(0) = 0.5 * (_material2s[e0] + _material2s[e1]);
     M.col(1) = -0.5 * (_material1s[e0] + _material1s[e1]);
 
     MATRIX3x2 M0;
     M0.col(0) = _material1s[e0];
     M0.col(1) = _material2s[e0];
-    
+
     MATRIX3x2 M1;
     M1.col(0) = _material1s[e1];
     M1.col(1) = _material2s[e1];
@@ -1337,30 +1300,28 @@ SPARSE_MATRIX STRAND_MESH::computeSinBendingHessian()
 ///////////////////////////////////////////////////////////////////////
 // bending force gradients
 ///////////////////////////////////////////////////////////////////////
-SPARSE_MATRIX STRAND_MESH::computeSinBendingClampedHessian()
-{
+SPARSE_MATRIX STRAND_MESH::computeSinBendingClampedHessian() {
   TIMER functionTimer(__FUNCTION__);
   vector<MATRIX11> perBendHessians(_totalBends);
-  for (unsigned int x = 0; x < _totalBends; x++)
-  {
-    const MATRIX2& B = _Bs[x];
+  for (unsigned int x = 0; x < _totalBends; x++) {
+    const MATRIX2 &B = _Bs[x];
     const REAL len = _refVertexLengths[x];
 
-    const VECTOR2& kappa = _kappas[x];
-    const VECTOR2& kappaBar = _kappaBars[x];
+    const VECTOR2 &kappa = _kappas[x];
+    const VECTOR2 &kappaBar = _kappaBars[x];
 
     const VECTOR2I edgeIndices = _bendEdges[x];
     const unsigned int e0 = edgeIndices[0];
     const unsigned int e1 = edgeIndices[1];
 
     MATRIX3x2 M;
-    M.col(0) =  0.5 * (_material2s[e0] + _material2s[e1]);
+    M.col(0) = 0.5 * (_material2s[e0] + _material2s[e1]);
     M.col(1) = -0.5 * (_material1s[e0] + _material1s[e1]);
 
     MATRIX3x2 M0;
     M0.col(0) = _material1s[e0];
     M0.col(1) = _material2s[e0];
-    
+
     MATRIX3x2 M1;
     M1.col(0) = _material1s[e1];
     M1.col(1) = _material2s[e1];
@@ -1382,8 +1343,7 @@ SPARSE_MATRIX STRAND_MESH::computeSinBendingClampedHessian()
 ///////////////////////////////////////////////////////////////////////
 // bending force gradients
 ///////////////////////////////////////////////////////////////////////
-SPARSE_MATRIX STRAND_MESH::computeBendingClampedHessian()
-{
+SPARSE_MATRIX STRAND_MESH::computeBendingClampedHessian() {
 #if USING_TAN_BENDING
   return computeTanBendingClampedHessian();
 #else
@@ -1394,35 +1354,33 @@ SPARSE_MATRIX STRAND_MESH::computeBendingClampedHessian()
 ///////////////////////////////////////////////////////////////////////
 // bending force gradients
 ///////////////////////////////////////////////////////////////////////
-SPARSE_MATRIX STRAND_MESH::computeTanBendingClampedHessian()
-{
+SPARSE_MATRIX STRAND_MESH::computeTanBendingClampedHessian() {
   TIMER functionTimer(__FUNCTION__);
   vector<MATRIX11> perBendHessians(_totalBends);
 
-  if (_bendingForceFilterEnabled)
-  {
-    std::cout << __FILE__ << " " << __FUNCTION__ << " " << __LINE__ << " : " << std::endl;
+  if (_bendingForceFilterEnabled) {
+    std::cout << __FILE__ << " " << __FUNCTION__ << " " << __LINE__ << " : "
+              << std::endl;
     std::cout << " BENDING FORCES FILTERED " << endl;
-    std::cout << __FILE__ << " " << __FUNCTION__ << " " << __LINE__ << " : " << std::endl;
+    std::cout << __FILE__ << " " << __FUNCTION__ << " " << __LINE__ << " : "
+              << std::endl;
   }
-  for (unsigned int x = 0; x < _totalBends; x++)
-  {
-    const MATRIX2& B = _Bs[x];
+  for (unsigned int x = 0; x < _totalBends; x++) {
+    const MATRIX2 &B = _Bs[x];
     const REAL len = _refVertexLengths[x];
 
-    const VECTOR2& kappa = _kappas[x];
-    const VECTOR2& kappaBar = _kappaBars[x];
-    const MATRIX11x2& gradKappa = computeGradKappa(x);
+    const VECTOR2 &kappa = _kappas[x];
+    const VECTOR2 &kappaBar = _kappaBars[x];
+    const MATRIX11x2 &gradKappa = computeGradKappa(x);
 
     MATRIX11 localJ = 1.0 / len * gradKappa * B * gradKappa.transpose();
 
-    const pair<MATRIX11, MATRIX11>& hessKappa = computeHessianKappa(x);
+    const pair<MATRIX11, MATRIX11> &hessKappa = computeHessianKappa(x);
     const VECTOR2 temp = 1.0 / len * (kappa - kappaBar).transpose() * B;
     localJ += temp(0) * hessKappa.first + temp(1) * hessKappa.second;
 
     perBendHessians[x] = -1.0 * clampEigenvalues(localJ);
-    if (_bendingForceFilterEnabled)
-    { 
+    if (_bendingForceFilterEnabled) {
       if (kappa.norm() > _bendingFilterThreshold)
         perBendHessians[x] *= 0.0;
     }
@@ -1433,8 +1391,7 @@ SPARSE_MATRIX STRAND_MESH::computeTanBendingClampedHessian()
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-VECTOR11 STRAND_MESH::computeTanGradTwist(const int bendIndex) const
-{
+VECTOR11 STRAND_MESH::computeTanGradTwist(const int bendIndex) const {
   VECTOR11 Dtwist;
   Dtwist.setZero();
 
@@ -1444,9 +1401,9 @@ VECTOR11 STRAND_MESH::computeTanGradTwist(const int bendIndex) const
 
   // in case sin is being called, explicitly compute the
   // tan version here
-  //VECTOR3 kb = _kbs[bendIndex];
-  const VECTOR3& t0 = _tangents[e0];
-  const VECTOR3& t1 = _tangents[e1];
+  // VECTOR3 kb = _kbs[bendIndex];
+  const VECTOR3 &t0 = _tangents[e0];
+  const VECTOR3 &t1 = _tangents[e1];
   VECTOR3 kb = 2.0 * t0.cross(t1) / (1.0 + t0.dot(t1));
 
   /*
@@ -1456,7 +1413,7 @@ VECTOR11 STRAND_MESH::computeTanGradTwist(const int bendIndex) const
       */
 
   Dtwist.segment<3>(0) = -0.5 / (_edgeLengths[e0]) * kb;
-  Dtwist.segment<3>(8) =  0.5 / (_edgeLengths[e1]) * kb;
+  Dtwist.segment<3>(8) = 0.5 / (_edgeLengths[e1]) * kb;
   Dtwist.segment<3>(4) = -(Dtwist.segment<3>(0) + Dtwist.segment<3>(8));
   Dtwist(3) = -1;
   Dtwist(7) = 1;
@@ -1466,28 +1423,27 @@ VECTOR11 STRAND_MESH::computeTanGradTwist(const int bendIndex) const
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-VECTOR11 STRAND_MESH::computeDWAGradTwist(const int bendIndex) const
-{
+VECTOR11 STRAND_MESH::computeDWAGradTwist(const int bendIndex) const {
   VECTOR11 Dtwist;
   Dtwist.setZero();
 
   const VECTOR2I edgeIndices = _bendEdges[bendIndex];
   const unsigned int i0 = edgeIndices[0];
   const unsigned int i1 = edgeIndices[1];
-  const VECTOR3& e0 = _edges[i0];
-  const VECTOR3& e1 = _edges[i1];
-  const VECTOR3& t0 = _tangents[i0];
-  const VECTOR3& t1 = _tangents[i1];
+  const VECTOR3 &e0 = _edges[i0];
+  const VECTOR3 &e1 = _edges[i1];
+  const VECTOR3 &t0 = _tangents[i0];
+  const VECTOR3 &t1 = _tangents[i1];
   VECTOR3 kb = (t0.cross(t1)).normalized();
 
   REAL angle = acos(t0.dot(t1));
 
-  REAL coeff = tan(angle) * 0.5;  // stable, approaches the original
-  //REAL coeff = angle; // also stable, doesn't resist very much
-  //REAL coeff = sin(angle); // also stable, but too lively? 
+  REAL coeff = tan(angle) * 0.5; // stable, approaches the original
+  // REAL coeff = angle; // also stable, doesn't resist very much
+  // REAL coeff = sin(angle); // also stable, but too lively?
 
   Dtwist.segment<3>(0) = -0.5 / (_edgeLengths[i0]) * coeff * kb;
-  Dtwist.segment<3>(8) =  0.5 / (_edgeLengths[i1]) * coeff * kb;
+  Dtwist.segment<3>(8) = 0.5 / (_edgeLengths[i1]) * coeff * kb;
   Dtwist.segment<3>(4) = -(Dtwist.segment<3>(0) + Dtwist.segment<3>(8));
   Dtwist(3) = -1;
   Dtwist(7) = 1;
@@ -1497,8 +1453,7 @@ VECTOR11 STRAND_MESH::computeDWAGradTwist(const int bendIndex) const
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-VECTOR11 STRAND_MESH::computeSinGradTwist(const int bendIndex) const
-{
+VECTOR11 STRAND_MESH::computeSinGradTwist(const int bendIndex) const {
   VECTOR11 Dtwist;
   Dtwist.setZero();
 
@@ -1508,19 +1463,19 @@ VECTOR11 STRAND_MESH::computeSinGradTwist(const int bendIndex) const
 
   // in case sin is being called, explicitly compute the
   // sin version here
-  //VECTOR3 kb = _kbs[bendIndex];
-  const VECTOR3& edge0 = _edges[e0];
-  const VECTOR3& edge1 = _edges[e1];
-  const VECTOR3& t0 = _tangents[e0];
-  const VECTOR3& t1 = _tangents[e1];
-  //VECTOR3 kb = edge0.cross(edge1) / (edge0.norm() * (edge0 + edge1).norm());
+  // VECTOR3 kb = _kbs[bendIndex];
+  const VECTOR3 &edge0 = _edges[e0];
+  const VECTOR3 &edge1 = _edges[e1];
+  const VECTOR3 &t0 = _tangents[e0];
+  const VECTOR3 &t1 = _tangents[e1];
+  // VECTOR3 kb = edge0.cross(edge1) / (edge0.norm() * (edge0 + edge1).norm());
   VECTOR3 kb = t0.cross(t1) / ((t0 + t1).norm());
 
-  //const REAL coeff = 0.5;
+  // const REAL coeff = 0.5;
   const REAL coeff = 1.0;
 
   Dtwist.segment<3>(0) = -coeff / (_edgeLengths[e0]) * kb;
-  Dtwist.segment<3>(8) =  coeff / (_edgeLengths[e1]) * kb;
+  Dtwist.segment<3>(8) = coeff / (_edgeLengths[e1]) * kb;
   Dtwist.segment<3>(4) = -(Dtwist.segment<3>(0) + Dtwist.segment<3>(8));
   Dtwist(3) = -1;
   Dtwist(7) = 1;
@@ -1530,8 +1485,7 @@ VECTOR11 STRAND_MESH::computeSinGradTwist(const int bendIndex) const
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-VECTOR STRAND_MESH::computeTwistingForces() const
-{
+VECTOR STRAND_MESH::computeTwistingForces() const {
 #if USING_TAN_TWISTING
   return computeTanTwistingForces();
 #elif USING_DWA_TWISTING
@@ -1543,18 +1497,15 @@ VECTOR STRAND_MESH::computeTwistingForces() const
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-VECTOR STRAND_MESH::computeTanTwistingForces() const
-{
+VECTOR STRAND_MESH::computeTanTwistingForces() const {
   vector<VECTOR11> perBendForces(_totalBends);
-  for (unsigned int x = 0; x < _totalBends; x++)
-  {
+  for (unsigned int x = 0; x < _totalBends; x++) {
     const REAL len = _refVertexLengths[x];
     const REAL kt = _kts[x];
     const REAL twist = _twists[x];
     const REAL undeformedTwist = _undeformedTwists[x];
 
-    REAL value = kt / len
-      * (twist - undeformedTwist);
+    REAL value = kt / len * (twist - undeformedTwist);
 
     VECTOR11 force = -value * computeTanGradTwist(x);
     /*
@@ -1572,19 +1523,16 @@ VECTOR STRAND_MESH::computeTanTwistingForces() const
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-VECTOR STRAND_MESH::computeDWATwistingForces() const
-{
+VECTOR STRAND_MESH::computeDWATwistingForces() const {
   TIMER functionTimer(__FUNCTION__);
   vector<VECTOR11> perBendForces(_totalBends);
-  for (unsigned int x = 0; x < _totalBends; x++)
-  {
+  for (unsigned int x = 0; x < _totalBends; x++) {
     const REAL len = _refVertexLengths[x];
     const REAL kt = _kts[x];
     const REAL twist = _twists[x];
     const REAL undeformedTwist = _undeformedTwists[x];
 
-    REAL value = kt / len
-      * (twist - undeformedTwist);
+    REAL value = kt / len * (twist - undeformedTwist);
 
     VECTOR11 force = -value * computeDWAGradTwist(x);
     perBendForces[x] = force;
@@ -1595,18 +1543,15 @@ VECTOR STRAND_MESH::computeDWATwistingForces() const
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-VECTOR STRAND_MESH::computeSinTwistingForces() const
-{
+VECTOR STRAND_MESH::computeSinTwistingForces() const {
   vector<VECTOR11> perBendForces(_totalBends);
-  for (unsigned int x = 0; x < _totalBends; x++)
-  {
+  for (unsigned int x = 0; x < _totalBends; x++) {
     const REAL len = _refVertexLengths[x];
     const REAL kt = _kts[x];
     const REAL twist = _twists[x];
     const REAL undeformedTwist = _undeformedTwists[x];
 
-    REAL value = kt / len
-      * (twist - undeformedTwist);
+    REAL value = kt / len * (twist - undeformedTwist);
 
     VECTOR11 force = -value * computeSinGradTwist(x);
     perBendForces[x] = force;
@@ -1617,8 +1562,7 @@ VECTOR STRAND_MESH::computeSinTwistingForces() const
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-MATRIX11 STRAND_MESH::computeTanHessianTwist(const int bendIndex) const
-{
+MATRIX11 STRAND_MESH::computeTanHessianTwist(const int bendIndex) const {
   MATRIX11 DDtwist;
   DDtwist.setZero();
 
@@ -1626,8 +1570,8 @@ MATRIX11 STRAND_MESH::computeTanHessianTwist(const int bendIndex) const
   const unsigned int e0 = edgeIndices[0];
   const unsigned int e1 = edgeIndices[1];
 
-  const VECTOR3& te = _tangents[e0];
-  const VECTOR3& tf = _tangents[e1];
+  const VECTOR3 &te = _tangents[e0];
+  const VECTOR3 &tf = _tangents[e1];
   const REAL norm_e = _edgeLengths[e0];
   const REAL norm_f = _edgeLengths[e1];
   VECTOR3 kb = 2.0 * te.cross(tf) / (1.0 + te.dot(tf));
@@ -1641,23 +1585,23 @@ MATRIX11 STRAND_MESH::computeTanHessianTwist(const int bendIndex) const
   REAL chi = 1 + te.dot(tf);
   VECTOR3 tilde_t = 1.0 / chi * (te + tf);
 
-  MATRIX3 D2mDe2 = -0.25 / (norm_e * norm_e) * (outerProd(kb, te + tilde_t)
-                                           + outerProd(te + tilde_t, kb));
-  MATRIX3 D2mDf2 = -0.25 / (norm_f * norm_f) * (outerProd(kb, tf + tilde_t)
-                                           + outerProd(tf + tilde_t, kb));
+  MATRIX3 D2mDe2 = -0.25 / (norm_e * norm_e) *
+                   (outerProd(kb, te + tilde_t) + outerProd(te + tilde_t, kb));
+  MATRIX3 D2mDf2 = -0.25 / (norm_f * norm_f) *
+                   (outerProd(kb, tf + tilde_t) + outerProd(tf + tilde_t, kb));
   MATRIX3 D2mDeDf = 0.5 / (norm_e * norm_f) *
                     (2.0 / chi * crossProduct(te) - outerProd(kb, tilde_t));
   MATRIX3 D2mDfDe = D2mDeDf.transpose();
 
-  DDtwist.block<3,3>(0,0) =   D2mDe2;
-  DDtwist.block<3,3>(0,4) = - D2mDe2 + D2mDeDf;
-  DDtwist.block<3,3>(0,8) =          - D2mDeDf;
-  DDtwist.block<3,3>(4,0) = - D2mDe2           + D2mDfDe;
-  DDtwist.block<3,3>(4,4) =   D2mDe2 - D2mDeDf - D2mDfDe + D2mDf2;
-  DDtwist.block<3,3>(4,8) =            D2mDeDf           - D2mDf2;
-  DDtwist.block<3,3>(8,0) =                    - D2mDfDe;
-  DDtwist.block<3,3>(8,4) =                      D2mDfDe - D2mDf2;
-  DDtwist.block<3,3>(8,8) =                                D2mDf2;
+  DDtwist.block<3, 3>(0, 0) = D2mDe2;
+  DDtwist.block<3, 3>(0, 4) = -D2mDe2 + D2mDeDf;
+  DDtwist.block<3, 3>(0, 8) = -D2mDeDf;
+  DDtwist.block<3, 3>(4, 0) = -D2mDe2 + D2mDfDe;
+  DDtwist.block<3, 3>(4, 4) = D2mDe2 - D2mDeDf - D2mDfDe + D2mDf2;
+  DDtwist.block<3, 3>(4, 8) = D2mDeDf - D2mDf2;
+  DDtwist.block<3, 3>(8, 0) = -D2mDfDe;
+  DDtwist.block<3, 3>(8, 4) = D2mDfDe - D2mDf2;
+  DDtwist.block<3, 3>(8, 8) = D2mDf2;
 
   return DDtwist;
 }
@@ -1719,10 +1663,10 @@ MATRIX11 STRAND_MESH::computeSinHessianTwist(const int bendIndex) const
   const VECTOR2I edgeIndices = _bendEdges[bendIndex];
   const unsigned int i0 = edgeIndices[0];
   const unsigned int i1 = edgeIndices[1];
-  const VECTOR3& e0 = _edges[i0];
-  const VECTOR3& e1 = _edges[i1];
-  const VECTOR3& t0 = _tangents[i0];
-  const VECTOR3& t1 = _tangents[i1];
+  const VECTOR3 &e0 = _edges[i0];
+  const VECTOR3 &e1 = _edges[i1];
+  const VECTOR3 &t0 = _tangents[i0];
+  const VECTOR3 &t1 = _tangents[i1];
 
   MATRIX3x2 E;
   E.col(0) = e0;
@@ -1730,30 +1674,33 @@ MATRIX11 STRAND_MESH::computeSinHessianTwist(const int bendIndex) const
 
   const VECTOR3 kb = bending.binormal(e0, e1);
   const pair<MATRIX3, MATRIX3> gradient = bending.binormalGradient(E);
-  const MATRIX3& G0 = gradient.first;
-  const MATRIX3& G1 = gradient.second;
+  const MATRIX3 &G0 = gradient.first;
+  const MATRIX3 &G1 = gradient.second;
 
   const REAL e0norm = e0.norm();
   const REAL e1norm = e1.norm();
 
-  //MATRIX3 D2mDe2 = (1.0 / e0norm) * G0 - (1.0 / (e0norm * e0norm * e0norm)) * (kb * e0.transpose());
-  //MATRIX3 D2mDf2 = (1.0 / e1norm) * G1 - (1.0 / (e1norm * e1norm * e1norm)) * (kb * e1.transpose());
-  MATRIX3 D2mDe2 = -(1.0 / (e0norm * e0norm)) * (kb * t0.transpose() + t0 * kb.transpose());
-  MATRIX3 D2mDf2 = -(1.0 / (e1norm * e1norm)) * (kb * t1.transpose() + t1 * kb.transpose());
+  // MATRIX3 D2mDe2 = (1.0 / e0norm) * G0 - (1.0 / (e0norm * e0norm * e0norm)) *
+  // (kb * e0.transpose()); MATRIX3 D2mDf2 = (1.0 / e1norm) * G1 - (1.0 /
+  // (e1norm * e1norm * e1norm)) * (kb * e1.transpose());
+  MATRIX3 D2mDe2 =
+      -(1.0 / (e0norm * e0norm)) * (kb * t0.transpose() + t0 * kb.transpose());
+  MATRIX3 D2mDf2 =
+      -(1.0 / (e1norm * e1norm)) * (kb * t1.transpose() + t1 * kb.transpose());
   MATRIX3 D2mDeDf = (1.0 / e0norm) * G1;
-  //D2mDe2 = 0.5 * (D2mDe2 + D2mDe2.transpose());
-  //D2mDf2 = 0.5 * (D2mDf2 + D2mDf2.transpose());
+  // D2mDe2 = 0.5 * (D2mDe2 + D2mDe2.transpose());
+  // D2mDf2 = 0.5 * (D2mDf2 + D2mDf2.transpose());
   MATRIX3 D2mDfDe = D2mDeDf.transpose();
 
-  DDtwist.block<3,3>(0,0) =   D2mDe2;
-  DDtwist.block<3,3>(0,4) = - D2mDe2 + D2mDeDf;
-  DDtwist.block<3,3>(0,8) =          - D2mDeDf;
-  DDtwist.block<3,3>(4,0) = - D2mDe2           + D2mDfDe;
-  DDtwist.block<3,3>(4,4) =   D2mDe2 - D2mDeDf - D2mDfDe + D2mDf2;
-  DDtwist.block<3,3>(4,8) =            D2mDeDf           - D2mDf2;
-  DDtwist.block<3,3>(8,0) =                    - D2mDfDe;
-  DDtwist.block<3,3>(8,4) =                      D2mDfDe - D2mDf2;
-  DDtwist.block<3,3>(8,8) =                                D2mDf2;
+  DDtwist.block<3, 3>(0, 0) = D2mDe2;
+  DDtwist.block<3, 3>(0, 4) = -D2mDe2 + D2mDeDf;
+  DDtwist.block<3, 3>(0, 8) = -D2mDeDf;
+  DDtwist.block<3, 3>(4, 0) = -D2mDe2 + D2mDfDe;
+  DDtwist.block<3, 3>(4, 4) = D2mDe2 - D2mDeDf - D2mDfDe + D2mDf2;
+  DDtwist.block<3, 3>(4, 8) = D2mDeDf - D2mDf2;
+  DDtwist.block<3, 3>(8, 0) = -D2mDfDe;
+  DDtwist.block<3, 3>(8, 4) = D2mDfDe - D2mDf2;
+  DDtwist.block<3, 3>(8, 8) = D2mDf2;
 
   return 0.5 * DDtwist;
 }
@@ -1761,8 +1708,7 @@ MATRIX11 STRAND_MESH::computeSinHessianTwist(const int bendIndex) const
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-SPARSE_MATRIX STRAND_MESH::computeTwistingHessian() const
-{
+SPARSE_MATRIX STRAND_MESH::computeTwistingHessian() const {
   TIMER functionTimer(__FUNCTION__);
 #if USING_TAN_TWISTING
   return computeTanTwistingHessian();
@@ -1775,126 +1721,119 @@ SPARSE_MATRIX STRAND_MESH::computeTwistingHessian() const
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-SPARSE_MATRIX STRAND_MESH::computeDWATwistingClampedHessian() const
-{
+SPARSE_MATRIX STRAND_MESH::computeDWATwistingClampedHessian() const {
   TIMER functionTimer(__FUNCTION__);
   vector<MATRIX11> perBendHessians(_totalBends);
 
-  for (unsigned int x = 0; x < _totalBends; x++)
-  {
+  for (unsigned int x = 0; x < _totalBends; x++) {
     const REAL len = _refVertexLengths[x];
     const REAL kt = _kts[x];
     const REAL twist = _twists[x];
     const REAL undeformedTwist = _undeformedTwists[x];
 
-    const VECTOR11& gradTwist = computeDWAGradTwist(x);
-    //const MATRIX11& hessTwist = computeDWAHessianTwist(x);
+    const VECTOR11 &gradTwist = computeDWAGradTwist(x);
+    // const MATRIX11& hessTwist = computeDWAHessianTwist(x);
 
     MATRIX11 localJ = kt / len * (gradTwist * gradTwist.transpose());
     perBendHessians[x] = -1.0 * localJ;
   }
-  
+
   return buildPerBendMatrix(perBendHessians);
 }
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-SPARSE_MATRIX STRAND_MESH::computeDWATwistingHessian() const
-{
+SPARSE_MATRIX STRAND_MESH::computeDWATwistingHessian() const {
   TIMER functionTimer(__FUNCTION__);
   vector<MATRIX11> perBendHessians(_totalBends);
 
-  for (unsigned int x = 0; x < _totalBends; x++)
-  {
+  for (unsigned int x = 0; x < _totalBends; x++) {
     const REAL len = _refVertexLengths[x];
     const REAL kt = _kts[x];
     const REAL twist = _twists[x];
     const REAL undeformedTwist = _undeformedTwists[x];
 
-    const VECTOR11& gradTwist = computeDWAGradTwist(x);
+    const VECTOR11 &gradTwist = computeDWAGradTwist(x);
 
     MATRIX11 localJ = kt / len * (gradTwist * gradTwist.transpose());
     perBendHessians[x] = -1.0 * localJ;
   }
-  
+
   return buildPerBendMatrix(perBendHessians);
 }
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-SPARSE_MATRIX STRAND_MESH::computeSinTwistingClampedHessian() const
-{
+SPARSE_MATRIX STRAND_MESH::computeSinTwistingClampedHessian() const {
   vector<MATRIX11> perBendHessians(_totalBends);
 
-  for (unsigned int x = 0; x < _totalBends; x++)
-  {
+  for (unsigned int x = 0; x < _totalBends; x++) {
     const REAL len = _refVertexLengths[x];
     const REAL kt = _kts[x];
     const REAL twist = _twists[x];
     const REAL undeformedTwist = _undeformedTwists[x];
 
-    const VECTOR11& gradTwist = computeSinGradTwist(x);
-    const MATRIX11& hessTwist = computeSinHessianTwist(x);
+    const VECTOR11 &gradTwist = computeSinGradTwist(x);
+    const MATRIX11 &hessTwist = computeSinHessianTwist(x);
 
 #if !USING_GAUSS_NEWTON_TWISTING
-    MATRIX11 localJ = kt / len * ((twist - undeformedTwist) * hessTwist
-                       + gradTwist * gradTwist.transpose());
+    MATRIX11 localJ = kt / len *
+                      ((twist - undeformedTwist) * hessTwist +
+                       gradTwist * gradTwist.transpose());
 #else
     MATRIX11 localJ = kt / len * (gradTwist * gradTwist.transpose());
 #endif
     perBendHessians[x] = -1.0 * clampEigenvalues(localJ);
   }
-  
+
   return buildPerBendMatrix(perBendHessians);
 }
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-SPARSE_MATRIX STRAND_MESH::computeSinTwistingHessian() const
-{
+SPARSE_MATRIX STRAND_MESH::computeSinTwistingHessian() const {
   vector<MATRIX11> perBendHessians(_totalBends);
 
-  for (unsigned int x = 0; x < _totalBends; x++)
-  {
+  for (unsigned int x = 0; x < _totalBends; x++) {
     const REAL len = _refVertexLengths[x];
     const REAL kt = _kts[x];
     const REAL twist = _twists[x];
     const REAL undeformedTwist = _undeformedTwists[x];
 
-    const VECTOR11& gradTwist = computeSinGradTwist(x);
-    const MATRIX11& hessTwist = computeSinHessianTwist(x);
+    const VECTOR11 &gradTwist = computeSinGradTwist(x);
+    const MATRIX11 &hessTwist = computeSinHessianTwist(x);
 
 #if !USING_GAUSS_NEWTON_TWISTING
-    MATRIX11 localJ = kt / len * ((twist - undeformedTwist) * hessTwist
-                       + gradTwist * gradTwist.transpose());
+    MATRIX11 localJ = kt / len *
+                      ((twist - undeformedTwist) * hessTwist +
+                       gradTwist * gradTwist.transpose());
 #else
     MATRIX11 localJ = kt / len * (gradTwist * gradTwist.transpose());
 #endif
     perBendHessians[x] = -1.0 * localJ;
   }
-  
+
   return buildPerBendMatrix(perBendHessians);
 }
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-SPARSE_MATRIX STRAND_MESH::computeTanTwistingHessian() const
-{
+SPARSE_MATRIX STRAND_MESH::computeTanTwistingHessian() const {
   vector<MATRIX11> perBendHessians(_totalBends);
 
-  for (unsigned int x = 0; x < _totalBends; x++)
-  {
+  for (unsigned int x = 0; x < _totalBends; x++) {
     const REAL len = _refVertexLengths[x];
     const REAL kt = _kts[x];
     const REAL twist = _twists[x];
     const REAL undeformedTwist = _undeformedTwists[x];
 
-    const VECTOR11& gradTwist = computeTanGradTwist(x);
-    const MATRIX11& hessTwist = computeTanHessianTwist(x);
+    const VECTOR11 &gradTwist = computeTanGradTwist(x);
+    const MATRIX11 &hessTwist = computeTanHessianTwist(x);
 
 #if !USING_GAUSS_NEWTON_TWISTING
-    MATRIX11 localJ = kt / len * ((twist - undeformedTwist) * hessTwist
-                       + gradTwist * gradTwist.transpose());
+    MATRIX11 localJ = kt / len *
+                      ((twist - undeformedTwist) * hessTwist +
+                       gradTwist * gradTwist.transpose());
 #else
     MATRIX11 localJ = kt / len * (gradTwist * gradTwist.transpose());
 #endif
@@ -1902,14 +1841,13 @@ SPARSE_MATRIX STRAND_MESH::computeTanTwistingHessian() const
 
     cout << " per bend: " << endl << perBendHessians[x] << endl;
   }
-  
+
   return buildPerBendMatrix(perBendHessians);
 }
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-SPARSE_MATRIX STRAND_MESH::computeTwistingClampedHessian() const
-{
+SPARSE_MATRIX STRAND_MESH::computeTwistingClampedHessian() const {
 #if USING_TAN_TWISTING
   return computeTanTwistingClampedHessian();
 #elif USING_DWA_TWISTING
@@ -1921,24 +1859,23 @@ SPARSE_MATRIX STRAND_MESH::computeTwistingClampedHessian() const
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-SPARSE_MATRIX STRAND_MESH::computeTanTwistingClampedHessian() const
-{
+SPARSE_MATRIX STRAND_MESH::computeTanTwistingClampedHessian() const {
   TIMER functionTimer(__FUNCTION__);
   vector<MATRIX11> perBendHessians(_totalBends);
 
-  for (unsigned int x = 0; x < _totalBends; x++)
-  {
+  for (unsigned int x = 0; x < _totalBends; x++) {
     const REAL len = _refVertexLengths[x];
     const REAL kt = _kts[x];
     const REAL twist = _twists[x];
     const REAL undeformedTwist = _undeformedTwists[x];
 
-    const VECTOR11& gradTwist = computeTanGradTwist(x);
-    const MATRIX11& hessTwist = computeTanHessianTwist(x);
+    const VECTOR11 &gradTwist = computeTanGradTwist(x);
+    const MATRIX11 &hessTwist = computeTanHessianTwist(x);
 
 #if !USING_GAUSS_NEWTON_TWISTING
-    MATRIX11 localJ = kt / len * ((twist - undeformedTwist) * hessTwist
-                       + gradTwist * gradTwist.transpose());
+    MATRIX11 localJ = kt / len *
+                      ((twist - undeformedTwist) * hessTwist +
+                       gradTwist * gradTwist.transpose());
 #else
     MATRIX11 localJ = kt / len * (gradTwist * gradTwist.transpose());
 #endif
@@ -1951,13 +1888,11 @@ SPARSE_MATRIX STRAND_MESH::computeTanTwistingClampedHessian() const
 ///////////////////////////////////////////////////////////////////////
 // get the area of each edge
 ///////////////////////////////////////////////////////////////////////
-const VECTOR STRAND_MESH::voronoiAreas() const
-{
+const VECTOR STRAND_MESH::voronoiAreas() const {
   VECTOR areas(_vertices.size());
   areas.setZero();
 
-  for (unsigned int x = 0; x < _totalEdges; x++)
-  {
+  for (unsigned int x = 0; x < _totalEdges; x++) {
     areas[x] += 0.5 * _restEdgeLengths[x];
     areas[x + 1] += 0.5 * _restEdgeLengths[x];
   }
@@ -1968,29 +1903,25 @@ const VECTOR STRAND_MESH::voronoiAreas() const
 ///////////////////////////////////////////////////////////////////////
 // this is here just to debug twisting energies
 ///////////////////////////////////////////////////////////////////////
-void STRAND_MESH::cacheOldAngles()
-{
+void STRAND_MESH::cacheOldAngles() {
   _tangentsOld = _tangents;
   _directorOld1 = _director1s;
 }
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-void STRAND_MESH::computeEdges()
-{
+void STRAND_MESH::computeEdges() {
   // original DVT
-  //for (int j = 0; j < ne(); ++j)
+  // for (int j = 0; j < ne(); ++j)
   //  setEdge(j, getVertex(j + 1) - getVertex(j));
 
   _edges.resize(_totalEdges);
-  for (unsigned int i = 0; i < _totalEdges; i++)
-  {
-    const VECTOR2I& indices = _edgeIndices[i];
+  for (unsigned int i = 0; i < _totalEdges; i++) {
+    const VECTOR2I &indices = _edgeIndices[i];
     _edges[i] = _vertices[indices[1]] - _vertices[indices[0]];
 
 #if 1
-    if (!(_edges[i].norm() > 1e-8))
-    {
+    if (!(_edges[i].norm() > 1e-8)) {
       cout << " vertex 0: " << _vertices[indices[0]].transpose() << endl;
       cout << " vertex 1: " << _vertices[indices[1]].transpose() << endl;
 
@@ -2006,19 +1937,17 @@ void STRAND_MESH::computeEdges()
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-void STRAND_MESH::computeTangents()
-{
+void STRAND_MESH::computeTangents() {
   // original DVT
-  //for (int j = 0; j < ne(); ++j)
+  // for (int j = 0; j < ne(); ++j)
   //  setTangent(j, getEdge(j).normalized());
   assert(_tangents.size() == _edges.size());
 
-  for (unsigned int i = 0; i < _totalEdges; i++)
-  {
+  for (unsigned int i = 0; i < _totalEdges; i++) {
     // edges are not degenerate, right?
     assert(_edges[i].norm() > 1e-8);
     _tangents[i] = _edges[i].normalized();
-    
+
     // tangents are not degenerate, right?
     assert(_tangents[i].norm() > 1e-8);
   }
@@ -2026,8 +1955,7 @@ void STRAND_MESH::computeTangents()
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-void STRAND_MESH::computeReferenceDirectors()
-{
+void STRAND_MESH::computeReferenceDirectors() {
   assert(_director1s.size() == _totalEdges);
   assert(_director2s.size() == _totalEdges);
 
@@ -2045,8 +1973,7 @@ void STRAND_MESH::computeReferenceDirectors()
 
   // TODO: this doesn't store an "old", so the calling order starts to matter,
   // which isn't great.
-  for (unsigned int i = 0; i < _totalEdges; i++)
-  {
+  for (unsigned int i = 0; i < _totalEdges; i++) {
     const VECTOR3 tangent = _edges[i].normalized();
     const VECTOR3 director1 = _director1s[i];
     VECTOR3 u = parallel_transport(director1, _tangents[i], tangent);
@@ -2058,8 +1985,7 @@ void STRAND_MESH::computeReferenceDirectors()
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-void STRAND_MESH::computeCurvatureBinormals()
-{
+void STRAND_MESH::computeCurvatureBinormals() {
 #if USING_TAN_BENDING
   computeTanBinormals();
 #else
@@ -2069,46 +1995,41 @@ void STRAND_MESH::computeCurvatureBinormals()
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-void STRAND_MESH::computeTanBinormals()
-{
+void STRAND_MESH::computeTanBinormals() {
   assert(_kbs.size() == _totalBends);
   assert(_kbs.size() == _bendEdges.size());
 
-  for (unsigned int i = 0; i < _totalBends; i++)
-  {
-    const VECTOR2I& edgeIndices = _bendEdges[i];
+  for (unsigned int i = 0; i < _totalBends; i++) {
+    const VECTOR2I &edgeIndices = _bendEdges[i];
 
-    const VECTOR3& t0 = _tangents[edgeIndices[0]];
-    const VECTOR3& t1 = _tangents[edgeIndices[1]];
+    const VECTOR3 &t0 = _tangents[edgeIndices[0]];
+    const VECTOR3 &t1 = _tangents[edgeIndices[1]];
     _kbs[i] = 2.0 * t0.cross(t1) / (1.0 + t0.dot(t1));
   }
 }
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-void STRAND_MESH::computeSinBinormals()
-{
+void STRAND_MESH::computeSinBinormals() {
   assert(_kbs.size() == _totalBends);
   assert(_kbs.size() == _bendEdges.size());
 
-  for (unsigned int i = 0; i < _totalBends; i++)
-  {
-    const VECTOR2I& edgeIndices = _bendEdges[i];
+  for (unsigned int i = 0; i < _totalBends; i++) {
+    const VECTOR2I &edgeIndices = _bendEdges[i];
 
-    const VECTOR3& e0 = _edges[edgeIndices[0]];
-    const VECTOR3& e1 = _edges[edgeIndices[1]];
-    
-    //const STRAND::SIN_BENDING bending;
+    const VECTOR3 &e0 = _edges[edgeIndices[0]];
+    const VECTOR3 &e1 = _edges[edgeIndices[1]];
+
+    // const STRAND::SIN_BENDING bending;
     //_kbs[i] = e0.cross(e1) / (e0.norm() * e1.norm());
     const STRAND::SIN_BENDING bending;
-    _kbs[i] = bending.binormal(e0,e1);
+    _kbs[i] = bending.binormal(e0, e1);
   }
 }
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-void STRAND_MESH::computeEdgeLengths()
-{
+void STRAND_MESH::computeEdgeLengths() {
   assert(_edgeLengths.size() == _totalEdges);
 
   for (unsigned int i = 0; i < _totalEdges; i++)
@@ -2117,22 +2038,20 @@ void STRAND_MESH::computeEdgeLengths()
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-void STRAND_MESH::computeVoronoiLengths()
-{
-  //setVoronoiLength(0, 0.5 * getEdgeLength(0));
-  //for (int i = 1; i < nv() - 1; ++i) {
-  //  setVoronoiLength(i, 0.5 * (getEdgeLength(i - 1) + getEdgeLength(i)));
-  //}
-  //setVoronoiLength(nv() - 1, 0.5 * getEdgeLength(ne() - 1));
+void STRAND_MESH::computeVoronoiLengths() {
+  // setVoronoiLength(0, 0.5 * getEdgeLength(0));
+  // for (int i = 1; i < nv() - 1; ++i) {
+  //   setVoronoiLength(i, 0.5 * (getEdgeLength(i - 1) + getEdgeLength(i)));
+  // }
+  // setVoronoiLength(nv() - 1, 0.5 * getEdgeLength(ne() - 1));
 
   assert(_voronoiLengths.size() == _totalVertices);
   _voronoiLengths.setZero();
 
   // we're not tracking the endpoints, so do it this way
-  for (unsigned int i = 0; i < _totalEdges; i++)
-  {
+  for (unsigned int i = 0; i < _totalEdges; i++) {
     const VECTOR2I edgeIndices = _edgeIndices[i];
-    const REAL& length = _edgeLengths[i];
+    const REAL &length = _edgeLengths[i];
     _voronoiLengths[edgeIndices[0]] += 0.5 * length;
     _voronoiLengths[edgeIndices[1]] += 0.5 * length;
   }
@@ -2140,17 +2059,15 @@ void STRAND_MESH::computeVoronoiLengths()
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-void STRAND_MESH::computeMaterialDirectors()
-{
+void STRAND_MESH::computeMaterialDirectors() {
   assert(_material1s.size() == _totalEdges);
   assert(_material2s.size() == _totalEdges);
 
-  for (unsigned int j = 0; j < _totalEdges; j++)
-  {
+  for (unsigned int j = 0; j < _totalEdges; j++) {
     REAL c = cos(_thetas[j]);
     REAL s = sin(_thetas[j]);
-    const VECTOR3& u = _director1s[j];
-    const VECTOR3& v = _director2s[j];
+    const VECTOR3 &u = _director1s[j];
+    const VECTOR3 &v = _director2s[j];
     _material1s[j] = c * u + s * v;
     _material2s[j] = -s * u + c * v;
   }
@@ -2158,13 +2075,12 @@ void STRAND_MESH::computeMaterialDirectors()
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-void STRAND_MESH::computeReferenceTwist()
-{
-  //for (int i = 1; i < nv() - 1; ++i) {
-  //  const Vec3d& u0 = getReferenceDirector1(i - 1);
-  //  const Vec3d& u1 = getReferenceDirector1(i);
-  //  const Vec3d& tangent = getTangent(i);
-  //  Scalar& referenceTwist = property(m_referenceTwist)[i];
+void STRAND_MESH::computeReferenceTwist() {
+  // for (int i = 1; i < nv() - 1; ++i) {
+  //   const Vec3d& u0 = getReferenceDirector1(i - 1);
+  //   const Vec3d& u1 = getReferenceDirector1(i);
+  //   const Vec3d& tangent = getTangent(i);
+  //   Scalar& referenceTwist = property(m_referenceTwist)[i];
 
   //  // transport reference frame to next edge
   //  Vec3d ut = parallel_transport(u0, getTangent(i - 1), tangent);
@@ -2178,24 +2094,24 @@ void STRAND_MESH::computeReferenceTwist()
 
   assert(_referenceTwists.size() == _totalBends);
 
-  for (unsigned int i = 0; i < _totalBends; i++)
-  {
+  for (unsigned int i = 0; i < _totalBends; i++) {
     const VECTOR2I edgeIndices = _bendEdges[i];
-    const VECTOR3& u0 = _director1s[edgeIndices[0]];
-    const VECTOR3& u1 = _director1s[edgeIndices[1]];
-    const VECTOR3& t0 = _tangents[edgeIndices[0]];
-    const VECTOR3& t1 = _tangents[edgeIndices[1]];
+    const VECTOR3 &u0 = _director1s[edgeIndices[0]];
+    const VECTOR3 &u1 = _director1s[edgeIndices[1]];
+    const VECTOR3 &t0 = _tangents[edgeIndices[0]];
+    const VECTOR3 &t1 = _tangents[edgeIndices[1]];
     const VECTOR3 uParallel = parallel_transport(u0, t0, t1);
 
-    REAL& referenceTwist = _referenceTwists[i];
-    if (t1.norm() < 1e-8)
-    {
+    REAL &referenceTwist = _referenceTwists[i];
+    if (t1.norm() < 1e-8) {
       cout << " uParallel:" << uParallel.transpose() << endl;
       cout << " t1:       " << t1.transpose() << endl;
       cout << " u0:       " << u0.transpose() << endl;
       cout << " edgeIndices:  " << edgeIndices.transpose() << endl;
-      cout << " _tangents0:   " << _tangents[edgeIndices[0]].transpose() << endl;
-      cout << " _tangents1:   " << _tangents[edgeIndices[1]].transpose() << endl;
+      cout << " _tangents0:   " << _tangents[edgeIndices[0]].transpose()
+           << endl;
+      cout << " _tangents1:   " << _tangents[edgeIndices[1]].transpose()
+           << endl;
     }
 
     // rotate by current value of reference twist
@@ -2208,43 +2124,44 @@ void STRAND_MESH::computeReferenceTwist()
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-void STRAND_MESH::computeVertexMasses()
-{
+void STRAND_MESH::computeVertexMasses() {
   assert(_vertexMasses.size() == _totalVertices);
 
-  //for (unsigned int i = 0; i < _totalVertices; i++)
+  // for (unsigned int i = 0; i < _totalVertices; i++)
   //{
-  //  Scalar mass = 0;
-  //  if (i > 0) {
-  //    mass +=
-  //      computeMass(density(), radiusA(i - 1), radiusB(i - 1),
-  //                  0.5 * getEdgeLength(i - 1));
-  //  }
-  //  if (i < nv() - 1) {
-  //    mass +=
-  //      computeMass(density(), radiusA(i), radiusB(i),
-  //                  0.5 * getEdgeLength(i));
-  //  }
-  //  //assert( mass > 0.0 );
-  //  setVertexMass(i, mass);
-  //}
+  //   Scalar mass = 0;
+  //   if (i > 0) {
+  //     mass +=
+  //       computeMass(density(), radiusA(i - 1), radiusB(i - 1),
+  //                   0.5 * getEdgeLength(i - 1));
+  //   }
+  //   if (i < nv() - 1) {
+  //     mass +=
+  //       computeMass(density(), radiusA(i), radiusB(i),
+  //                   0.5 * getEdgeLength(i));
+  //   }
+  //   //assert( mass > 0.0 );
+  //   setVertexMass(i, mass);
+  // }
 
   _vertexMasses.setZero();
 
-  for (unsigned int i = 0; i < _totalEdges; i++)
-  {
+  for (unsigned int i = 0; i < _totalEdges; i++) {
     const VECTOR2I edge = _edgeIndices[i];
 
     //_vertexMasses[i] += density * M_PI * radiusA * radiusB * _edgeLengths[i];
     //_vertexMasses[i] += DENSITY * M_PI * RADIUSA * RADIUSB * _edgeLengths[i];
     //_vertexMasses[i] += DENSITY * M_PI * 0.001 * 0.001 * _edgeLengths[i];
 
-    //_vertexMasses[edge[0]] += 0.5 * DENSITY * M_PI * 0.001 * 0.001 * _edgeLengths[i];
-    //_vertexMasses[edge[1]] += 0.5 * DENSITY * M_PI * 0.001 * 0.001 * _edgeLengths[i];
-    //_vertexMasses[edge[0]] += 0.5 * DENSITY * M_PI * RADIUSA * RADIUSB * _edgeLengths[i];
-    //_vertexMasses[edge[1]] += 0.5 * DENSITY * M_PI * RADIUSA * RADIUSB * _edgeLengths[i];
-    _vertexMasses[edge[0]] += 0.5 * _density * M_PI * _radiusA * _radiusB * _edgeLengths[i];
-    _vertexMasses[edge[1]] += 0.5 * _density * M_PI * _radiusA * _radiusB * _edgeLengths[i];
+    //_vertexMasses[edge[0]] += 0.5 * DENSITY * M_PI * 0.001 * 0.001 *
+    //_edgeLengths[i]; _vertexMasses[edge[1]] += 0.5 * DENSITY * M_PI * 0.001 *
+    //0.001 * _edgeLengths[i]; _vertexMasses[edge[0]] += 0.5 * DENSITY * M_PI *
+    //RADIUSA * RADIUSB * _edgeLengths[i]; _vertexMasses[edge[1]] += 0.5 *
+    //DENSITY * M_PI * RADIUSA * RADIUSB * _edgeLengths[i];
+    _vertexMasses[edge[0]] +=
+        0.5 * _density * M_PI * _radiusA * _radiusB * _edgeLengths[i];
+    _vertexMasses[edge[1]] +=
+        0.5 * _density * M_PI * _radiusA * _radiusB * _edgeLengths[i];
   }
 }
 
@@ -2252,27 +2169,25 @@ void STRAND_MESH::computeVertexMasses()
 // TODO: this needs to be made more generic, a STRAND class that
 // stores each, end-to-end.
 ///////////////////////////////////////////////////////////////////////
-void STRAND_MESH::computeSpaceParallel()
-{
+void STRAND_MESH::computeSpaceParallel() {
   //// transport first edge in time
-  //edge_iter eit = edges_begin(), end = edges_end();
-  //edge_handle eh = *eit;
-  //Vec3d t0 = getEdge(eh).normalized();
-  //Vec3d u = parallel_transport(getReferenceDirector1(eh), getTangent(eh), t0);
-  //u = (u - u.dot(t0) * t0).normalized();
-  //setReferenceDirector1(eh, u);
-  //setReferenceDirector2(eh, t0.cross(u));
+  // edge_iter eit = edges_begin(), end = edges_end();
+  // edge_handle eh = *eit;
+  // Vec3d t0 = getEdge(eh).normalized();
+  // Vec3d u = parallel_transport(getReferenceDirector1(eh), getTangent(eh),
+  // t0); u = (u - u.dot(t0) * t0).normalized(); setReferenceDirector1(eh, u);
+  // setReferenceDirector2(eh, t0.cross(u));
   //
   //// transport along centerline (Bishop frame)
-  //for (++eit; eit != end; ++eit) {
-  //  eh = *eit;
-  //  Vec3d t1 = getEdge(eh).normalized();
-  //  u = parallel_transport(u, t0, t1);
-  //  u = (u - u.dot(t1) * t1).normalized();
-  //  setReferenceDirector1(eh, u);
-  //  setReferenceDirector2(eh, t1.cross(u));
-  //  t0 = t1;
-  //}
+  // for (++eit; eit != end; ++eit) {
+  //   eh = *eit;
+  //   Vec3d t1 = getEdge(eh).normalized();
+  //   u = parallel_transport(u, t0, t1);
+  //   u = (u - u.dot(t1) * t1).normalized();
+  //   setReferenceDirector1(eh, u);
+  //   setReferenceDirector2(eh, t1.cross(u));
+  //   t0 = t1;
+  // }
 
   VECTOR3 t0 = _edges[0].normalized();
   VECTOR3 u = parallel_transport(_director1s[0], _tangents[0], t0);
@@ -2281,8 +2196,7 @@ void STRAND_MESH::computeSpaceParallel()
   _director2s[0] = t0.cross(u);
 
   // TODO: this needs to be generic, per strand, not ordered according to array
-  for (unsigned int x = 1; x < _totalEdges; x++)
-  {
+  for (unsigned int x = 1; x < _totalEdges; x++) {
     VECTOR3 t1 = _edges[x].normalized();
     u = parallel_transport(u, t0, t1);
     u = (u - u.dot(t1) * t1).normalized();
@@ -2294,11 +2208,9 @@ void STRAND_MESH::computeSpaceParallel()
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-void STRAND_MESH::computeTwists()
-{
+void STRAND_MESH::computeTwists() {
   assert(_twists.size() == _totalBends);
-  for (unsigned int x = 0; x < _totalBends; x++)
-  {
+  for (unsigned int x = 0; x < _totalBends; x++) {
     const VECTOR2I edgeIndices = _bendEdges[x];
 
     const REAL referenceTwist = _referenceTwists[x];
@@ -2311,24 +2223,22 @@ void STRAND_MESH::computeTwists()
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-void STRAND_MESH::computeKappas()
-{
+void STRAND_MESH::computeKappas() {
   assert(_kappas.size() == _totalBends);
 
-  for (unsigned int x = 0; x < _totalBends; x++)
-  {
+  for (unsigned int x = 0; x < _totalBends; x++) {
     const VECTOR2I edgeIndices = _bendEdges[x];
     const VECTOR3 kb = _kbs[x];
 
-    const VECTOR3& m1e = _material1s[edgeIndices[0]];
-    const VECTOR3& m2e = _material2s[edgeIndices[0]];
-    const VECTOR3& m1f = _material1s[edgeIndices[1]];
-    const VECTOR3& m2f = _material2s[edgeIndices[1]];
+    const VECTOR3 &m1e = _material1s[edgeIndices[0]];
+    const VECTOR3 &m2e = _material2s[edgeIndices[0]];
+    const VECTOR3 &m1f = _material1s[edgeIndices[1]];
+    const VECTOR3 &m2f = _material2s[edgeIndices[1]];
 
     MATRIX3x2 M;
-    M.col(0) =  0.5 * (m2e + m2f);
+    M.col(0) = 0.5 * (m2e + m2f);
     M.col(1) = -0.5 * (m1e + m1f);
-    
+
     _kappas[x] = M.transpose() * kb;
   }
 }
@@ -2370,16 +2280,15 @@ void STRAND_MESH::computeTanKappas()
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-void STRAND_MESH::computeBs(const REAL& E, const REAL& radiusA, const REAL& radiusB)
-{
+void STRAND_MESH::computeBs(const REAL &E, const REAL &radiusA,
+                            const REAL &radiusB) {
   assert(_Bs.size() == _totalBends);
-  for (unsigned int x = 0; x < _totalBends; x++)
-  {
+  for (unsigned int x = 0; x < _totalBends; x++) {
     MATRIX2 B;
     B.setZero();
 
-    B(0,0) = E * M_PI * (radiusA * radiusA * radiusA * radiusB) * 0.25;
-    B(1,1) = E * M_PI * (radiusA * radiusB * radiusB * radiusB) * 0.25;
+    B(0, 0) = E * M_PI * (radiusA * radiusA * radiusA * radiusB) * 0.25;
+    B(1, 1) = E * M_PI * (radiusA * radiusB * radiusB * radiusB) * 0.25;
 
     _Bs[x] = B;
   }
@@ -2387,22 +2296,20 @@ void STRAND_MESH::computeBs(const REAL& E, const REAL& radiusA, const REAL& radi
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-void STRAND_MESH::computeRefVertexLengths()
-{
+void STRAND_MESH::computeRefVertexLengths() {
   assert(_refVertexLengths.size() == _totalBends);
-  for (unsigned int x = 0; x < _totalBends; x++)
-  {
-    const VECTOR2I& edgeIndices = _bendEdges[x];
+  for (unsigned int x = 0; x < _totalBends; x++) {
+    const VECTOR2I &edgeIndices = _bendEdges[x];
 
-    const REAL length = _edgeLengths[edgeIndices[0]] + _edgeLengths[edgeIndices[1]];
+    const REAL length =
+        _edgeLengths[edgeIndices[0]] + _edgeLengths[edgeIndices[1]];
     _refVertexLengths[x] = length * 0.5;
   }
 }
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-void STRAND_MESH::updateProperties()
-{
+void STRAND_MESH::updateProperties() {
   computeEdges();
   computeReferenceDirectors();
   computeTangents();
@@ -2422,51 +2329,49 @@ void STRAND_MESH::updateProperties()
 ///////////////////////////////////////////////////////////////////////
 // print out all the vertex positions and thetas
 ///////////////////////////////////////////////////////////////////////
-void STRAND_MESH::printState()
-{
-  std::cout << "==================================================" << std::endl;
-  for (unsigned int x = 0; x < _totalVertices; x++)
-  {
-    std::cout << " vertex " << x << ": " << _vertices[x].transpose() << std::endl;
+void STRAND_MESH::printState() {
+  std::cout << "=================================================="
+            << std::endl;
+  for (unsigned int x = 0; x < _totalVertices; x++) {
+    std::cout << " vertex " << x << ": " << _vertices[x].transpose()
+              << std::endl;
   }
-  for (unsigned int x = 0; x < _totalEdges; x++)
-  {
+  for (unsigned int x = 0; x < _totalEdges; x++) {
     std::cout << " theta " << x << ": " << _thetas[x] << std::endl;
   }
-  for (unsigned int x = 0; x < _totalBends; x++)
-  {
-    //const Scalar referenceTwist = this->getReferenceTwist(x);
-    std::cout << " reference twist " << x << ": " << _referenceTwists[x] << std::endl;
+  for (unsigned int x = 0; x < _totalBends; x++) {
+    // const Scalar referenceTwist = this->getReferenceTwist(x);
+    std::cout << " reference twist " << x << ": " << _referenceTwists[x]
+              << std::endl;
   }
-  for (unsigned int x = 0; x < _totalBends; x++)
-  {
-    std::cout << " curvature binormal " << x << ": " << _kbs[x].transpose() << std::endl;
+  for (unsigned int x = 0; x < _totalBends; x++) {
+    std::cout << " curvature binormal " << x << ": " << _kbs[x].transpose()
+              << std::endl;
   }
-  for (unsigned int x = 0; x < _totalEdges; x++)
-  {
-    std::cout << " reference 1 director " << x << ": " << _director1s[x].transpose() << std::endl;
+  for (unsigned int x = 0; x < _totalEdges; x++) {
+    std::cout << " reference 1 director " << x << ": "
+              << _director1s[x].transpose() << std::endl;
   }
-  for (unsigned int x = 0; x < _totalEdges; x++)
-  {
-    std::cout << " reference 2 director " << x << ": " << _director2s[x].transpose() << std::endl;
+  for (unsigned int x = 0; x < _totalEdges; x++) {
+    std::cout << " reference 2 director " << x << ": "
+              << _director2s[x].transpose() << std::endl;
   }
-  for (unsigned int x = 0; x < _totalEdges; x++)
-  {
-    std::cout << " material 1 director " << x << ": " << _material1s[x].transpose() << std::endl;
+  for (unsigned int x = 0; x < _totalEdges; x++) {
+    std::cout << " material 1 director " << x << ": "
+              << _material1s[x].transpose() << std::endl;
   }
-  for (unsigned int x = 0; x < _totalEdges; x++)
-  {
-    std::cout << " material 2 director " << x << ": " << _material2s[x].transpose() << std::endl;
+  for (unsigned int x = 0; x < _totalEdges; x++) {
+    std::cout << " material 2 director " << x << ": "
+              << _material2s[x].transpose() << std::endl;
   }
-  for (unsigned int x = 0; x < _totalVertices; x++)
-  {
+  for (unsigned int x = 0; x < _totalVertices; x++) {
     std::cout << " mass " << x << ": " << _vertexMasses[x] << std::endl;
   }
-  for (unsigned int x = 0; x < _totalEdges; x++)
-  {
+  for (unsigned int x = 0; x < _totalEdges; x++) {
     std::cout << " edge length " << x << ": " << _edgeLengths[x] << std::endl;
   }
-  std::cout << "==================================================" << std::endl;
+  std::cout << "=================================================="
+            << std::endl;
 }
 /*
 {
@@ -2484,8 +2389,7 @@ void STRAND_MESH::printState()
 //
 // TODO: each edge only owns one vertex; the downstream one
 ///////////////////////////////////////////////////////////////////////
-void STRAND_MESH::computeEdgeEdgeCollisions(const bool verbose)
-{
+void STRAND_MESH::computeEdgeEdgeCollisions(const bool verbose) {
   TIMER functionTimer(__FUNCTION__);
 
   // for visualization purposes
@@ -2499,16 +2403,16 @@ void STRAND_MESH::computeEdgeEdgeCollisions(const bool verbose)
 
   // get the nearest edge to each edge, not including itself
   // and ones where it shares a vertex
-  for (unsigned int x = 0; x < _edgeIndices.size(); x++)
-  {
-    //int closestEdge = -1;
-    //REAL closestDistance = FLT_MAX;
-    VECTOR2 aClosest(-1,-1);
-    VECTOR2 bClosest(-1,-1);
-    const VECTOR2I& outerEdge = _edgeIndices[x];
-    const VECTOR3& v0 = _vertices[outerEdge[0]];
-    const VECTOR3& v1 = _vertices[outerEdge[1]];
-    //const unsigned int outerFlat = outerEdge[0] + outerEdge[1] * _edgeIndices.size();
+  for (unsigned int x = 0; x < _edgeIndices.size(); x++) {
+    // int closestEdge = -1;
+    // REAL closestDistance = FLT_MAX;
+    VECTOR2 aClosest(-1, -1);
+    VECTOR2 bClosest(-1, -1);
+    const VECTOR2I &outerEdge = _edgeIndices[x];
+    const VECTOR3 &v0 = _vertices[outerEdge[0]];
+    const VECTOR3 &v1 = _vertices[outerEdge[1]];
+    // const unsigned int outerFlat = outerEdge[0] + outerEdge[1] *
+    // _edgeIndices.size();
 
     vector<int> nearbyEdges;
 #if 0
@@ -2519,13 +2423,14 @@ void STRAND_MESH::computeEdgeEdgeCollisions(const bool verbose)
 #endif
 
     // find the closest other edge
-    for (unsigned int y = 0; y < nearbyEdges.size(); y++)
-    {
-      if (x == y) continue;
+    for (unsigned int y = 0; y < nearbyEdges.size(); y++) {
+      if (x == y)
+        continue;
 
       // skip if index is smaller -- don't want to double count nearby edges
       // (a,b) and (b,a)
-      if ((unsigned int)nearbyEdges[y] < x) continue;
+      if ((unsigned int)nearbyEdges[y] < x)
+        continue;
 
       const VECTOR2I innerEdge = _edgeIndices[nearbyEdges[y]];
 
@@ -2534,21 +2439,21 @@ void STRAND_MESH::computeEdgeEdgeCollisions(const bool verbose)
           (outerEdge[1] == innerEdge[0]) || (outerEdge[1] == innerEdge[1]))
         continue;
 
-      const VECTOR3& v2 = _vertices[innerEdge[0]];
-      const VECTOR3& v3 = _vertices[innerEdge[1]];
+      const VECTOR3 &v2 = _vertices[innerEdge[0]];
+      const VECTOR3 &v3 = _vertices[innerEdge[1]];
 
       VECTOR3 innerPoint, outerPoint;
-      IntersectLineSegments(v0, v1, v2, v3,
-                            outerPoint, innerPoint);
+      IntersectLineSegments(v0, v1, v2, v3, outerPoint, innerPoint);
 
       const REAL distance = (innerPoint - outerPoint).norm();
 
       // if it's not close enough, skip it, but if it is close enough,
       // it's fine to add multiple contacts
-      if (distance > _collisionEps) continue;
+      if (distance > _collisionEps)
+        continue;
 
       // get the line interpolation coordinates
-      VECTOR2 a,b;
+      VECTOR2 a, b;
       const VECTOR3 e0 = v1 - v0;
       const VECTOR3 e1 = v3 - v2;
 
@@ -2560,16 +2465,22 @@ void STRAND_MESH::computeEdgeEdgeCollisions(const bool verbose)
       b[0] = 1.0 - b[1];
 
       // if it's really close to an end vertex, skip it
-      //const REAL skipEps = 1e-4;
+      // const REAL skipEps = 1e-4;
       const REAL skipEps = 0;
-      if ((a[0] < skipEps) || (a[0] > 1.0 - skipEps)) continue;
-      if ((a[1] < skipEps) || (a[1] > 1.0 - skipEps)) continue;
-      if ((b[0] < skipEps) || (b[0] > 1.0 - skipEps)) continue;
-      if ((b[1] < skipEps) || (b[1] > 1.0 - skipEps)) continue;
+      if ((a[0] < skipEps) || (a[0] > 1.0 - skipEps))
+        continue;
+      if ((a[1] < skipEps) || (a[1] > 1.0 - skipEps))
+        continue;
+      if ((b[0] < skipEps) || (b[0] > 1.0 - skipEps))
+        continue;
+      if ((b[1] < skipEps) || (b[1] > 1.0 - skipEps))
+        continue;
 
       // sanity check, what's the difference found here?
-      const VECTOR3 middle0 = a[0] * _vertices[outerEdge[0]] + a[1] * _vertices[outerEdge[1]];
-      const VECTOR3 middle1 = b[0] * _vertices[innerEdge[0]] + b[1] * _vertices[innerEdge[1]];
+      const VECTOR3 middle0 =
+          a[0] * _vertices[outerEdge[0]] + a[1] * _vertices[outerEdge[1]];
+      const VECTOR3 middle1 =
+          b[0] * _vertices[innerEdge[0]] + b[1] * _vertices[innerEdge[1]];
       const VECTOR3 diff = middle0 - middle1;
 
       /*
@@ -2578,30 +2489,32 @@ void STRAND_MESH::computeEdgeEdgeCollisions(const bool verbose)
       cout << " middle diffs:" << outerDiff << " " << innerDiff << endl;
       */
 
-      if (diff.norm() > _collisionEps) continue;
-      //cout << " collision diff: " << diff.norm() << endl;
+      if (diff.norm() > _collisionEps)
+        continue;
+      // cout << " collision diff: " << diff.norm() << endl;
 
-      pair<int,int> collision(x, nearbyEdges[y]);
+      pair<int, int> collision(x, nearbyEdges[y]);
       _edgeEdgeCollisions.push_back(collision);
 
-      pair<VECTOR2,VECTOR2> coordinate(a, b);
+      pair<VECTOR2, VECTOR2> coordinate(a, b);
       _edgeEdgeCoordinates.push_back(coordinate);
 
       // get the areas too
-      //const VECTOR2I innerEdge = _edgeIndices[nearbyEdges[y]];
-      const pair<int,int> outerPair(outerEdge[0], outerEdge[1]);
-      const pair<int,int> innerPair(innerEdge[0], innerEdge[1]);
+      // const VECTOR2I innerEdge = _edgeIndices[nearbyEdges[y]];
+      const pair<int, int> outerPair(outerEdge[0], outerEdge[1]);
+      const pair<int, int> innerPair(innerEdge[0], innerEdge[1]);
       const REAL xArea = _restEdgeLengths[_edgeHash[outerPair]];
       const REAL closestArea = _restEdgeLengths[_edgeHash[innerPair]];
       _edgeEdgeCollisionAreas.push_back(xArea + closestArea);
     }
   }
   assert(_edgeEdgeCollisions.size() == _edgeEdgeCoordinates.size());
-  //if (_edgeEdgeCollisions.size() > 0)
-  // cout <<"strand edge-edge."<<endl;
+  // if (_edgeEdgeCollisions.size() > 0)
+  //  cout <<"strand edge-edge."<<endl;
   if (verbose)
-    cout << " Found " << _edgeEdgeCollisions.size() << " strand edge-edge collisions " << endl;
-//#define VERY_VERBOSE 1
+    cout << " Found " << _edgeEdgeCollisions.size()
+         << " strand edge-edge collisions " << endl;
+// #define VERY_VERBOSE 1
 #if 0
   for (unsigned int x = 0; x < _edgeEdgeCollisions.size(); x++)
   {
@@ -2776,8 +2689,7 @@ void STRAND_MESH::computeEdgeEdgeCollisions(const bool verbose)
 ///////////////////////////////////////////////////////////////////////
 // set collision eps to something new
 ///////////////////////////////////////////////////////////////////////
-void STRAND_MESH::setCollisionEps(const REAL& eps)
-{
+void STRAND_MESH::setCollisionEps(const REAL &eps) {
   _collisionEps = eps;
   _edgeEdgeEnergy->setEps(eps);
 }
@@ -2785,23 +2697,20 @@ void STRAND_MESH::setCollisionEps(const REAL& eps)
 ///////////////////////////////////////////////////////////////////////
 // set collision stiffness to something new
 ///////////////////////////////////////////////////////////////////////
-void STRAND_MESH::setCollisionStiffness(const REAL& mu)
-{
+void STRAND_MESH::setCollisionStiffness(const REAL &mu) {
   _edgeEdgeEnergy->mu() = mu;
 }
 
 ///////////////////////////////////////////////////////////////////////
 // compute edge-edge collision forces using x-based formulation
 ///////////////////////////////////////////////////////////////////////
-VECTOR STRAND_MESH::computeEdgeEdgeCollisionForces() const
-{
+VECTOR STRAND_MESH::computeEdgeEdgeCollisionForces() const {
   TIMER functionTimer(__FUNCTION__);
 
   vector<VECTOR12> perEdgeForces(_edgeEdgeCollisions.size());
-  for (unsigned int i = 0; i < _edgeEdgeCollisions.size(); i++)
-  {
-    const VECTOR2I& edge0 = _edgeIndices[_edgeEdgeCollisions[i].first];
-    const VECTOR2I& edge1 = _edgeIndices[_edgeEdgeCollisions[i].second];
+  for (unsigned int i = 0; i < _edgeEdgeCollisions.size(); i++) {
+    const VECTOR2I &edge0 = _edgeIndices[_edgeEdgeCollisions[i].first];
+    const VECTOR2I &edge1 = _edgeIndices[_edgeEdgeCollisions[i].second];
 
     vector<VECTOR3> vs(4);
     vs[0] = _vertices[edge0[0]];
@@ -2809,10 +2718,11 @@ VECTOR STRAND_MESH::computeEdgeEdgeCollisionForces() const
     vs[2] = _vertices[edge1[0]];
     vs[3] = _vertices[edge1[1]];
 
-    const VECTOR2& a = _edgeEdgeCoordinates[i].first;
-    const VECTOR2& b = _edgeEdgeCoordinates[i].second;
+    const VECTOR2 &a = _edgeEdgeCoordinates[i].first;
+    const VECTOR2 &b = _edgeEdgeCoordinates[i].second;
 
-    const VECTOR12 force = -_edgeEdgeCollisionAreas[i] * _edgeEdgeEnergy->gradient(vs,a,b);
+    const VECTOR12 force =
+        -_edgeEdgeCollisionAreas[i] * _edgeEdgeEnergy->gradient(vs, a, b);
     // cout<<"------------edge edge mu: "<<_edgeEdgeEnergy->mu()<<endl;
     perEdgeForces[i] = force;
   }
@@ -2823,17 +2733,15 @@ VECTOR STRAND_MESH::computeEdgeEdgeCollisionForces() const
 ///////////////////////////////////////////////////////////////////////
 // compute edge-edge collision Hessians using x-based formulation
 ///////////////////////////////////////////////////////////////////////
-SPARSE_MATRIX STRAND_MESH::computeEdgeEdgeCollisionClampedHessian() const
-{
+SPARSE_MATRIX STRAND_MESH::computeEdgeEdgeCollisionClampedHessian() const {
   TIMER functionTimer(__FUNCTION__);
 
   vector<MATRIX12> perEdgeHessians(_edgeEdgeCollisions.size());
 #pragma omp parallel
 #pragma omp for schedule(static)
-  for (unsigned int i = 0; i < _edgeEdgeCollisions.size(); i++)
-  {
-    const VECTOR2I& edge0 = _edgeIndices[_edgeEdgeCollisions[i].first];
-    const VECTOR2I& edge1 = _edgeIndices[_edgeEdgeCollisions[i].second];
+  for (unsigned int i = 0; i < _edgeEdgeCollisions.size(); i++) {
+    const VECTOR2I &edge0 = _edgeIndices[_edgeEdgeCollisions[i].first];
+    const VECTOR2I &edge1 = _edgeIndices[_edgeEdgeCollisions[i].second];
 
     vector<VECTOR3> vs(4);
     vs[0] = _vertices[edge0[0]];
@@ -2841,9 +2749,10 @@ SPARSE_MATRIX STRAND_MESH::computeEdgeEdgeCollisionClampedHessian() const
     vs[2] = _vertices[edge1[0]];
     vs[3] = _vertices[edge1[1]];
 
-    const VECTOR2& a = _edgeEdgeCoordinates[i].first;
-    const VECTOR2& b = _edgeEdgeCoordinates[i].second;
-    const MATRIX12 H = -_edgeEdgeCollisionAreas[i] * _edgeEdgeEnergy->clampedHessian(vs,a,b);
+    const VECTOR2 &a = _edgeEdgeCoordinates[i].first;
+    const VECTOR2 &b = _edgeEdgeCoordinates[i].second;
+    const MATRIX12 H =
+        -_edgeEdgeCollisionAreas[i] * _edgeEdgeEnergy->clampedHessian(vs, a, b);
     perEdgeHessians[i] = H;
   }
 
@@ -2853,17 +2762,14 @@ SPARSE_MATRIX STRAND_MESH::computeEdgeEdgeCollisionClampedHessian() const
 ///////////////////////////////////////////////////////////////////////
 // find the strand with the longest length
 ///////////////////////////////////////////////////////////////////////
-const int STRAND_MESH::longestStrand() const
-{
+const int STRAND_MESH::longestStrand() const {
   int longestIndex = 0;
   REAL longestLength = strandLength(0);
 
-  for (unsigned int x = 0; x < _strandIndices.size(); x++)
-  {
+  for (unsigned int x = 0; x < _strandIndices.size(); x++) {
     const REAL length = strandLength(x);
 
-    if (length > longestLength)
-    {
+    if (length > longestLength) {
       longestIndex = x;
       longestLength = length;
     }
@@ -2874,15 +2780,13 @@ const int STRAND_MESH::longestStrand() const
 ///////////////////////////////////////////////////////////////////////
 // get the length of an individual strand
 ///////////////////////////////////////////////////////////////////////
-const REAL STRAND_MESH::strandLength(const unsigned int index) const
-{
-  const vector<int>& strand = _strandIndices[index];
+const REAL STRAND_MESH::strandLength(const unsigned int index) const {
+  const vector<int> &strand = _strandIndices[index];
 
   REAL length = 0;
-  for (unsigned int x = 0; x < strand.size() - 1; x++)
-  {
-    const VECTOR3& v0 = _vertices[strand[x]];
-    const VECTOR3& v1 = _vertices[strand[x + 1]];
+  for (unsigned int x = 0; x < strand.size() - 1; x++) {
+    const VECTOR3 &v0 = _vertices[strand[x]];
+    const VECTOR3 &v1 = _vertices[strand[x + 1]];
 
     length += (v0 - v1).norm();
   }
@@ -2893,24 +2797,23 @@ const REAL STRAND_MESH::strandLength(const unsigned int index) const
 ///////////////////////////////////////////////////////////////////////
 // output a single strand to an SOBJ file
 ///////////////////////////////////////////////////////////////////////
-const bool STRAND_MESH::writeStrand(const string& filename, const int index) const
-{
-  FILE* file = fopen(filename.c_str(), "w");
-  if (file == NULL)
-  {
+const bool STRAND_MESH::writeStrand(const string &filename,
+                                    const int index) const {
+  FILE *file = fopen(filename.c_str(), "w");
+  if (file == NULL) {
     cout << " Failed to open file " << filename.c_str() << endl;
     return false;
   }
 
-  if (index >= (int)_strandIndices.size()) return false;
- 
-  // get the strand 
-  const vector<int>& strand = _strandIndices[index];
+  if (index >= (int)_strandIndices.size())
+    return false;
+
+  // get the strand
+  const vector<int> &strand = _strandIndices[index];
 
   // write out its vertices
-  for (unsigned int x = 0; x < strand.size(); x++)
-  {
-    const VECTOR3& v = _vertices[strand[x]];
+  for (unsigned int x = 0; x < strand.size(); x++) {
+    const VECTOR3 &v = _vertices[strand[x]];
     fprintf(file, "v %f %f %f\n", v[0], v[1], v[2]);
   }
 
@@ -2919,7 +2822,7 @@ const bool STRAND_MESH::writeStrand(const string& filename, const int index) con
   for (unsigned int x = 0; x < strand.size(); x++)
     fprintf(file, "%i ", x);
   fprintf(file, "\n\n");
-  
+
   fclose(file);
   cout << " done. " << endl;
   return true;
@@ -2928,16 +2831,16 @@ const bool STRAND_MESH::writeStrand(const string& filename, const int index) con
 ///////////////////////////////////////////////////////////////////////
 // shared matrix construction between clamped and unclamped
 ///////////////////////////////////////////////////////////////////////
-SPARSE_MATRIX STRAND_MESH::buildPerBendMatrix(const vector<MATRIX11>& perBendHessians) const
-{
+SPARSE_MATRIX
+STRAND_MESH::buildPerBendMatrix(const vector<MATRIX11> &perBendHessians) const {
   if (_edgeEnd)
     return buildPerBendMatrixEdgeEnd(perBendHessians);
   return buildPerBendMatrixInterleaved(perBendHessians);
 }
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-VECTOR STRAND_MESH::buildPerEdgeVector(const vector<VECTOR6>& perEdgeForces) const
-{
+VECTOR
+STRAND_MESH::buildPerEdgeVector(const vector<VECTOR6> &perEdgeForces) const {
   if (_edgeEnd)
     return buildPerEdgeVectorEdgeEnd(perEdgeForces);
   return buildPerEdgeVectorInterleaved(perEdgeForces);
@@ -2946,8 +2849,8 @@ VECTOR STRAND_MESH::buildPerEdgeVector(const vector<VECTOR6>& perEdgeForces) con
 ///////////////////////////////////////////////////////////////////////
 // distribute the edge Hessians to the global matrix
 ///////////////////////////////////////////////////////////////////////
-SPARSE_MATRIX STRAND_MESH::buildPerEdgeMatrix(const vector<MATRIX6>& perEdgeHessians) const
-{
+SPARSE_MATRIX
+STRAND_MESH::buildPerEdgeMatrix(const vector<MATRIX6> &perEdgeHessians) const {
   if (_edgeEnd)
     return buildPerEdgeMatrixEdgeEnd(perEdgeHessians);
   return buildPerEdgeMatrixInterleaved(perEdgeHessians);
@@ -2955,8 +2858,8 @@ SPARSE_MATRIX STRAND_MESH::buildPerEdgeMatrix(const vector<MATRIX6>& perEdgeHess
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-VECTOR STRAND_MESH::buildPerBendVector(const vector<VECTOR11>& perBendForces) const
-{
+VECTOR
+STRAND_MESH::buildPerBendVector(const vector<VECTOR11> &perBendForces) const {
   if (_edgeEnd)
     return buildPerBendVectorEdgeEnd(perBendForces);
   return buildPerBendVectorInterleaved(perBendForces);
@@ -2964,8 +2867,8 @@ VECTOR STRAND_MESH::buildPerBendVector(const vector<VECTOR11>& perBendForces) co
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-VECTOR STRAND_MESH::buildEdgeEdgeVector(const vector<VECTOR12>& perEdgeForces) const
-{
+VECTOR
+STRAND_MESH::buildEdgeEdgeVector(const vector<VECTOR12> &perEdgeForces) const {
   if (_edgeEnd)
     return buildEdgeEdgeVectorEdgeEnd(perEdgeForces);
   return buildEdgeEdgeVectorInterleaved(perEdgeForces);
@@ -2973,8 +2876,8 @@ VECTOR STRAND_MESH::buildEdgeEdgeVector(const vector<VECTOR12>& perEdgeForces) c
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-SPARSE_MATRIX STRAND_MESH::buildEdgeEdgeMatrix(const vector<MATRIX12>& perEdgeHessians) const
-{
+SPARSE_MATRIX STRAND_MESH::buildEdgeEdgeMatrix(
+    const vector<MATRIX12> &perEdgeHessians) const {
   if (_edgeEnd)
     return buildEdgeEdgeMatrixEdgeEnd(perEdgeHessians);
   return buildEdgeEdgeMatrixInterleaved(perEdgeHessians);
@@ -2984,73 +2887,63 @@ SPARSE_MATRIX STRAND_MESH::buildEdgeEdgeMatrix(const vector<MATRIX12>& perEdgeHe
 // shared matrix construction between clamped and unclamped
 // assumes that all the edge DOFs are packed at the end
 ///////////////////////////////////////////////////////////////////////
-SPARSE_MATRIX STRAND_MESH::buildPerBendMatrixEdgeEnd(const vector<MATRIX11>& perBendHessians) const
-{
+SPARSE_MATRIX STRAND_MESH::buildPerBendMatrixEdgeEnd(
+    const vector<MATRIX11> &perBendHessians) const {
   typedef Eigen::Triplet<REAL> TRIPLET;
   vector<TRIPLET> triplets;
-  
-  // do the vertex DOFs first
-  for (unsigned int x = 0; x < _totalBends; x++)
-  {
-    const VECTOR3I& vertexIndices = _bendVertices[x];
-    const MATRIX11& H = perBendHessians[x];
 
-    for (unsigned int i = 0; i < 3; i++)
-    {
+  // do the vertex DOFs first
+  for (unsigned int x = 0; x < _totalBends; x++) {
+    const VECTOR3I &vertexIndices = _bendVertices[x];
+    const MATRIX11 &H = perBendHessians[x];
+
+    for (unsigned int i = 0; i < 3; i++) {
       const unsigned int vi = vertexIndices[i];
-      for (unsigned int j = 0; j < 3; j++)
-      {
+      for (unsigned int j = 0; j < 3; j++) {
         const unsigned int vj = vertexIndices[j];
         for (int b = 0; b < 3; b++)
-          for (int a = 0; a < 3; a++)
-           {
-              const REAL entry = H(4 * i + a, 4 * j + b);
-              TRIPLET triplet(3 * vi + a, 3 * vj + b,entry);
-              triplets.push_back(triplet);
-           }
+          for (int a = 0; a < 3; a++) {
+            const REAL entry = H(4 * i + a, 4 * j + b);
+            TRIPLET triplet(3 * vi + a, 3 * vj + b, entry);
+            triplets.push_back(triplet);
+          }
       }
     }
   }
 
   // do the edge-edge (twist) DOFs second
   const unsigned int vertexEnd = 3 * _totalVertices;
-  for (unsigned int x = 0; x < _totalBends; x++)
-  {
-    const VECTOR2I& edgeIndices = _bendEdges[x];
-    const MATRIX11& H = perBendHessians[x];
+  for (unsigned int x = 0; x < _totalBends; x++) {
+    const VECTOR2I &edgeIndices = _bendEdges[x];
+    const MATRIX11 &H = perBendHessians[x];
 
-    for (unsigned int i = 0; i < 2; i++)
-    {
+    for (unsigned int i = 0; i < 2; i++) {
       const unsigned int ei = edgeIndices[i];
-      for (unsigned int j = 0; j < 2; j++)
-      {
+      for (unsigned int j = 0; j < 2; j++) {
         const unsigned int ej = edgeIndices[j];
-        TRIPLET triplet(vertexEnd + ei, vertexEnd + ej, H(4 * i + 3, 4 * j + 3));
+        TRIPLET triplet(vertexEnd + ei, vertexEnd + ej,
+                        H(4 * i + 3, 4 * j + 3));
         triplets.push_back(triplet);
       }
     }
   }
 
   // edge-vertex is last
-  for (unsigned int x = 0; x < _totalBends; x++)
-  {
-    const VECTOR3I& vertexIndices = _bendVertices[x];
-    const VECTOR2I& edgeIndices = _bendEdges[x];
-    const MATRIX11& H = perBendHessians[x];
+  for (unsigned int x = 0; x < _totalBends; x++) {
+    const VECTOR3I &vertexIndices = _bendVertices[x];
+    const VECTOR2I &edgeIndices = _bendEdges[x];
+    const MATRIX11 &H = perBendHessians[x];
 
-    for (unsigned int i = 0; i < 2; i++)
-    {
+    for (unsigned int i = 0; i < 2; i++) {
       const unsigned int ei = edgeIndices[i];
-      for (unsigned int j = 0; j < 3; j++)
-      {
+      for (unsigned int j = 0; j < 3; j++) {
         const unsigned int vj = vertexIndices[j];
-        for (unsigned int a = 0; a < 3; a++)
-        {
+        for (unsigned int a = 0; a < 3; a++) {
           const unsigned int row = vertexEnd + ei;
           const unsigned int col = 3 * vj + a;
-          const REAL& entry = H(4 * i + 3, 4 * j + a);
-          TRIPLET triplet0(row,col,entry);
-          TRIPLET triplet1(col,row,entry);
+          const REAL &entry = H(4 * i + 3, 4 * j + a);
+          TRIPLET triplet0(row, col, entry);
+          TRIPLET triplet1(col, row, entry);
           triplets.push_back(triplet0);
           triplets.push_back(triplet1);
         }
@@ -3069,48 +2962,41 @@ SPARSE_MATRIX STRAND_MESH::buildPerBendMatrixEdgeEnd(const vector<MATRIX11>& per
 // shared matrix construction between clamped and unclamped
 // assumes that all the edge DOFs are interleaved after vertices
 ///////////////////////////////////////////////////////////////////////
-SPARSE_MATRIX STRAND_MESH::buildPerBendMatrixInterleaved(const vector<MATRIX11>& perBendHessians) const
-{
+SPARSE_MATRIX STRAND_MESH::buildPerBendMatrixInterleaved(
+    const vector<MATRIX11> &perBendHessians) const {
   typedef Eigen::Triplet<REAL> TRIPLET;
   vector<TRIPLET> triplets;
-  
-  // do the vertex DOFs first
-  for (unsigned int x = 0; x < _totalBends; x++)
-  {
-    const VECTOR3I& vertexIndices = _bendVertices[x];
-    const MATRIX11& H = perBendHessians[x];
 
-    for (unsigned int i = 0; i < 3; i++)
-    {
+  // do the vertex DOFs first
+  for (unsigned int x = 0; x < _totalBends; x++) {
+    const VECTOR3I &vertexIndices = _bendVertices[x];
+    const MATRIX11 &H = perBendHessians[x];
+
+    for (unsigned int i = 0; i < 3; i++) {
       const unsigned int vi = vertexIndices[i];
       const unsigned int viGlobal = _globalVertexIndices[vi];
-      for (unsigned int j = 0; j < 3; j++)
-      {
+      for (unsigned int j = 0; j < 3; j++) {
         const unsigned int vj = vertexIndices[j];
         const unsigned int vjGlobal = _globalVertexIndices[vj];
         for (int b = 0; b < 3; b++)
-          for (int a = 0; a < 3; a++)
-           {
-              const REAL entry = H(4 * i + a, 4 * j + b);
-              TRIPLET triplet(viGlobal + a, vjGlobal + b,entry);
-              triplets.push_back(triplet);
-           }
+          for (int a = 0; a < 3; a++) {
+            const REAL entry = H(4 * i + a, 4 * j + b);
+            TRIPLET triplet(viGlobal + a, vjGlobal + b, entry);
+            triplets.push_back(triplet);
+          }
       }
     }
   }
 
   // do the edge-edge (twist) DOFs second
-  for (unsigned int x = 0; x < _totalBends; x++)
-  {
-    const VECTOR2I& edgeIndices = _bendEdges[x];
-    const MATRIX11& H = perBendHessians[x];
+  for (unsigned int x = 0; x < _totalBends; x++) {
+    const VECTOR2I &edgeIndices = _bendEdges[x];
+    const MATRIX11 &H = perBendHessians[x];
 
-    for (unsigned int i = 0; i < 2; i++)
-    {
+    for (unsigned int i = 0; i < 2; i++) {
       const unsigned int ei = edgeIndices[i];
       const unsigned int eiGlobal = _globalEdgeIndices[ei];
-      for (unsigned int j = 0; j < 2; j++)
-      {
+      for (unsigned int j = 0; j < 2; j++) {
         const unsigned int ej = edgeIndices[j];
         const unsigned int ejGlobal = _globalEdgeIndices[ej];
         TRIPLET triplet(eiGlobal, ejGlobal, H(4 * i + 3, 4 * j + 3));
@@ -3120,27 +3006,23 @@ SPARSE_MATRIX STRAND_MESH::buildPerBendMatrixInterleaved(const vector<MATRIX11>&
   }
 
   // edge-vertex is last
-  for (unsigned int x = 0; x < _totalBends; x++)
-  {
-    const VECTOR3I& vertexIndices = _bendVertices[x];
-    const VECTOR2I& edgeIndices = _bendEdges[x];
-    const MATRIX11& H = perBendHessians[x];
+  for (unsigned int x = 0; x < _totalBends; x++) {
+    const VECTOR3I &vertexIndices = _bendVertices[x];
+    const VECTOR2I &edgeIndices = _bendEdges[x];
+    const MATRIX11 &H = perBendHessians[x];
 
-    for (unsigned int i = 0; i < 2; i++)
-    {
+    for (unsigned int i = 0; i < 2; i++) {
       const unsigned int ei = edgeIndices[i];
       const unsigned int eiGlobal = _globalEdgeIndices[ei];
-      for (unsigned int j = 0; j < 3; j++)
-      {
+      for (unsigned int j = 0; j < 3; j++) {
         const unsigned int vj = vertexIndices[j];
         const unsigned int vjGlobal = _globalVertexIndices[vj];
-        for (unsigned int a = 0; a < 3; a++)
-        {
+        for (unsigned int a = 0; a < 3; a++) {
           const unsigned int row = eiGlobal;
           const unsigned int col = vjGlobal + a;
-          const REAL& entry = H(4 * i + 3, 4 * j + a);
-          TRIPLET triplet0(row,col,entry);
-          TRIPLET triplet1(col,row,entry);
+          const REAL &entry = H(4 * i + 3, 4 * j + a);
+          TRIPLET triplet0(row, col, entry);
+          TRIPLET triplet1(col, row, entry);
           triplets.push_back(triplet0);
           triplets.push_back(triplet1);
         }
@@ -3158,8 +3040,8 @@ SPARSE_MATRIX STRAND_MESH::buildPerBendMatrixInterleaved(const vector<MATRIX11>&
 ///////////////////////////////////////////////////////////////////////
 // assumes that all the edge DOFs are packed at the end
 ///////////////////////////////////////////////////////////////////////
-VECTOR STRAND_MESH::buildPerEdgeVectorEdgeEnd(const vector<VECTOR6>& perEdgeForces) const
-{
+VECTOR STRAND_MESH::buildPerEdgeVectorEdgeEnd(
+    const vector<VECTOR6> &perEdgeForces) const {
   // scatter the forces to the global force vector, this can be parallelized
   // better where each vector entry pulls from perElementForce, but let's get
   // the slow preliminary version working first
@@ -3167,17 +3049,16 @@ VECTOR STRAND_MESH::buildPerEdgeVectorEdgeEnd(const vector<VECTOR6>& perEdgeForc
   VECTOR forces(DOFs);
   forces.setZero();
 
-  for (unsigned int x = 0; x < _totalEdges; x++)
-  {
+  for (unsigned int x = 0; x < _totalEdges; x++) {
     const VECTOR2I edge = _edgeIndices[x];
-    const VECTOR6& edgeForce = perEdgeForces[x];
+    const VECTOR6 &edgeForce = perEdgeForces[x];
 
     unsigned int i = 3 * edge[0];
-    forces[i]     += edgeForce[0];
+    forces[i] += edgeForce[0];
     forces[i + 1] += edgeForce[1];
     forces[i + 2] += edgeForce[2];
     unsigned int j = 3 * edge[1];
-    forces[j]     += edgeForce[3];
+    forces[j] += edgeForce[3];
     forces[j + 1] += edgeForce[4];
     forces[j + 2] += edgeForce[5];
   }
@@ -3188,8 +3069,8 @@ VECTOR STRAND_MESH::buildPerEdgeVectorEdgeEnd(const vector<VECTOR6>& perEdgeForc
 ///////////////////////////////////////////////////////////////////////
 // assumes that all the edge DOFs are interleaved with vertex DOFs
 ///////////////////////////////////////////////////////////////////////
-VECTOR STRAND_MESH::buildPerEdgeVectorInterleaved(const vector<VECTOR6>& perEdgeForces) const
-{
+VECTOR STRAND_MESH::buildPerEdgeVectorInterleaved(
+    const vector<VECTOR6> &perEdgeForces) const {
   // scatter the forces to the global force vector, this can be parallelized
   // better where each vector entry pulls from perElementForce, but let's get
   // the slow preliminary version working first
@@ -3197,17 +3078,16 @@ VECTOR STRAND_MESH::buildPerEdgeVectorInterleaved(const vector<VECTOR6>& perEdge
   VECTOR forces(DOFs);
   forces.setZero();
 
-  for (unsigned int x = 0; x < _totalEdges; x++)
-  {
+  for (unsigned int x = 0; x < _totalEdges; x++) {
     const VECTOR2I edge = _edgeIndices[x];
-    const VECTOR6& edgeForce = perEdgeForces[x];
+    const VECTOR6 &edgeForce = perEdgeForces[x];
 
     unsigned int i = _globalVertexIndices[edge[0]];
-    forces[i]     += edgeForce[0];
+    forces[i] += edgeForce[0];
     forces[i + 1] += edgeForce[1];
     forces[i + 2] += edgeForce[2];
     unsigned int j = _globalVertexIndices[edge[1]];
-    forces[j]     += edgeForce[3];
+    forces[j] += edgeForce[3];
     forces[j + 1] += edgeForce[4];
     forces[j + 2] += edgeForce[5];
   }
@@ -3219,27 +3099,23 @@ VECTOR STRAND_MESH::buildPerEdgeVectorInterleaved(const vector<VECTOR6>& perEdge
 // distribute the edge Hessians to the global matrix
 // assumes that all the edge DOFs are packed at the end
 ///////////////////////////////////////////////////////////////////////
-SPARSE_MATRIX STRAND_MESH::buildPerEdgeMatrixEdgeEnd(const vector<MATRIX6>& perEdgeHessians) const
-{
+SPARSE_MATRIX STRAND_MESH::buildPerEdgeMatrixEdgeEnd(
+    const vector<MATRIX6> &perEdgeHessians) const {
   // build out the triplets
   typedef Eigen::Triplet<REAL> TRIPLET;
   vector<TRIPLET> triplets;
-  for (unsigned int i = 0; i < _totalEdges; i++)
-  {
+  for (unsigned int i = 0; i < _totalEdges; i++) {
     const VECTOR2I edge = _edgeIndices[i];
-    const MATRIX6& H = perEdgeHessians[i];
+    const MATRIX6 &H = perEdgeHessians[i];
 
     // NOTE: this indexing logic has not been tested against more
     // complex geometries!
-    for (int y = 0; y < 2; y++)
-    {
+    for (int y = 0; y < 2; y++) {
       const int yVertex = edge[y];
-      for (int x = 0; x < 2; x++)
-      {
+      for (int x = 0; x < 2; x++) {
         const int xVertex = edge[x];
         for (int b = 0; b < 3; b++)
-          for (int a = 0; a < 3; a++)
-          {
+          for (int a = 0; a < 3; a++) {
             const REAL entry = H(3 * x + a, 3 * y + b);
             TRIPLET triplet(3 * xVertex + a, 3 * yVertex + b, entry);
             triplets.push_back(triplet);
@@ -3259,29 +3135,25 @@ SPARSE_MATRIX STRAND_MESH::buildPerEdgeMatrixEdgeEnd(const vector<MATRIX6>& perE
 // distribute the edge Hessians to the global matrix
 // assumes that all the edge DOFs are interleaved with vertices
 ///////////////////////////////////////////////////////////////////////
-SPARSE_MATRIX STRAND_MESH::buildPerEdgeMatrixInterleaved(const vector<MATRIX6>& perEdgeHessians) const
-{
+SPARSE_MATRIX STRAND_MESH::buildPerEdgeMatrixInterleaved(
+    const vector<MATRIX6> &perEdgeHessians) const {
   // build out the triplets
   typedef Eigen::Triplet<REAL> TRIPLET;
   vector<TRIPLET> triplets;
-  for (unsigned int i = 0; i < _totalEdges; i++)
-  {
+  for (unsigned int i = 0; i < _totalEdges; i++) {
     const VECTOR2I edge = _edgeIndices[i];
-    const MATRIX6& H = perEdgeHessians[i];
+    const MATRIX6 &H = perEdgeHessians[i];
 
     // NOTE: this indexing logic has not been tested against more
     // complex geometries!
-    for (int y = 0; y < 2; y++)
-    {
+    for (int y = 0; y < 2; y++) {
       const int yVertex = edge[y];
       const int yGlobal = _globalVertexIndices[yVertex];
-      for (int x = 0; x < 2; x++)
-      {
+      for (int x = 0; x < 2; x++) {
         const int xVertex = edge[x];
         const int xGlobal = _globalVertexIndices[xVertex];
         for (int b = 0; b < 3; b++)
-          for (int a = 0; a < 3; a++)
-          {
+          for (int a = 0; a < 3; a++) {
             const REAL entry = H(3 * x + a, 3 * y + b);
             TRIPLET triplet(xGlobal + a, yGlobal + b, entry);
             triplets.push_back(triplet);
@@ -3300,34 +3172,32 @@ SPARSE_MATRIX STRAND_MESH::buildPerEdgeMatrixInterleaved(const vector<MATRIX6>& 
 ///////////////////////////////////////////////////////////////////////
 // assumes that all the edge DOFs are packed at the end
 ///////////////////////////////////////////////////////////////////////
-VECTOR STRAND_MESH::buildPerBendVectorEdgeEnd(const vector<VECTOR11>& perBendForces) const 
-{
+VECTOR STRAND_MESH::buildPerBendVectorEdgeEnd(
+    const vector<VECTOR11> &perBendForces) const {
   VECTOR forces(_DOFs);
   forces.setZero();
-  for (unsigned int x = 0; x < _totalBends; x++)
-  {
+  for (unsigned int x = 0; x < _totalBends; x++) {
     const VECTOR3I vertexIndices = _bendVertices[x];
     const unsigned int v0 = vertexIndices[0];
     const unsigned int v1 = vertexIndices[1];
     const unsigned int v2 = vertexIndices[2];
 
-    forces[3 * v0]     += perBendForces[x][0];
+    forces[3 * v0] += perBendForces[x][0];
     forces[3 * v0 + 1] += perBendForces[x][1];
     forces[3 * v0 + 2] += perBendForces[x][2];
 
-    forces[3 * v1]     += perBendForces[x][4];
+    forces[3 * v1] += perBendForces[x][4];
     forces[3 * v1 + 1] += perBendForces[x][5];
     forces[3 * v1 + 2] += perBendForces[x][6];
 
-    forces[3 * v2]     += perBendForces[x][8];
+    forces[3 * v2] += perBendForces[x][8];
     forces[3 * v2 + 1] += perBendForces[x][9];
     forces[3 * v2 + 2] += perBendForces[x][10];
   }
 
   const int vertexEnd = 3 * _totalVertices;
-  for (unsigned int x = 0; x < _totalBends; x++)
-  {
-    const VECTOR2I& edgeIndices = _bendEdges[x];
+  for (unsigned int x = 0; x < _totalBends; x++) {
+    const VECTOR2I &edgeIndices = _bendEdges[x];
     const unsigned int e0 = edgeIndices[0];
     const unsigned int e1 = edgeIndices[1];
 
@@ -3341,33 +3211,31 @@ VECTOR STRAND_MESH::buildPerBendVectorEdgeEnd(const vector<VECTOR11>& perBendFor
 ///////////////////////////////////////////////////////////////////////
 // assumes that all the edge DOFs are interleaved with vertex DOFs
 ///////////////////////////////////////////////////////////////////////
-VECTOR STRAND_MESH::buildPerBendVectorInterleaved(const vector<VECTOR11>& perBendForces) const 
-{
+VECTOR STRAND_MESH::buildPerBendVectorInterleaved(
+    const vector<VECTOR11> &perBendForces) const {
   VECTOR forces(_DOFs);
   forces.setZero();
-  for (unsigned int x = 0; x < _totalBends; x++)
-  {
+  for (unsigned int x = 0; x < _totalBends; x++) {
     const VECTOR3I vertexIndices = _bendVertices[x];
     const unsigned int v0 = _globalVertexIndices[vertexIndices[0]];
     const unsigned int v1 = _globalVertexIndices[vertexIndices[1]];
     const unsigned int v2 = _globalVertexIndices[vertexIndices[2]];
 
-    forces[v0]     += perBendForces[x][0];
+    forces[v0] += perBendForces[x][0];
     forces[v0 + 1] += perBendForces[x][1];
     forces[v0 + 2] += perBendForces[x][2];
 
-    forces[v1]     += perBendForces[x][4];
+    forces[v1] += perBendForces[x][4];
     forces[v1 + 1] += perBendForces[x][5];
     forces[v1 + 2] += perBendForces[x][6];
 
-    forces[v2]     += perBendForces[x][8];
+    forces[v2] += perBendForces[x][8];
     forces[v2 + 1] += perBendForces[x][9];
     forces[v2 + 2] += perBendForces[x][10];
   }
 
-  for (unsigned int x = 0; x < _totalBends; x++)
-  {
-    const VECTOR2I& edgeIndices = _bendEdges[x];
+  for (unsigned int x = 0; x < _totalBends; x++) {
+    const VECTOR2I &edgeIndices = _bendEdges[x];
     const unsigned int e0 = _globalEdgeIndices[edgeIndices[0]];
     const unsigned int e1 = _globalEdgeIndices[edgeIndices[1]];
 
@@ -3381,19 +3249,18 @@ VECTOR STRAND_MESH::buildPerBendVectorInterleaved(const vector<VECTOR11>& perBen
 ///////////////////////////////////////////////////////////////////////
 // assumes that all the edge DOFs are packed at the end
 ///////////////////////////////////////////////////////////////////////
-VECTOR STRAND_MESH::buildEdgeEdgeVectorEdgeEnd(const vector<VECTOR12>& perEdgeForces) const
-{
+VECTOR STRAND_MESH::buildEdgeEdgeVectorEdgeEnd(
+    const vector<VECTOR12> &perEdgeForces) const {
   // scatter the forces to the global force vector, this can be parallelized
   // better where each vector entry pulls from perElementForce, but let's get
   // the slow preliminary version working first
   VECTOR forces(_DOFs);
   forces.setZero();
 
-  for (unsigned int i = 0; i < _edgeEdgeCollisions.size(); i++)
-  {
-    const VECTOR2I& edge0 = _edgeIndices[_edgeEdgeCollisions[i].first];
-    const VECTOR2I& edge1 = _edgeIndices[_edgeEdgeCollisions[i].second];
-    const VECTOR12& edgeForce = perEdgeForces[i];
+  for (unsigned int i = 0; i < _edgeEdgeCollisions.size(); i++) {
+    const VECTOR2I &edge0 = _edgeIndices[_edgeEdgeCollisions[i].first];
+    const VECTOR2I &edge1 = _edgeIndices[_edgeEdgeCollisions[i].second];
+    const VECTOR12 &edgeForce = perEdgeForces[i];
 
     vector<int> vertexIndices(4);
     vertexIndices[0] = edge0[0];
@@ -3401,11 +3268,10 @@ VECTOR STRAND_MESH::buildEdgeEdgeVectorEdgeEnd(const vector<VECTOR12>& perEdgeFo
     vertexIndices[2] = edge1[0];
     vertexIndices[3] = edge1[1];
 
-    for (int x = 0; x < 4; x++)
-    {
+    for (int x = 0; x < 4; x++) {
       unsigned int index = 3 * vertexIndices[x];
       assert(index < _DOFs);
-      forces[index]     += edgeForce[3 * x];
+      forces[index] += edgeForce[3 * x];
       forces[index + 1] += edgeForce[3 * x + 1];
       forces[index + 2] += edgeForce[3 * x + 2];
     }
@@ -3417,19 +3283,18 @@ VECTOR STRAND_MESH::buildEdgeEdgeVectorEdgeEnd(const vector<VECTOR12>& perEdgeFo
 ///////////////////////////////////////////////////////////////////////
 // assumes that all the edge DOFs are interleaved with vertex DOFs
 ///////////////////////////////////////////////////////////////////////
-VECTOR STRAND_MESH::buildEdgeEdgeVectorInterleaved(const vector<VECTOR12>& perEdgeForces) const
-{
+VECTOR STRAND_MESH::buildEdgeEdgeVectorInterleaved(
+    const vector<VECTOR12> &perEdgeForces) const {
   // scatter the forces to the global force vector, this can be parallelized
   // better where each vector entry pulls from perElementForce, but let's get
   // the slow preliminary version working first
   VECTOR forces(_DOFs);
   forces.setZero();
 
-  for (unsigned int i = 0; i < _edgeEdgeCollisions.size(); i++)
-  {
-    const VECTOR2I& edge0 = _edgeIndices[_edgeEdgeCollisions[i].first];
-    const VECTOR2I& edge1 = _edgeIndices[_edgeEdgeCollisions[i].second];
-    const VECTOR12& edgeForce = perEdgeForces[i];
+  for (unsigned int i = 0; i < _edgeEdgeCollisions.size(); i++) {
+    const VECTOR2I &edge0 = _edgeIndices[_edgeEdgeCollisions[i].first];
+    const VECTOR2I &edge1 = _edgeIndices[_edgeEdgeCollisions[i].second];
+    const VECTOR12 &edgeForce = perEdgeForces[i];
 
     vector<int> vertexIndices(4);
     vertexIndices[0] = _globalVertexIndices[edge0[0]];
@@ -3437,11 +3302,10 @@ VECTOR STRAND_MESH::buildEdgeEdgeVectorInterleaved(const vector<VECTOR12>& perEd
     vertexIndices[2] = _globalVertexIndices[edge1[0]];
     vertexIndices[3] = _globalVertexIndices[edge1[1]];
 
-    for (int x = 0; x < 4; x++)
-    {
+    for (int x = 0; x < 4; x++) {
       unsigned int index = vertexIndices[x];
       assert(index < _DOFs);
-      forces[index]     += edgeForce[3 * x];
+      forces[index] += edgeForce[3 * x];
       forces[index + 1] += edgeForce[3 * x + 1];
       forces[index + 2] += edgeForce[3 * x + 2];
     }
@@ -3453,17 +3317,16 @@ VECTOR STRAND_MESH::buildEdgeEdgeVectorInterleaved(const vector<VECTOR12>& perEd
 ///////////////////////////////////////////////////////////////////////
 // assumes that all the edge DOFs are packed at the end
 ///////////////////////////////////////////////////////////////////////
-SPARSE_MATRIX STRAND_MESH::buildEdgeEdgeMatrixEdgeEnd(const vector<MATRIX12>& perEdgeHessians) const
-{
+SPARSE_MATRIX STRAND_MESH::buildEdgeEdgeMatrixEdgeEnd(
+    const vector<MATRIX12> &perEdgeHessians) const {
   TIMER functionTimer(__FUNCTION__);
   // build out the triplets
   typedef Eigen::Triplet<REAL> TRIPLET;
   vector<TRIPLET> triplets;
-  for (unsigned int i = 0; i < _edgeEdgeCollisions.size(); i++)
-  {
-    const MATRIX12& H = perEdgeHessians[i];
-    const VECTOR2I& edge0 = _edgeIndices[_edgeEdgeCollisions[i].first];
-    const VECTOR2I& edge1 = _edgeIndices[_edgeEdgeCollisions[i].second];
+  for (unsigned int i = 0; i < _edgeEdgeCollisions.size(); i++) {
+    const MATRIX12 &H = perEdgeHessians[i];
+    const VECTOR2I &edge0 = _edgeIndices[_edgeEdgeCollisions[i].first];
+    const VECTOR2I &edge1 = _edgeIndices[_edgeEdgeCollisions[i].second];
 
     vector<int> vertexIndices(4);
     vertexIndices[0] = edge0[0];
@@ -3471,15 +3334,12 @@ SPARSE_MATRIX STRAND_MESH::buildEdgeEdgeMatrixEdgeEnd(const vector<MATRIX12>& pe
     vertexIndices[2] = edge1[0];
     vertexIndices[3] = edge1[1];
 
-    for (int y = 0; y < 4; y++)
-    {
+    for (int y = 0; y < 4; y++) {
       int yVertex = vertexIndices[y];
-      for (int x = 0; x < 4; x++)
-      {
+      for (int x = 0; x < 4; x++) {
         int xVertex = vertexIndices[x];
         for (int b = 0; b < 3; b++)
-          for (int a = 0; a < 3; a++)
-          {
+          for (int a = 0; a < 3; a++) {
             const REAL entry = H(3 * x + a, 3 * y + b);
             TRIPLET triplet(3 * xVertex + a, 3 * yVertex + b, entry);
             triplets.push_back(triplet);
@@ -3497,17 +3357,16 @@ SPARSE_MATRIX STRAND_MESH::buildEdgeEdgeMatrixEdgeEnd(const vector<MATRIX12>& pe
 ///////////////////////////////////////////////////////////////////////
 // assumes that all the edge DOFs are interleaved with vertex DOFs
 ///////////////////////////////////////////////////////////////////////
-SPARSE_MATRIX STRAND_MESH::buildEdgeEdgeMatrixInterleaved(const vector<MATRIX12>& perEdgeHessians) const
-{
+SPARSE_MATRIX STRAND_MESH::buildEdgeEdgeMatrixInterleaved(
+    const vector<MATRIX12> &perEdgeHessians) const {
   TIMER functionTimer(__FUNCTION__);
   // build out the triplets
   typedef Eigen::Triplet<REAL> TRIPLET;
   vector<TRIPLET> triplets;
-  for (unsigned int i = 0; i < _edgeEdgeCollisions.size(); i++)
-  {
-    const MATRIX12& H = perEdgeHessians[i];
-    const VECTOR2I& edge0 = _edgeIndices[_edgeEdgeCollisions[i].first];
-    const VECTOR2I& edge1 = _edgeIndices[_edgeEdgeCollisions[i].second];
+  for (unsigned int i = 0; i < _edgeEdgeCollisions.size(); i++) {
+    const MATRIX12 &H = perEdgeHessians[i];
+    const VECTOR2I &edge0 = _edgeIndices[_edgeEdgeCollisions[i].first];
+    const VECTOR2I &edge1 = _edgeIndices[_edgeEdgeCollisions[i].second];
 
     vector<int> vertexIndices(4);
     vertexIndices[0] = _globalVertexIndices[edge0[0]];
@@ -3515,15 +3374,12 @@ SPARSE_MATRIX STRAND_MESH::buildEdgeEdgeMatrixInterleaved(const vector<MATRIX12>
     vertexIndices[2] = _globalVertexIndices[edge1[0]];
     vertexIndices[3] = _globalVertexIndices[edge1[1]];
 
-    for (int y = 0; y < 4; y++)
-    {
+    for (int y = 0; y < 4; y++) {
       int yVertex = vertexIndices[y];
-      for (int x = 0; x < 4; x++)
-      {
+      for (int x = 0; x < 4; x++) {
         int xVertex = vertexIndices[x];
         for (int b = 0; b < 3; b++)
-          for (int a = 0; a < 3; a++)
-          {
+          for (int a = 0; a < 3; a++) {
             const REAL entry = H(3 * x + a, 3 * y + b);
             TRIPLET triplet(xVertex + a, yVertex + b, entry);
             triplets.push_back(triplet);
@@ -3537,19 +3393,17 @@ SPARSE_MATRIX STRAND_MESH::buildEdgeEdgeMatrixInterleaved(const vector<MATRIX12>
 
   return A;
 }
-  
+
 ///////////////////////////////////////////////////////////////////////
 // build out the indexing into the global vector
 ///////////////////////////////////////////////////////////////////////
-void STRAND_MESH::buildGlobalIndices()
-{
+void STRAND_MESH::buildGlobalIndices() {
   // see which edge each vertex owns
   _vertexOwnsEdge.resize(_totalVertices);
   for (unsigned int x = 0; x < _totalVertices; x++)
     _vertexOwnsEdge[x] = -1;
 
-  for (unsigned int x = 0; x < _totalBends; x++)
-  {
+  for (unsigned int x = 0; x < _totalBends; x++) {
     const VECTOR3I vertices = _bendVertices[x];
     const VECTOR2I edges = _bendEdges[x];
     // cout<<"vertices: "<<vertices.transpose()<<endl;
@@ -3558,7 +3412,7 @@ void STRAND_MESH::buildGlobalIndices()
     // this one actually may have been assigned in
     // the previous bend
     // assert(_vertexOwnsEdge[vertices[0]] == -1);
-    
+
     // this hasn't been assigned before, right?
     assert(_vertexOwnsEdge[vertices[1]] == -1);
 
@@ -3572,22 +3426,19 @@ void STRAND_MESH::buildGlobalIndices()
 
   unsigned int currentStrand = 0;
   unsigned int index = 0;
-  for (unsigned int x = 0; x < _totalVertices; x++)
-  {
+  for (unsigned int x = 0; x < _totalVertices; x++) {
     _globalVertexIndices[x] = index;
     index += 3;
 
     // if it owns an edge, store it
-    if (_vertexOwnsEdge[x] != -1)
-    {
+    if (_vertexOwnsEdge[x] != -1) {
       const int whichEdge = _vertexOwnsEdge[x];
       _globalEdgeIndices[whichEdge] = index;
       index++;
     }
     // if it doesn't own an edge, it must be the end of a strand
     // so store that as well
-    else
-    {
+    else {
       // DEBUG: why is this guard needed for DVT?
       if (currentStrand < _totalStrands)
         _globalStrandEnds[currentStrand] = index;
@@ -3596,10 +3447,10 @@ void STRAND_MESH::buildGlobalIndices()
   }
 
   // this all lines up, right?
-  cout<<"_DOFs"<<_DOFs<<endl;
-  cout<<"index"<<index<<endl;
+  cout << "_DOFs" << _DOFs << endl;
+  cout << "index" << index << endl;
   assert(index == _DOFs);
-  //assert(currentStrand == _totalStrands);
+  // assert(currentStrand == _totalStrands);
 }
 
-}
+} // namespace HOBAK

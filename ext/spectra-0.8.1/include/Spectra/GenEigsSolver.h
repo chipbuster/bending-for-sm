@@ -15,7 +15,6 @@
 
 namespace Spectra {
 
-
 ///
 /// \ingroup EigenSolver
 ///
@@ -27,17 +26,19 @@ namespace Spectra {
 /// and eigenvectors of a general matrix can now be complex-valued.
 ///
 /// \tparam Scalar        The element type of the matrix.
-///                       Currently supported types are `float`, `double` and `long double`.
+///                       Currently supported types are `float`, `double` and
+///                       `long double`.
 /// \tparam SelectionRule An enumeration value indicating the selection rule of
 ///                       the requested eigenvalues, for example `LARGEST_MAGN`
 ///                       to retrieve eigenvalues with the largest magnitude.
 ///                       The full list of enumeration values can be found in
 ///                       \ref Enumerations.
-/// \tparam OpType        The name of the matrix operation class. Users could either
+/// \tparam OpType        The name of the matrix operation class. Users could
+/// either
 ///                       use the wrapper classes such as DenseGenMatProd and
 ///                       SparseGenMatProd, or define their
-///                       own that implements all the public member functions as in
-///                       DenseGenMatProd.
+///                       own that implements all the public member functions as
+///                       in DenseGenMatProd.
 ///
 /// An example that illustrates the usage of GenEigsSolver is give below:
 ///
@@ -59,7 +60,8 @@ namespace Spectra {
 ///
 ///     // Construct eigen solver object, requesting the largest
 ///     // (in magnitude, or norm) three eigenvalues
-///     GenEigsSolver< double, LARGEST_MAGN, DenseGenMatProd<double> > eigs(&op, 3, 6);
+///     GenEigsSolver< double, LARGEST_MAGN, DenseGenMatProd<double> > eigs(&op,
+///     3, 6);
 ///
 ///     // Initialize and compute
 ///     eigs.init();
@@ -89,7 +91,8 @@ namespace Spectra {
 ///
 /// int main()
 /// {
-///     // A band matrix with 1 on the main diagonal, 2 on the below-main subdiagonal,
+///     // A band matrix with 1 on the main diagonal, 2 on the below-main
+///     subdiagonal,
 ///     // and 3 on the above-main subdiagonal
 ///     const int n = 10;
 ///     Eigen::SparseMatrix<double> M(n, n);
@@ -103,11 +106,12 @@ namespace Spectra {
 ///             M.insert(i + 1, i) = 2.0;
 ///     }
 ///
-///     // Construct matrix operation object using the wrapper class SparseGenMatProd
-///     SparseGenMatProd<double> op(M);
+///     // Construct matrix operation object using the wrapper class
+///     SparseGenMatProd SparseGenMatProd<double> op(M);
 ///
-///     // Construct eigen solver object, requesting the largest three eigenvalues
-///     GenEigsSolver< double, LARGEST_MAGN, SparseGenMatProd<double> > eigs(&op, 3, 6);
+///     // Construct eigen solver object, requesting the largest three
+///     eigenvalues GenEigsSolver< double, LARGEST_MAGN,
+///     SparseGenMatProd<double> > eigs(&op, 3, 6);
 ///
 ///     // Initialize and compute
 ///     eigs.init();
@@ -123,37 +127,38 @@ namespace Spectra {
 ///     return 0;
 /// }
 /// \endcode
-template < typename Scalar = double,
-           int SelectionRule = LARGEST_MAGN,
-           typename OpType = DenseGenMatProd<double> >
-class GenEigsSolver: public GenEigsBase<Scalar, SelectionRule, OpType, IdentityBOp>
-{
+template <typename Scalar = double, int SelectionRule = LARGEST_MAGN,
+          typename OpType = DenseGenMatProd<double>>
+class GenEigsSolver
+    : public GenEigsBase<Scalar, SelectionRule, OpType, IdentityBOp> {
 private:
-    typedef Eigen::Index Index;
+  typedef Eigen::Index Index;
 
 public:
-    ///
-    /// Constructor to create a solver object.
-    ///
-    /// \param op   Pointer to the matrix operation object, which should implement
-    ///             the matrix-vector multiplication operation of \f$A\f$:
-    ///             calculating \f$Av\f$ for any vector \f$v\f$. Users could either
-    ///             create the object from the wrapper class such as DenseGenMatProd, or
-    ///             define their own that implements all the public member functions
-    ///             as in DenseGenMatProd.
-    /// \param nev  Number of eigenvalues requested. This should satisfy \f$1\le nev \le n-2\f$,
-    ///             where \f$n\f$ is the size of matrix.
-    /// \param ncv  Parameter that controls the convergence speed of the algorithm.
-    ///             Typically a larger `ncv` means faster convergence, but it may
-    ///             also result in greater memory use and more matrix operations
-    ///             in each iteration. This parameter must satisfy \f$nev+2 \le ncv \le n\f$,
-    ///             and is advised to take \f$ncv \ge 2\cdot nev + 1\f$.
-    ///
-    GenEigsSolver(OpType* op, Index nev, Index ncv) :
-        GenEigsBase<Scalar, SelectionRule, OpType, IdentityBOp>(op, NULL, nev, ncv)
-    {}
+  ///
+  /// Constructor to create a solver object.
+  ///
+  /// \param op   Pointer to the matrix operation object, which should implement
+  ///             the matrix-vector multiplication operation of \f$A\f$:
+  ///             calculating \f$Av\f$ for any vector \f$v\f$. Users could
+  ///             either create the object from the wrapper class such as
+  ///             DenseGenMatProd, or define their own that implements all the
+  ///             public member functions as in DenseGenMatProd.
+  /// \param nev  Number of eigenvalues requested. This should satisfy \f$1\le
+  /// nev \le n-2\f$,
+  ///             where \f$n\f$ is the size of matrix.
+  /// \param ncv  Parameter that controls the convergence speed of the
+  /// algorithm.
+  ///             Typically a larger `ncv` means faster convergence, but it may
+  ///             also result in greater memory use and more matrix operations
+  ///             in each iteration. This parameter must satisfy \f$nev+2 \le
+  ///             ncv \le n\f$, and is advised to take \f$ncv \ge 2\cdot nev +
+  ///             1\f$.
+  ///
+  GenEigsSolver(OpType *op, Index nev, Index ncv)
+      : GenEigsBase<Scalar, SelectionRule, OpType, IdentityBOp>(op, NULL, nev,
+                                                                ncv) {}
 };
-
 
 } // namespace Spectra
 

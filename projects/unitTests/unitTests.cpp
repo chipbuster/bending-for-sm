@@ -24,4 +24,3 @@ using namespace std;
 
 #include "STRAND_TESTS.h"
 #include "SHELL_TESTS.h"
-

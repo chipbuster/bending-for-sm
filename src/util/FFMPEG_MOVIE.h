@@ -1,16 +1,16 @@
 /*
 This file is part of HOBAK.
 
-HOBAK is free software: you can redistribute it and/or modify it under the terms of 
-the GNU General Public License as published by the Free Software Foundation, either 
-version 3 of the License, or (at your option) any later version.
+HOBAK is free software: you can redistribute it and/or modify it under the terms
+of the GNU General Public License as published by the Free Software Foundation,
+either version 3 of the License, or (at your option) any later version.
 
-HOBAK is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; 
-without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
-PURPOSE. See the GNU General Public License for more details.
+HOBAK is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along with HOBAK. 
-If not, see <https://www.gnu.org/licenses/>.
+You should have received a copy of the GNU General Public License along with
+HOBAK. If not, see <https://www.gnu.org/licenses/>.
 */
 #ifndef FFMPEG_MOVIE_H
 #define FFMPEG_MOVIE_H
@@ -47,15 +47,14 @@ public:
   // The original screengrab code is from GLVU:
   // http://www.cs.unc.edu/~walk/software/glvu/
   ////////////////////////////////////////////////////////////////////////
-  void addFrameGL()
-  {
+  void addFrameGL() {
     GLint OldReadBuffer;
-    glGetIntegerv(GL_READ_BUFFER,&OldReadBuffer);
+    glGetIntegerv(GL_READ_BUFFER, &OldReadBuffer);
     glReadBuffer(GL_FRONT);
 
     GLint OldPackAlignment;
-    glGetIntegerv(GL_PACK_ALIGNMENT,&OldPackAlignment); 
-    glPixelStorei(GL_PACK_ALIGNMENT,1);
+    glGetIntegerv(GL_PACK_ALIGNMENT, &OldPackAlignment);
+    glPixelStorei(GL_PACK_ALIGNMENT, 1);
 
     // get the screen pixels
     int width = glutGet((GLenum)GLUT_WINDOW_WIDTH);
@@ -69,19 +68,21 @@ public:
     glReadPixels(0,0,width,height,GL_RGB,GL_UNSIGNED_BYTE,Pixels);
     */
     // use this if you're just streaming from memory
-    GLubyte* Pixels = new GLubyte[NumPixels*4];
-    if (Pixels==NULL) { printf("UNABLE TO ALLOC PIXEL READ ARRAY!\n"); return; }
-    glReadPixels(0,0,width,height,GL_RGBA,GL_UNSIGNED_BYTE,Pixels);
+    GLubyte *Pixels = new GLubyte[NumPixels * 4];
+    if (Pixels == NULL) {
+      printf("UNABLE TO ALLOC PIXEL READ ARRAY!\n");
+      return;
+    }
+    glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, Pixels);
 
     // store the screen pixels
-    if (_width == -1 && _height == -1)
-    {
+    if (_width == -1 && _height == -1) {
       _width = width;
       _height = height;
     }
     _frames.push_back(Pixels);
 
-    glPixelStorei(GL_PACK_ALIGNMENT,OldPackAlignment);
+    glPixelStorei(GL_PACK_ALIGNMENT, OldPackAlignment);
     glReadBuffer((GLenum)OldReadBuffer);
 
     _totalFrames++;
@@ -90,12 +91,10 @@ public:
   ////////////////////////////////////////////////////////////////////////
   // dump out the final movie, plus PPMs
   ////////////////////////////////////////////////////////////////////////
-  void writeMovie(const char* moviename) 
-  {
+  void writeMovie(const char *moviename) {
     using namespace std;
 
-    if (_frames.size() == 0) 
-    {
+    if (_frames.size() == 0) {
       cout << " No frames to output to movie! " << endl;
       return;
     }
@@ -106,14 +105,12 @@ public:
 
     // write all the frames out as PPM
     cout << " Writing frame " << flush;
-    for (unsigned int x = 0; x < _frames.size(); x++)
-    {
+    for (unsigned int x = 0; x < _frames.size(); x++) {
       cout << x << " " << flush;
       char filename[1024];
       sprintf(filename, "./temp/frame_%04i.ppm", x);
-      FILE* fp = fopen(filename, "wb");
-      if (fp == NULL)
-      {
+      FILE *fp = fopen(filename, "wb");
+      if (fp == NULL) {
         cout << " Couldn't open file " << filename << "!!!" << endl;
         exit(0);
       }
@@ -124,14 +121,14 @@ public:
     cout << " done." << endl;
 
     // call FFMPEG
-    string ffmpeg("ffmpeg -framerate 60 -i ./temp/frame_%04d.ppm -pix_fmt yuv420p -vf vflip -vcodec libx264 -y -b:v 20000k ");
-    ffmpeg = ffmpeg + string(moviename); 
+    string ffmpeg("ffmpeg -framerate 60 -i ./temp/frame_%04d.ppm -pix_fmt "
+                  "yuv420p -vf vflip -vcodec libx264 -y -b:v 20000k ");
+    ffmpeg = ffmpeg + string(moviename);
     system(ffmpeg.c_str());
 
     // delete all the PPM files
     cout << " Cleaning up ... " << flush;
-    for (unsigned int x = 0; x < _frames.size(); x++)
-    {
+    for (unsigned int x = 0; x < _frames.size(); x++) {
       char filename[1024];
       sprintf(filename, "./temp/frame_%04i.ppm", x);
       string rm("rm " + std::string(filename));
@@ -143,22 +140,23 @@ public:
   ////////////////////////////////////////////////////////////////////////
   // stream out the final movie, without using files
   ////////////////////////////////////////////////////////////////////////
-  void streamWriteMovie(const char* moviename) 
-  {
+  void streamWriteMovie(const char *moviename) {
     using namespace std;
 
-    if (_frames.size() == 0) 
-    {
+    if (_frames.size() == 0) {
       cout << " No frames to output to movie! " << endl;
       return;
     }
 
     char buffer[1024];
-    sprintf(buffer, "ffmpeg -r 60 -f rawvideo -pix_fmt rgba -s %ix%i -i - ", _width, _height);
-    string ffmpegCmd = string(buffer) + string("-threads 0 -preset fast -y -pix_fmt yuv420p -crf 21 -vf vflip -vcodec libx264 ");
+    sprintf(buffer, "ffmpeg -r 60 -f rawvideo -pix_fmt rgba -s %ix%i -i - ",
+            _width, _height);
+    string ffmpegCmd =
+        string(buffer) + string("-threads 0 -preset fast -y -pix_fmt yuv420p "
+                                "-crf 21 -vf vflip -vcodec libx264 ");
     ffmpegCmd = ffmpegCmd + string(moviename);
 
-    FILE* ffmpeg = popen(ffmpegCmd.c_str(), "w");
+    FILE *ffmpeg = popen(ffmpegCmd.c_str(), "w");
 
     for (unsigned int x = 0; x < _frames.size(); x++)
       fwrite(_frames[x], sizeof(int) * _width * _height, 1, ffmpeg);
@@ -167,7 +165,7 @@ public:
   }
 
 private:
-  std::vector<GLubyte*> _frames;
+  std::vector<GLubyte *> _frames;
   int _totalFrames;
   int _width;
   int _height;
@@ -175,4 +173,3 @@ private:
 };
 
 #endif
-

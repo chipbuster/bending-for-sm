@@ -15,7 +15,6 @@ namespace HOBAK {
 
 class SIMULATION_SCENE {
 public:
-
   // initialize the scene
   SIMULATION_SCENE() {
     _pauseFrame = -2;
@@ -36,8 +35,7 @@ public:
     _autoplay = true;
   };
 
-  virtual ~SIMULATION_SCENE()
-  {
+  virtual ~SIMULATION_SCENE() {
 
     for (unsigned int x = 0; x < _kinematicShapes.size(); x++)
       delete _kinematicShapes[x];
@@ -49,63 +47,63 @@ public:
   // TODO: Describe the scene build built. You have to do this!
   virtual void printSceneDescription() = 0;
 
-  const VECTOR3& eye() const         { return _eye; };
-  const VECTOR3& lookAt() const      { return _lookAt; };
-  const VECTOR3& up() const          { return _up; };
-  const VECTOR3& worldCenter() const { return _worldCenter; };
-  const VECTOR3& gravity() const  { return _gravity; };
-  const int& pauseFrame() const   { return _pauseFrame; };
-  const int& frameNumber() const  { return _frameNumber; };
-  const bool& drawFeature() const { return _drawFeature; };
-  const int& arrowCounter() const { return _arrowCounter; };
-  const vector<KINEMATIC_SHAPE*>& kinematicShapes() const { return _kinematicShapes; };
-  const bool& normalizedVertices() const { return _normalizedVertices; };
-  const bool& exitOnPause() const { return _exitOnPause; };
+  const VECTOR3 &eye() const { return _eye; };
+  const VECTOR3 &lookAt() const { return _lookAt; };
+  const VECTOR3 &up() const { return _up; };
+  const VECTOR3 &worldCenter() const { return _worldCenter; };
+  const VECTOR3 &gravity() const { return _gravity; };
+  const int &pauseFrame() const { return _pauseFrame; };
+  const int &frameNumber() const { return _frameNumber; };
+  const bool &drawFeature() const { return _drawFeature; };
+  const int &arrowCounter() const { return _arrowCounter; };
+  const vector<KINEMATIC_SHAPE *> &kinematicShapes() const {
+    return _kinematicShapes;
+  };
+  const bool &normalizedVertices() const { return _normalizedVertices; };
+  const bool &exitOnPause() const { return _exitOnPause; };
 
-  const MATRIX3& initialA() const           { return _initialA; };
-  const VECTOR3& initialTranslation() const { return _initialTranslation; };
+  const MATRIX3 &initialA() const { return _initialA; };
+  const VECTOR3 &initialTranslation() const { return _initialTranslation; };
 
-  REAL& E()              { return _E; };
-  const REAL& E() const  { return _E; };
-  //REAL& nu()             { return _nu; };
-  //const REAL& nu() const { return _nu; };
-  REAL& G()             { return _G; };
-  const REAL& G() const { return _G; };
+  REAL &E() { return _E; };
+  const REAL &E() const { return _E; };
+  // REAL& nu()             { return _nu; };
+  // const REAL& nu() const { return _nu; };
+  REAL &G() { return _G; };
+  const REAL &G() const { return _G; };
 
-  VECTOR3& eye()         { return _eye; };
-  VECTOR3& lookAt()      { return _lookAt; };
-  VECTOR3& up()          { return _up; };
-  VECTOR3& worldCenter() { return _worldCenter; };
-  VECTOR3& gravity()     { return _gravity; };
-  int& pauseFrame()      { return _pauseFrame; };
-  int& frameNumber()     { return _frameNumber; };
-  bool& drawFeature()    { return _drawFeature; };
-  int& arrowCounter()    { return _arrowCounter; };
-  bool& leftArrow()      { return _leftArrow; };
-  bool& rightArrow()     { return _rightArrow; };
-  bool& normalizedVertices() { return _normalizedVertices; };
-  vector<KINEMATIC_SHAPE*>& kinematicShapes() { return _kinematicShapes; };
+  VECTOR3 &eye() { return _eye; };
+  VECTOR3 &lookAt() { return _lookAt; };
+  VECTOR3 &up() { return _up; };
+  VECTOR3 &worldCenter() { return _worldCenter; };
+  VECTOR3 &gravity() { return _gravity; };
+  int &pauseFrame() { return _pauseFrame; };
+  int &frameNumber() { return _frameNumber; };
+  bool &drawFeature() { return _drawFeature; };
+  int &arrowCounter() { return _arrowCounter; };
+  bool &leftArrow() { return _leftArrow; };
+  bool &rightArrow() { return _rightArrow; };
+  bool &normalizedVertices() { return _normalizedVertices; };
+  vector<KINEMATIC_SHAPE *> &kinematicShapes() { return _kinematicShapes; };
 
   const string sceneName() const { return _sceneName; };
   const string movieName() const { return _sceneName + std::string(".mov"); };
-  const string jsonName() const  { return _sceneName + std::string(".json"); };
+  const string jsonName() const { return _sceneName + std::string(".json"); };
   const bool autoplay() const { return _autoplay; };
 
-
   // simulation loop
-  virtual void stepSimulation(const bool verbose = true) {
-
-    _frameNumber++;
-  };
+  virtual void stepSimulation(const bool verbose = true) { _frameNumber++; };
 
   // should we write a movie at this frame?
-  const bool writeMovie() const { 
-    if (_movieInterval == -1) return false;
+  const bool writeMovie() const {
+    if (_movieInterval == -1)
+      return false;
 
-    if ((_frameNumber % _movieInterval) == 0)
-    {
-      cout << __FILE__ << " " << __FUNCTION__ << " " << __LINE__ << " : " << endl;
-      cout << " Frame number: " << _frameNumber << " movie interval: " << _movieInterval << endl;
+    if ((_frameNumber % _movieInterval) == 0) {
+      cout << __FILE__ << " " << __FUNCTION__ << " " << __LINE__ << " : "
+           << endl;
+      cout << " Frame number: " << _frameNumber
+           << " movie interval: " << _movieInterval << endl;
       cout << " mod: " << _frameNumber % _movieInterval << endl;
       return true;
     }
@@ -114,11 +112,11 @@ public:
 
   virtual bool writeFrameToFile() { return true; };
 
-// drawScene MUST have this guard, so it can be deactivated for regression testing
+// drawScene MUST have this guard, so it can be deactivated for regression
+// testing
 #ifndef GL_DISABLED
   // what to draw?
-  virtual void drawScene()
-  {
+  virtual void drawScene() {
     glEnable(GL_DEPTH_TEST);
     for (unsigned int x = 0; x < _kinematicShapes.size(); x++)
       drawKinematicShape(*_kinematicShapes[x]);
@@ -128,19 +126,15 @@ public:
 protected:
   // set the positions to previous timestep, in case the user wants to
   // look at that instead of the current step
-  void setToPreviousTimestep()
-  {
-  }
+  void setToPreviousTimestep() {}
 
   // restore positions from previous timestep, in case the user just drew
   // the previous timestep, but now we want the state to be consistent
   // when drawing the next frame
-  void restoreToCurrentTimestep()
-  {
-  }
+  void restoreToCurrentTimestep() {}
 
   // scene geometry
-  vector<KINEMATIC_SHAPE*> _kinematicShapes;
+  vector<KINEMATIC_SHAPE *> _kinematicShapes;
 
   // solver and materials
 
@@ -170,7 +164,6 @@ protected:
   // should we save this frame?
   bool _writeToFile = false;
 
-
   // did we normalize the vertices when we read them in?
   bool _normalizedVertices;
 
@@ -191,17 +184,17 @@ protected:
 
   // should we exit when we hit the pause frame?
   bool _exitOnPause;
- 
+
   // what interval should we write out a movie at?
   int _movieInterval;
- 
+
   // Young's modulus and Poisson's ratio. There aren't well-integrated into
   // the volumetric files yet
   REAL _E;
-  //REAL _nu;     // let's prefer shear modulus to Poisson's ratio
+  // REAL _nu;     // let's prefer shear modulus to Poisson's ratio
   REAL _G;
 };
 
-}
+} // namespace HOBAK
 
 #endif

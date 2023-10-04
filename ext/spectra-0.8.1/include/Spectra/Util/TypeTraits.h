@@ -14,7 +14,6 @@
 
 namespace Spectra {
 
-
 // For a real value type "Scalar", we want to know its smallest
 // positive value, i.e., std::numeric_limits<Scalar>::min().
 // However, we must take non-standard value types into account,
@@ -28,43 +27,26 @@ namespace Spectra {
 // to mimic it for non-standard types.
 
 // Generic definition
-template <typename Scalar>
-struct TypeTraits
-{
-    static inline Scalar min()
-    {
-        return Eigen::numext::pow(Eigen::NumTraits<Scalar>::epsilon(), Scalar(3));
-    }
+template <typename Scalar> struct TypeTraits {
+  static inline Scalar min() {
+    return Eigen::numext::pow(Eigen::NumTraits<Scalar>::epsilon(), Scalar(3));
+  }
 };
 
 // Full specialization
-template <>
-struct TypeTraits<float>
-{
-    static inline float min()
-    {
-        return std::numeric_limits<float>::min();
-    }
+template <> struct TypeTraits<float> {
+  static inline float min() { return std::numeric_limits<float>::min(); }
 };
 
-template <>
-struct TypeTraits<double>
-{
-    static inline double min()
-    {
-        return std::numeric_limits<double>::min();
-    }
+template <> struct TypeTraits<double> {
+  static inline double min() { return std::numeric_limits<double>::min(); }
 };
 
-template <>
-struct TypeTraits<long double>
-{
-    static inline long double min()
-    {
-        return std::numeric_limits<long double>::min();
-    }
+template <> struct TypeTraits<long double> {
+  static inline long double min() {
+    return std::numeric_limits<long double>::min();
+  }
 };
-
 
 } // namespace Spectra
 

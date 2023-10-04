@@ -40,7 +40,9 @@ THE SOFTWARE.
 #include <unistd.h>
 #endif
 
+#include <atomic>  // C++11
 #include <cassert>
+#include <chrono>  // C++11
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
@@ -48,11 +50,8 @@ THE SOFTWARE.
 #include <fstream>
 #include <iostream>
 #include <map>
-#include <vector>
-
-#include <atomic>  // C++11
-#include <chrono>  // C++11
 #include <thread>  // C++11
+#include <vector>
 
 #include "lfpAlloc/Allocator.hpp"
 
@@ -604,7 +603,7 @@ static bool tryParseDouble(const char *s, const char *s_end, double *result) {
     if (read == 0) goto fail;
   }
 
-assemble :
+assemble:
   *result = (sign == '+' ? 1 : -1) *
             (exponent ? std::ldexp(mantissa * std::pow(5.0, exponent), exponent)
                       : mantissa);
@@ -1414,7 +1413,8 @@ bool parseObj(attrib_t *attrib, std::vector<shape_t> *shapes,
             }
 
             if (command.type == COMMAND_MTLLIB) {
-              // Save the indices of the `mtllib` command in `commands` to easily find it later
+              // Save the indices of the `mtllib` command in `commands` to
+              // easily find it later
               mtllib_t_index = t;
               mtllib_i_index = commands[t].size();
             }

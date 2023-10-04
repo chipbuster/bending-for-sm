@@ -20,41 +20,45 @@ namespace fs = std::filesystem;
 
 class NET_SCENE_CORNER : public SIMULATION_SCENE {
 public:
-  virtual void printSceneDescription() override
-  {
-    cout << "=====================================================================" << endl;
+  virtual void printSceneDescription() override {
+    cout << "=================================================================="
+            "==="
+         << endl;
     cout << " Net moving corners scene" << endl;
-    cout << "=====================================================================" << endl;
+    cout << "=================================================================="
+            "==="
+         << endl;
   }
 
-
   // for testing stretch
-  virtual bool buildScene() override
-  {
+  virtual bool buildScene() override {
     // this will determine the MOV and JSON filenames
     // _sceneName = "net_moving_corners";
-    _n0 = 41; _n1 = 41; _subSegment = 2;
+    _n0 = 41;
+    _n1 = 41;
+    _subSegment = 2;
     string method = "ours";
     // string method = "tan";
     // string method = "brute";
     // string method = "GN";
     // string method = "unFIl";
 
-    //const REAL bottomStart = 2.0 - 0.5 * _bottomStrandSpacing * _bottomStrands;
+    // const REAL bottomStart = 2.0 - 0.5 * _bottomStrandSpacing *
+    // _bottomStrands;
 
-    //const int totalTopPoints = 5;
-    //const int totalBottomPoints = 8;
-    //const int totalTopPoints = 100;
-    //const int totalTopPoints = 50;
-    //const int totalTopPoints = 30;
+    // const int totalTopPoints = 5;
+    // const int totalBottomPoints = 8;
+    // const int totalTopPoints = 100;
+    // const int totalTopPoints = 50;
+    // const int totalTopPoints = 30;
 
     buildNet();
 
-    _gravity = VECTOR3(0,-1.0,0);
+    _gravity = VECTOR3(0, -1.0, 0);
 
     const REAL E = 1e8;
-    //const REAL E = 1e6;
-    //const REAL E = 1e5; // things seem to misbehave here
+    // const REAL E = 1e6;
+    // const REAL E = 1e5; // things seem to misbehave here
     const REAL nu = 0.36;
     const REAL density = 1.32;
     const REAL radiusA = 0.001;
@@ -66,22 +70,26 @@ public:
     sprintf(buffer, "_E%.1f", E);
     _sceneName = "net_moving_corners" + method + buffer;
 
-    _strandMesh = new STRAND_NET_MESH(_restVertices, _strandIndices, E, nu, density, radiusA, radiusB);
+    _strandMesh = new STRAND_NET_MESH(_restVertices, _strandIndices, E, nu,
+                                      density, radiusA, radiusB);
 
-    // _strandMesh = new STRAND_MESH_FASTER(restVertices, strandIndices, E, nu, density, radiusA, radiusB);
+    // _strandMesh = new STRAND_MESH_FASTER(restVertices, strandIndices, E, nu,
+    // density, radiusA, radiusB);
 
     _strandMesh->setCollisionEps(collisionEps);
     _strandMesh->bendingForceFilterEnabled() = false;
 
     // create the integrator
     const REAL k = E * M_PI * radiusA * radiusB * 1e-4;
-    cout <<" Stretching stiffness: " << k << endl;
-    STRAND::QUADRATIC_STRETCHING* stretchingEnergy = new STRAND::QUADRATIC_STRETCHING(k);
+    cout << " Stretching stiffness: " << k << endl;
+    STRAND::QUADRATIC_STRETCHING *stretchingEnergy =
+        new STRAND::QUADRATIC_STRETCHING(k);
     _strandSolver = new STRAND::TIMESTEPPER(*_strandMesh, *stretchingEnergy);
     _strandSolver->setDt(1.0 / 30.0); // lots of interpenetrations
     _strandSolver->collisionsEnabled() = false;
     //_strandSolver->setDt(1.0 / 100.0);// passes through
-    //_strandSolver->setDt(1.0 / 200.0);  // some pass-throughs, looks like a good CCD debugging scenario
+    //_strandSolver->setDt(1.0 / 200.0);  // some pass-throughs, looks like a
+    //good CCD debugging scenario
     // _strandSolver->setDt(1.0 / 300.0);  // works fine
 
     _strandSolver->hessianClampingEnabled() = true;
@@ -91,11 +99,11 @@ public:
     _strandSolver->collisionStiffness() = 10;
     _strandSolver->collisionDampingBeta() = 0;
 
-    //const REAL cubeScale = 0.5;
-    // REAL sphereScale = 0.3;
-    // VECTOR3 center0(0.5, -1.0, 0.5);
-    // _kinematicShapes.push_back(new SPHERE(center0, sphereScale));
-    // _strandSolver->addKinematicCollisionObject(_kinematicShapes[0]);
+    // const REAL cubeScale = 0.5;
+    //  REAL sphereScale = 0.3;
+    //  VECTOR3 center0(0.5, -1.0, 0.5);
+    //  _kinematicShapes.push_back(new SPHERE(center0, sphereScale));
+    //  _strandSolver->addKinematicCollisionObject(_kinematicShapes[0]);
 
     REAL sphereScale = 0.02;
     VECTOR3 center0(0.0, 0.0, 0.0);
@@ -111,11 +119,9 @@ public:
     _strandSolver->attachKinematicSurfaceConstraints(_kinematicShapes[2]);
     _strandSolver->attachKinematicSurfaceConstraints(_kinematicShapes[3]);
 
-    
-
-    _eye    = VECTOR3(2.0, 3.0, 4.0);
+    _eye = VECTOR3(2.0, 3.0, 4.0);
     _lookAt = VECTOR3(0.3, 0.0, 0.0);
-    _up     = VECTOR3(0.0, 1.0, 0.0);
+    _up = VECTOR3(0.0, 1.0, 0.0);
 
     // _eye    = VECTOR3(0.327816, 0.174481, 1.04042);
     // _lookAt = VECTOR3(-0.309947, 0.414465, 1.77231);
@@ -134,8 +140,7 @@ public:
   }
 
   // simulation loop
-  virtual void stepSimulation(const bool verbose = true) override
-  {
+  virtual void stepSimulation(const bool verbose = true) override {
 
     _strandSolver->externalForces().setZero();
     _strandSolver->addGravity(_gravity);
@@ -143,74 +148,76 @@ public:
     //_strandSolver->solveNewton(verbose);
 
     // move corners
-    _kinematicShapes[0]->translation() = _kinematicShapes[0]->translation() + VECTOR3(0.001, 0.0, 0.001);
-    _kinematicShapes[1]->translation() = _kinematicShapes[1]->translation() + VECTOR3(-0.001, 0.0, 0.001);
-    _kinematicShapes[2]->translation() = _kinematicShapes[2]->translation() + VECTOR3(0.001, 0.0, -0.001);
-    _kinematicShapes[3]->translation() = _kinematicShapes[3]->translation() + VECTOR3(-0.001, 0.0, -0.001);
+    _kinematicShapes[0]->translation() =
+        _kinematicShapes[0]->translation() + VECTOR3(0.001, 0.0, 0.001);
+    _kinematicShapes[1]->translation() =
+        _kinematicShapes[1]->translation() + VECTOR3(-0.001, 0.0, 0.001);
+    _kinematicShapes[2]->translation() =
+        _kinematicShapes[2]->translation() + VECTOR3(0.001, 0.0, -0.001);
+    _kinematicShapes[3]->translation() =
+        _kinematicShapes[3]->translation() + VECTOR3(-0.001, 0.0, -0.001);
 
     _frameNumber++;
   };
 
-  void buildNet()
-  {
+  void buildNet() {
     // procedurally generate a net
 
     // vertices
-    const REAL spacing = 1.0/(REAL(_n0) - 1.0);
+    const REAL spacing = 1.0 / (REAL(_n0) - 1.0);
     const REAL subSpacing = spacing / REAL(_subSegment);
     // _strandIndices.resize(_n0 + _n1);
     // for(int x = 0; x < (_n0 + _n1); x++)
     //   _strandIndices[x].clear();
     // // cout<<"spacing"<< spacing<<endl;
-    // const int num0 = 1 + (_n1 - 1) * _subSegment, num1 = 1 + (_n0 - 1) * _subSegment;
-    // int vId = 0;
-    // for(int z = 0; z < _n1 - 1; z++){
+    // const int num0 = 1 + (_n1 - 1) * _subSegment, num1 = 1 + (_n0 - 1) *
+    // _subSegment; int vId = 0; for(int z = 0; z < _n1 - 1; z++){
     //   for(int x = 0; x < _n0 - 1; x++){
-    //     _restVertices.push_back(VECTOR3(x * _subSegment * spacing, 0.0, z * _subSegment * spacing));
-    //     _strandIndices[z].push_back(vId);
+    //     _restVertices.push_back(VECTOR3(x * _subSegment * spacing, 0.0, z *
+    //     _subSegment * spacing)); _strandIndices[z].push_back(vId);
     //     _strandIndices[_n1]
     //     vId ++;
     //     for(int i = 0; i < _subSegment - 1; i++){
-    //       _restVertices.push_back(VECTOR3(x * _subSegment * spacing + i * spacing, 0.0, z * _subSegment * spacing));
+    //       _restVertices.push_back(VECTOR3(x * _subSegment * spacing + i *
+    //       spacing, 0.0, z * _subSegment * spacing));
     //       _strandIndices[z].push_back(vId);
     //       vId ++;
     //     }
     //   }
 
     // }
-    
+
     // vertex
-    for(int z = 0; z < _n1; z++){
-      for(int x = 0; x < _n0; x++){
-        _restVertices.push_back(VECTOR3(x * spacing, 0.0 , z * spacing));
+    for (int z = 0; z < _n1; z++) {
+      for (int x = 0; x < _n0; x++) {
+        _restVertices.push_back(VECTOR3(x * spacing, 0.0, z * spacing));
       }
     }
 
-
     // strands
     // along x
-    for(int z = 0; z < _n1; z++){
+    for (int z = 0; z < _n1; z++) {
       vector<int> strand;
-      for(int x = 0; x < _n0; x++){
+      for (int x = 0; x < _n0; x++) {
         strand.push_back(_n0 * z + x);
       }
       _strandIndices.push_back(strand);
     }
     // along z
-    for(int x = 0; x < _n0; x++){
+    for (int x = 0; x < _n0; x++) {
       vector<int> strand;
-      for(int z = 0; z < _n1; z++){
+      for (int z = 0; z < _n1; z++) {
         strand.push_back(_n0 * z + x);
       }
       _strandIndices.push_back(strand);
     }
   }
 
-// drawScene MUST have this guard, so it can be deactivated for regression testing
+// drawScene MUST have this guard, so it can be deactivated for regression
+// testing
 #ifndef GL_DISABLED
   // what to draw?
-  virtual void drawScene()
-  {
+  virtual void drawScene() {
     const bool drawOld = false;
 
     drawAxes();
@@ -248,19 +255,19 @@ public:
 #endif
 
 protected:
-  //STRAND_MESH* _strandMesh;
-  STRAND_NET_MESH* _strandMesh;
-  STRAND::TIMESTEPPER* _strandSolver;
-  STRAND::STRETCHING* _strechingEnergy;
+  // STRAND_MESH* _strandMesh;
+  STRAND_NET_MESH *_strandMesh;
+  STRAND::TIMESTEPPER *_strandSolver;
+  STRAND::STRETCHING *_strechingEnergy;
 
-  //shape parameters
-  int _n0, _n1, _subSegment; // _n0 along x; _n1 along z; 
+  // shape parameters
+  int _n0, _n1, _subSegment; // _n0 along x; _n1 along z;
   std::vector<VECTOR3> _restVertices;
-  vector<vector<int> > _strandIndices;
+  vector<vector<int>> _strandIndices;
 
   string _strandFilePath;
 };
 
-}
+} // namespace HOBAK
 
 #endif

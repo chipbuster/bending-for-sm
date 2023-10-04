@@ -1,16 +1,16 @@
 /*
 This file is part of HOBAK.
 
-HOBAK is free software: you can redistribute it and/or modify it under the terms of 
-the GNU General Public License as published by the Free Software Foundation, either 
-version 3 of the License, or (at your option) any later version.
+HOBAK is free software: you can redistribute it and/or modify it under the terms
+of the GNU General Public License as published by the Free Software Foundation,
+either version 3 of the License, or (at your option) any later version.
 
-HOBAK is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; 
-without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR 
-PURPOSE. See the GNU General Public License for more details.
+HOBAK is distributed in the hope that it will be useful, but WITHOUT ANY
+WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+PARTICULAR PURPOSE. See the GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License along with HOBAK. 
-If not, see <https://www.gnu.org/licenses/>.
+You should have received a copy of the GNU General Public License along with
+HOBAK. If not, see <https://www.gnu.org/licenses/>.
 */
 #include "VECTOR3_FIELD_3D.h"
 #include <omp.h>
@@ -21,10 +21,11 @@ namespace HOBAK {
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-VECTOR3_FIELD_3D::VECTOR3_FIELD_3D(const int& xRes, const int& yRes, const int& zRes,
-    const VECTOR3& center, const VECTOR3& lengths) :
-  _xRes(xRes), _yRes(yRes), _zRes(zRes), _center(center), _lengths(lengths), _initialized(true)
-{
+VECTOR3_FIELD_3D::VECTOR3_FIELD_3D(const int &xRes, const int &yRes,
+                                   const int &zRes, const VECTOR3 &center,
+                                   const VECTOR3 &lengths)
+    : _xRes(xRes), _yRes(yRes), _zRes(zRes), _center(center), _lengths(lengths),
+      _initialized(true) {
   _totalCells = _xRes * _yRes * _zRes;
   _slabSize = _xRes * _yRes;
   _data = new VECTOR3[_totalCells];
@@ -34,10 +35,12 @@ VECTOR3_FIELD_3D::VECTOR3_FIELD_3D(const int& xRes, const int& yRes, const int& 
   _dz = _lengths[2] / _zRes;
 }
 
-VECTOR3_FIELD_3D::VECTOR3_FIELD_3D(double* data, const int& xRes, const int& yRes, const int& zRes,
-    const VECTOR3& center, const VECTOR3& lengths) :
-  _xRes(xRes), _yRes(yRes), _zRes(zRes), _center(center), _lengths(lengths), _initialized(true)
-{
+VECTOR3_FIELD_3D::VECTOR3_FIELD_3D(double *data, const int &xRes,
+                                   const int &yRes, const int &zRes,
+                                   const VECTOR3 &center,
+                                   const VECTOR3 &lengths)
+    : _xRes(xRes), _yRes(yRes), _zRes(zRes), _center(center), _lengths(lengths),
+      _initialized(true) {
   _totalCells = _xRes * _yRes * _zRes;
   _slabSize = _xRes * _yRes;
   _data = new VECTOR3[_totalCells];
@@ -46,18 +49,16 @@ VECTOR3_FIELD_3D::VECTOR3_FIELD_3D(double* data, const int& xRes, const int& yRe
   _dy = _lengths[1] / _yRes;
   _dz = _lengths[2] / _zRes;
 
-  for (int x = 0; x < _totalCells; x++)
-  {
+  for (int x = 0; x < _totalCells; x++) {
     _data[x][0] = data[3 * x];
     _data[x][1] = data[3 * x + 1];
     _data[x][2] = data[3 * x + 2];
   }
 }
 
-VECTOR3_FIELD_3D::VECTOR3_FIELD_3D(const VECTOR3_FIELD_3D& m) :
-  _xRes(m.xRes()), _yRes(m.yRes()), _zRes(m.zRes()),
-  _center(m.center()), _lengths(m.lengths()), _initialized(true)
-{
+VECTOR3_FIELD_3D::VECTOR3_FIELD_3D(const VECTOR3_FIELD_3D &m)
+    : _xRes(m.xRes()), _yRes(m.yRes()), _zRes(m.zRes()), _center(m.center()),
+      _lengths(m.lengths()), _initialized(true) {
   _totalCells = _xRes * _yRes * _zRes;
   _slabSize = _xRes * _yRes;
   _data = new VECTOR3[_totalCells];
@@ -70,10 +71,9 @@ VECTOR3_FIELD_3D::VECTOR3_FIELD_3D(const VECTOR3_FIELD_3D& m) :
     _data[x] = m[x];
 }
 
-VECTOR3_FIELD_3D::VECTOR3_FIELD_3D(const FIELD_3D& m) :
-  _xRes(m.xRes()), _yRes(m.yRes()), _zRes(m.zRes()),
-  _center(m.center()), _lengths(m.lengths()), _initialized(true)
-{
+VECTOR3_FIELD_3D::VECTOR3_FIELD_3D(const FIELD_3D &m)
+    : _xRes(m.xRes()), _yRes(m.yRes()), _zRes(m.zRes()), _center(m.center()),
+      _lengths(m.lengths()), _initialized(true) {
   _totalCells = _xRes * _yRes * _zRes;
   _slabSize = _xRes * _yRes;
   _data = new VECTOR3[_totalCells];
@@ -83,32 +83,26 @@ VECTOR3_FIELD_3D::VECTOR3_FIELD_3D(const FIELD_3D& m) :
   _dz = _lengths[2] / _zRes;
 }
 
-VECTOR3_FIELD_3D::VECTOR3_FIELD_3D() :
-  _xRes(-1), _yRes(-1), _zRes(-1), _totalCells(-1), _data(NULL), _initialized(false)
-{
-}
+VECTOR3_FIELD_3D::VECTOR3_FIELD_3D()
+    : _xRes(-1), _yRes(-1), _zRes(-1), _totalCells(-1), _data(NULL),
+      _initialized(false) {}
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-VECTOR3_FIELD_3D::~VECTOR3_FIELD_3D()
-{
-  delete[] _data;
-}
-  
+VECTOR3_FIELD_3D::~VECTOR3_FIELD_3D() { delete[] _data; }
+
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-void VECTOR3_FIELD_3D::clear()
-{
+void VECTOR3_FIELD_3D::clear() {
   for (int x = 0; x < _totalCells; x++)
     _data[x].setZero();
 }
 
 ///////////////////////////////////////////////////////////////////////
-// reset the lengths to something else, and recompute all the 
+// reset the lengths to something else, and recompute all the
 // dimesions as well
 ///////////////////////////////////////////////////////////////////////
-void VECTOR3_FIELD_3D::setLengths(const VECTOR3& lengths)
-{
+void VECTOR3_FIELD_3D::setLengths(const VECTOR3 &lengths) {
   _lengths = lengths;
 
   _dx = _lengths[0] / _xRes;
@@ -119,20 +113,19 @@ void VECTOR3_FIELD_3D::setLengths(const VECTOR3& lengths)
 ///////////////////////////////////////////////////////////////////////
 // create a field of the grid positions of the passed in grid
 ///////////////////////////////////////////////////////////////////////
-VECTOR3_FIELD_3D VECTOR3_FIELD_3D::cellCenters(const FIELD_3D& input)
-{
+VECTOR3_FIELD_3D VECTOR3_FIELD_3D::cellCenters(const FIELD_3D &input) {
   int xRes = input.xRes();
   int yRes = input.yRes();
   int zRes = input.zRes();
-  const VECTOR3& center = input.center();
-  const VECTOR3& lengths = input.lengths();
+  const VECTOR3 &center = input.center();
+  const VECTOR3 &lengths = input.lengths();
   VECTOR3_FIELD_3D final(xRes, yRes, zRes, center, lengths);
 
   int index = 0;
   for (int z = 0; z < zRes; z++)
     for (int y = 0; y < yRes; y++)
       for (int x = 0; x < xRes; x++, index++)
-        final[index] = input.cellCenter(x,y,z);
+        final[index] = input.cellCenter(x, y, z);
 
   return final;
 }
@@ -140,8 +133,7 @@ VECTOR3_FIELD_3D VECTOR3_FIELD_3D::cellCenters(const FIELD_3D& input)
 ///////////////////////////////////////////////////////////////////////
 // take the gradient of a scalar field
 ///////////////////////////////////////////////////////////////////////
-VECTOR3_FIELD_3D VECTOR3_FIELD_3D::gradient(const FIELD_3D& input)
-{
+VECTOR3_FIELD_3D VECTOR3_FIELD_3D::gradient(const FIELD_3D &input) {
   TIMER functionTimer(__FUNCTION__);
 
   const int xRes = input.xRes();
@@ -149,45 +141,44 @@ VECTOR3_FIELD_3D VECTOR3_FIELD_3D::gradient(const FIELD_3D& input)
   const int zRes = input.zRes();
   const int slabSize = xRes * yRes;
   const int totalCells = xRes * yRes * zRes;
-  const VECTOR3& center = input.center();
-  const VECTOR3& lengths = input.lengths();
+  const VECTOR3 &center = input.center();
+  const VECTOR3 &lengths = input.lengths();
   VECTOR3_FIELD_3D final(xRes, yRes, zRes, center, lengths);
- 
+
   const REAL dxHalfInv = 0.5 / input.dx();
   const REAL dyHalfInv = 0.5 / input.dy();
   const REAL dzHalfInv = 0.5 / input.dz();
 
   // do the x middles
 #pragma omp parallel
-#pragma omp for  schedule(dynamic)
+#pragma omp for schedule(dynamic)
   for (int z = 0; z < zRes; z++)
     for (int y = 0; y < yRes; y++)
-      for (int x = 1; x < xRes - 1; x++)
-      {
+      for (int x = 1; x < xRes - 1; x++) {
         int index = x + y * xRes + z * slabSize;
         final[index][0] = (input[index + 1] - input[index - 1]) * dxHalfInv;
       }
 
-  // do the y middles
+      // do the y middles
 #pragma omp parallel
-#pragma omp for  schedule(dynamic)
+#pragma omp for schedule(dynamic)
   for (int z = 0; z < zRes; z++)
     for (int y = 1; y < yRes - 1; y++)
-      for (int x = 0; x < xRes; x++)
-      {
+      for (int x = 0; x < xRes; x++) {
         int index = x + y * xRes + z * slabSize;
-        final[index][1] = (input[index + xRes] - input[index - xRes]) * dyHalfInv;
+        final[index][1] =
+            (input[index + xRes] - input[index - xRes]) * dyHalfInv;
       }
 
-  // do the z middles
+      // do the z middles
 #pragma omp parallel
-#pragma omp for  schedule(dynamic)
+#pragma omp for schedule(dynamic)
   for (int z = 1; z < zRes - 1; z++)
     for (int y = 0; y < yRes; y++)
-      for (int x = 0; x < xRes; x++)
-      {
+      for (int x = 0; x < xRes; x++) {
         int index = x + y * xRes + z * slabSize;
-        final[index][2] = (input[index + slabSize] - input[index - slabSize]) * dzHalfInv;
+        final[index][2] =
+            (input[index + slabSize] - input[index - slabSize]) * dzHalfInv;
       }
 
   // reset dx's to a single cell
@@ -196,10 +187,9 @@ VECTOR3_FIELD_3D VECTOR3_FIELD_3D::gradient(const FIELD_3D& input)
   REAL dzInv = 1.0 / input.dz();
 
 #pragma omp parallel
-#pragma omp for  schedule(dynamic)
+#pragma omp for schedule(dynamic)
   for (int y = 0; y < yRes; y++)
-    for (int x = 0; x < xRes; x++)
-    {
+    for (int x = 0; x < xRes; x++) {
       // front slab
       int index = x + y * xRes;
       final[index][2] = (input[index + slabSize] - input[index]) * dzInv;
@@ -210,10 +200,9 @@ VECTOR3_FIELD_3D VECTOR3_FIELD_3D::gradient(const FIELD_3D& input)
     }
 
 #pragma omp parallel
-#pragma omp for  schedule(dynamic)
+#pragma omp for schedule(dynamic)
   for (int z = 0; z < zRes; z++)
-    for (int x = 0; x < xRes; x++)
-    {
+    for (int x = 0; x < xRes; x++) {
       // bottom slab
       int index = x + z * slabSize;
       final[index][1] = (input[index + xRes] - input[index]) * dyInv;
@@ -224,10 +213,9 @@ VECTOR3_FIELD_3D VECTOR3_FIELD_3D::gradient(const FIELD_3D& input)
     }
 
 #pragma omp parallel
-#pragma omp for  schedule(dynamic)
+#pragma omp for schedule(dynamic)
   for (int z = 0; z < zRes; z++)
-    for (int y = 0; y < yRes; y++)
-    {
+    for (int y = 0; y < yRes; y++) {
       // left slab
       int index = y * xRes + z * slabSize;
       final[index][0] = (input[index + 1] - input[index]) * dxInv;
@@ -242,8 +230,7 @@ VECTOR3_FIELD_3D VECTOR3_FIELD_3D::gradient(const FIELD_3D& input)
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-FIELD_3D VECTOR3_FIELD_3D::scalarField(int component) const
-{
+FIELD_3D VECTOR3_FIELD_3D::scalarField(int component) const {
   assert(component >= 0 && component < 3);
 
   FIELD_3D final(_xRes, _yRes, _zRes, _center, _lengths);
@@ -256,8 +243,7 @@ FIELD_3D VECTOR3_FIELD_3D::scalarField(int component) const
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-FIELD_3D VECTOR3_FIELD_3D::magnitudeField() const
-{
+FIELD_3D VECTOR3_FIELD_3D::magnitudeField() const {
   FIELD_3D final(_xRes, _yRes, _zRes, _center, _lengths);
 
   for (int x = 0; x < _totalCells; x++)
@@ -269,8 +255,7 @@ FIELD_3D VECTOR3_FIELD_3D::magnitudeField() const
 ///////////////////////////////////////////////////////////////////////
 // take the field dot product
 ///////////////////////////////////////////////////////////////////////
-FIELD_3D operator*(const VECTOR3_FIELD_3D& u, const VECTOR3_FIELD_3D& v)
-{
+FIELD_3D operator*(const VECTOR3_FIELD_3D &u, const VECTOR3_FIELD_3D &v) {
   assert(u.xRes() == v.xRes());
   assert(u.yRes() == v.yRes());
   assert(u.zRes() == v.zRes());
@@ -287,8 +272,7 @@ FIELD_3D operator*(const VECTOR3_FIELD_3D& u, const VECTOR3_FIELD_3D& v)
 ///////////////////////////////////////////////////////////////////////
 // take the field dot product
 ///////////////////////////////////////////////////////////////////////
-VECTOR3_FIELD_3D operator*(const FIELD_3D& u, const VECTOR3_FIELD_3D& v)
-{
+VECTOR3_FIELD_3D operator*(const FIELD_3D &u, const VECTOR3_FIELD_3D &v) {
   assert(u.xRes() == v.xRes());
   assert(u.yRes() == v.yRes());
   assert(u.zRes() == v.zRes());
@@ -305,8 +289,8 @@ VECTOR3_FIELD_3D operator*(const FIELD_3D& u, const VECTOR3_FIELD_3D& v)
 ///////////////////////////////////////////////////////////////////////
 // sum two vector fields
 ///////////////////////////////////////////////////////////////////////
-VECTOR3_FIELD_3D operator+(const VECTOR3_FIELD_3D& u, const VECTOR3_FIELD_3D& v)
-{
+VECTOR3_FIELD_3D operator+(const VECTOR3_FIELD_3D &u,
+                           const VECTOR3_FIELD_3D &v) {
   assert(u.xRes() == v.xRes());
   assert(u.yRes() == v.yRes());
   assert(u.zRes() == v.zRes());
@@ -322,8 +306,8 @@ VECTOR3_FIELD_3D operator+(const VECTOR3_FIELD_3D& u, const VECTOR3_FIELD_3D& v)
 ///////////////////////////////////////////////////////////////////////
 // diff two vector fields
 ///////////////////////////////////////////////////////////////////////
-VECTOR3_FIELD_3D operator-(const VECTOR3_FIELD_3D& u, const VECTOR3_FIELD_3D& v)
-{
+VECTOR3_FIELD_3D operator-(const VECTOR3_FIELD_3D &u,
+                           const VECTOR3_FIELD_3D &v) {
   assert(u.xRes() == v.xRes());
   assert(u.yRes() == v.yRes());
   assert(u.zRes() == v.zRes());
@@ -339,8 +323,8 @@ VECTOR3_FIELD_3D operator-(const VECTOR3_FIELD_3D& u, const VECTOR3_FIELD_3D& v)
 ///////////////////////////////////////////////////////////////////////
 // return a grid of values at the given spatial positions
 ///////////////////////////////////////////////////////////////////////
-FIELD_3D VECTOR3_FIELD_3D::compose(const FIELD_3D& values, const VECTOR3_FIELD_3D& positions)
-{
+FIELD_3D VECTOR3_FIELD_3D::compose(const FIELD_3D &values,
+                                   const VECTOR3_FIELD_3D &positions) {
   assert(positions.xRes() == values.xRes());
   assert(positions.yRes() == values.yRes());
   assert(positions.zRes() == values.zRes());
@@ -360,8 +344,8 @@ FIELD_3D VECTOR3_FIELD_3D::compose(const FIELD_3D& values, const VECTOR3_FIELD_3
 ///////////////////////////////////////////////////////////////////////
 // return a grid of values at the given spatial positions
 ///////////////////////////////////////////////////////////////////////
-VECTOR3_FIELD_3D VECTOR3_FIELD_3D::compose(const VECTOR3_FIELD_3D& values, const VECTOR3_FIELD_3D& positions)
-{
+VECTOR3_FIELD_3D VECTOR3_FIELD_3D::compose(const VECTOR3_FIELD_3D &values,
+                                           const VECTOR3_FIELD_3D &positions) {
   assert(positions.xRes() == values.xRes());
   assert(positions.yRes() == values.yRes());
   assert(positions.zRes() == values.zRes());
@@ -381,8 +365,7 @@ VECTOR3_FIELD_3D VECTOR3_FIELD_3D::compose(const VECTOR3_FIELD_3D& values, const
 ///////////////////////////////////////////////////////////////////////
 // lookup value at some real-valued spatial position
 ///////////////////////////////////////////////////////////////////////
-const VECTOR3 VECTOR3_FIELD_3D::operator()(const VECTOR3& position) const
-{
+const VECTOR3 VECTOR3_FIELD_3D::operator()(const VECTOR3 &position) const {
   /*
   VECTOR3 positionCopy = position;
 
@@ -394,24 +377,25 @@ const VECTOR3 VECTOR3_FIELD_3D::operator()(const VECTOR3& position) const
   // recenter position
   positionCopy -= corner;
   */
-  VECTOR3 positionCopy = position - _center + (REAL)0.5 * _lengths - (REAL)0.5 * dxs();
+  VECTOR3 positionCopy =
+      position - _center + (REAL)0.5 * _lengths - (REAL)0.5 * dxs();
 
   positionCopy[0] *= 1.0 / _dx;
   positionCopy[1] *= 1.0 / _dy;
   positionCopy[2] *= 1.0 / _dz;
 
   int x0 = (int)positionCopy[0];
-  int x1    = x0 + 1;
+  int x1 = x0 + 1;
   int y0 = (int)positionCopy[1];
-  int y1    = y0 + 1;
+  int y1 = y0 + 1;
   int z0 = (int)positionCopy[2];
-  int z1    = z0 + 1;
+  int z1 = z0 + 1;
 
   // clamp everything
   x0 = (x0 < 0) ? 0 : x0;
   y0 = (y0 < 0) ? 0 : y0;
   z0 = (z0 < 0) ? 0 : z0;
-  
+
   x1 = (x1 < 0) ? 0 : x1;
   y1 = (y1 < 0) ? 0 : y1;
   z1 = (z1 < 0) ? 0 : z1;
@@ -425,11 +409,11 @@ const VECTOR3 VECTOR3_FIELD_3D::operator()(const VECTOR3& position) const
   z1 = (z1 > _zRes - 1) ? _zRes - 1 : z1;
 
   // get interpolation weights
-  const REAL s1 = positionCopy[0]- x0;
+  const REAL s1 = positionCopy[0] - x0;
   const REAL s0 = 1.0f - s1;
-  const REAL t1 = positionCopy[1]- y0;
+  const REAL t1 = positionCopy[1] - y0;
   const REAL t0 = 1.0f - t1;
-  const REAL u1 = positionCopy[2]- z0;
+  const REAL u1 = positionCopy[2] - z0;
   const REAL u0 = 1.0f - u1;
 
   const int i000 = x0 + y0 * _xRes + z0 * _slabSize;
@@ -452,8 +436,7 @@ const VECTOR3 VECTOR3_FIELD_3D::operator()(const VECTOR3& position) const
 ///////////////////////////////////////////////////////////////////////
 // lookup value at some real-valued spatial position
 ///////////////////////////////////////////////////////////////////////
-VECTOR3 VECTOR3_FIELD_3D::debugPositionOperator(const VECTOR3& position) const
-{
+VECTOR3 VECTOR3_FIELD_3D::debugPositionOperator(const VECTOR3 &position) const {
   /*
   VECTOR3 positionCopy = position;
 
@@ -465,18 +448,19 @@ VECTOR3 VECTOR3_FIELD_3D::debugPositionOperator(const VECTOR3& position) const
   // recenter position
   positionCopy -= corner;
   */
-  VECTOR3 positionCopy = position - _center + (REAL)0.5 * _lengths - (REAL)0.5 * dxs();
+  VECTOR3 positionCopy =
+      position - _center + (REAL)0.5 * _lengths - (REAL)0.5 * dxs();
 
   positionCopy[0] *= 1.0 / _dx;
   positionCopy[1] *= 1.0 / _dy;
   positionCopy[2] *= 1.0 / _dz;
 
   int x0 = (int)positionCopy[0];
-  int x1    = x0 + 1;
+  int x1 = x0 + 1;
   int y0 = (int)positionCopy[1];
-  int y1    = y0 + 1;
+  int y1 = y0 + 1;
   int z0 = (int)positionCopy[2];
-  int z1    = z0 + 1;
+  int z1 = z0 + 1;
 
   cout << " recomputed fine: " << x0 << " " << y0 << " " << z0 << endl;
   cout << " recomputed dx: " << _lengths[0] / _xRes << endl;
@@ -487,7 +471,7 @@ VECTOR3 VECTOR3_FIELD_3D::debugPositionOperator(const VECTOR3& position) const
   x0 = (x0 < 0) ? 0 : x0;
   y0 = (y0 < 0) ? 0 : y0;
   z0 = (z0 < 0) ? 0 : z0;
-  
+
   x1 = (x1 < 0) ? 0 : x1;
   y1 = (y1 < 0) ? 0 : y1;
   z1 = (z1 < 0) ? 0 : z1;
@@ -501,11 +485,11 @@ VECTOR3 VECTOR3_FIELD_3D::debugPositionOperator(const VECTOR3& position) const
   z1 = (z1 > _zRes - 1) ? _zRes - 1 : z1;
 
   // get interpolation weights
-  const REAL s1 = positionCopy[0]- x0;
+  const REAL s1 = positionCopy[0] - x0;
   const REAL s0 = 1.0f - s1;
-  const REAL t1 = positionCopy[1]- y0;
+  const REAL t1 = positionCopy[1] - y0;
   const REAL t0 = 1.0f - t1;
-  const REAL u1 = positionCopy[2]- z0;
+  const REAL u1 = positionCopy[2] - z0;
   const REAL u0 = 1.0f - u1;
 
   const int i000 = x0 + y0 * _xRes + z0 * _slabSize;
@@ -528,8 +512,7 @@ VECTOR3 VECTOR3_FIELD_3D::debugPositionOperator(const VECTOR3& position) const
 ///////////////////////////////////////////////////////////////////////
 // norms
 ///////////////////////////////////////////////////////////////////////
-REAL VECTOR3_FIELD_3D::sumMagnitudes()
-{
+REAL VECTOR3_FIELD_3D::sumMagnitudes() {
   REAL final = 0;
   for (int i = 0; i < _totalCells; i++)
     final += _data[i].norm();
@@ -540,8 +523,7 @@ REAL VECTOR3_FIELD_3D::sumMagnitudes()
 ///////////////////////////////////////////////////////////////////////
 // norms
 ///////////////////////////////////////////////////////////////////////
-REAL VECTOR3_FIELD_3D::maxMagnitudes()
-{
+REAL VECTOR3_FIELD_3D::maxMagnitudes() {
   REAL final = _data[0].norm();
   for (int i = 0; i < _totalCells; i++)
     if (_data[i].norm() > final)
@@ -553,8 +535,7 @@ REAL VECTOR3_FIELD_3D::maxMagnitudes()
 ///////////////////////////////////////////////////////////////////////
 // check if any entry is a nan
 ///////////////////////////////////////////////////////////////////////
-bool VECTOR3_FIELD_3D::isNan()
-{
+bool VECTOR3_FIELD_3D::isNan() {
   for (int x = 0; x < _totalCells; x++)
     for (int y = 0; y < 3; y++)
       if (isnan(_data[x][y]))
@@ -565,8 +546,7 @@ bool VECTOR3_FIELD_3D::isNan()
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-VECTOR3_FIELD_3D& VECTOR3_FIELD_3D::operator-=(const VECTOR3_FIELD_3D& input)
-{
+VECTOR3_FIELD_3D &VECTOR3_FIELD_3D::operator-=(const VECTOR3_FIELD_3D &input) {
   for (int x = 0; x < _totalCells; x++)
     _data[x] -= input[x];
 
@@ -575,8 +555,7 @@ VECTOR3_FIELD_3D& VECTOR3_FIELD_3D::operator-=(const VECTOR3_FIELD_3D& input)
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-VECTOR3_FIELD_3D& VECTOR3_FIELD_3D::operator+=(const VECTOR3_FIELD_3D& input)
-{
+VECTOR3_FIELD_3D &VECTOR3_FIELD_3D::operator+=(const VECTOR3_FIELD_3D &input) {
   for (int x = 0; x < _totalCells; x++)
     _data[x] += input[x];
 
@@ -585,8 +564,7 @@ VECTOR3_FIELD_3D& VECTOR3_FIELD_3D::operator+=(const VECTOR3_FIELD_3D& input)
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-VECTOR3_FIELD_3D& VECTOR3_FIELD_3D::operator*=(const REAL& alpha)
-{
+VECTOR3_FIELD_3D &VECTOR3_FIELD_3D::operator*=(const REAL &alpha) {
   for (int x = 0; x < _totalCells; x++)
     _data[x] *= alpha;
 
@@ -595,8 +573,7 @@ VECTOR3_FIELD_3D& VECTOR3_FIELD_3D::operator*=(const REAL& alpha)
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-VECTOR3_FIELD_3D& VECTOR3_FIELD_3D::operator=(const REAL& value)
-{
+VECTOR3_FIELD_3D &VECTOR3_FIELD_3D::operator=(const REAL &value) {
   for (int x = 0; x < _totalCells; x++)
     _data[x] = VECTOR3::Constant(value);
 
@@ -606,12 +583,12 @@ VECTOR3_FIELD_3D& VECTOR3_FIELD_3D::operator=(const REAL& value)
 ///////////////////////////////////////////////////////////////////////
 // extend some vector quantity off of a front, given a signed distance function
 ///////////////////////////////////////////////////////////////////////
-void VECTOR3_FIELD_3D::fastExtension(const FIELD_3D& signedDistance)
-{
-  cout << " Extending vectors ... "; flush(cout);
+void VECTOR3_FIELD_3D::fastExtension(const FIELD_3D &signedDistance) {
+  cout << " Extending vectors ... ";
+  flush(cout);
   // assume that initializeExtensionScalars has been called elsewhere
 
-  // insert the front for marching onto the heap 
+  // insert the front for marching onto the heap
   MIN_HEAP minHeap;
 
   // clear the retired nodes
@@ -633,88 +610,78 @@ void VECTOR3_FIELD_3D::fastExtension(const FIELD_3D& signedDistance)
 ///////////////////////////////////////////////////////////////////////
 // insert the front in preparation for reinitialization or extension
 ///////////////////////////////////////////////////////////////////////
-void VECTOR3_FIELD_3D::insertFront(const bool forward, FIELD_3D& distance, MIN_HEAP& minHeap)
-{
+void VECTOR3_FIELD_3D::insertFront(const bool forward, FIELD_3D &distance,
+                                   MIN_HEAP &minHeap) {
   REAL outside = distance.outside();
 
   // insert the ones for the forward marching
   minHeap.clear();
-  for (int i = 0; i < _totalCells; i++)
-  {
+  for (int i = 0; i < _totalCells; i++) {
     bool compare = (forward) ? distance[i] >= 0.0f && distance[i] < outside
                              : distance[i] <= 0.0f;
 
     REAL sum = 0.0f;
-    if (compare)
-    {
+    if (compare) {
       int zIndex = i / _slabSize;
       int yIndex = (i - zIndex * _slabSize) / _xRes;
       int xIndex = (i - zIndex * _slabSize - yIndex * _xRes);
       REAL center = distance[i];
 
       // x plus and minus
-      REAL xPlus  = (xIndex < _xRes - 1) ? distance[i + 1] : outside;
-      REAL xMinus = (xIndex > 0)         ? distance[i - 1] : outside;
+      REAL xPlus = (xIndex < _xRes - 1) ? distance[i + 1] : outside;
+      REAL xMinus = (xIndex > 0) ? distance[i - 1] : outside;
 
       // y plus and minus
-      REAL yPlus  = (yIndex < _yRes - 1) ? distance[i + _xRes] : outside;
-      REAL yMinus = (yIndex > 0)         ? distance[i - _xRes] : outside;
+      REAL yPlus = (yIndex < _yRes - 1) ? distance[i + _xRes] : outside;
+      REAL yMinus = (yIndex > 0) ? distance[i - _xRes] : outside;
 
       // z plus and minus
-      REAL zPlus  = (zIndex < _zRes - 1) ? distance[i + _slabSize] : outside;
-      REAL zMinus = (zIndex > 0)         ? distance[i - _slabSize] : outside;
+      REAL zPlus = (zIndex < _zRes - 1) ? distance[i + _slabSize] : outside;
+      REAL zMinus = (zIndex > 0) ? distance[i - _slabSize] : outside;
 
       REAL interpolate;
       compare = (forward) ? true : yPlus < outside;
-      if (yPlus * center <= 0.0f && compare)
-      {
+      if (yPlus * center <= 0.0f && compare) {
         interpolate = center / (center - yPlus);
         sum += 1.0f / (interpolate * interpolate);
       }
       compare = (forward) ? true : yMinus < outside;
-      if (yMinus * center <= 0.0f && compare)
-      {
+      if (yMinus * center <= 0.0f && compare) {
         interpolate = center / (center - yMinus);
         sum += 1.0f / (interpolate * interpolate);
       }
       compare = (forward) ? true : xMinus < outside;
-      if (xMinus * center <= 0.0f && compare)
-      {
+      if (xMinus * center <= 0.0f && compare) {
         interpolate = center / (center - xMinus);
         sum += 1.0f / (interpolate * interpolate);
       }
       compare = (forward) ? true : xPlus < outside;
-      if (xPlus * center <= 0.0f && compare)
-      {
+      if (xPlus * center <= 0.0f && compare) {
         interpolate = center / (center - xPlus);
         sum += 1.0f / (interpolate * interpolate);
       }
       compare = (forward) ? true : zMinus < outside;
-      if (zMinus * center <= 0.0f && compare)
-      {
+      if (zMinus * center <= 0.0f && compare) {
         interpolate = center / (center - zMinus);
         sum += 1.0f / (interpolate * interpolate);
       }
       compare = (forward) ? true : zPlus < outside;
-      if (zPlus * center <= 0.0f && compare)
-      {
+      if (zPlus * center <= 0.0f && compare) {
         interpolate = center / (center - zPlus);
         sum += 1.0f / (interpolate * interpolate);
       }
 
       REAL sign = (forward) ? 1.0f : -1.0f;
 
-      if (sum > 0.0f)
-      {
+      if (sum > 0.0f) {
         REAL finalDistance = sign / sqrtf(sum);
-       
+
         HEAP_ENTRY entry;
         entry.distance = finalDistance;
         entry.index = i;
         distance[i] = finalDistance;
         minHeap.insert(entry);
-      }
-      else
+      } else
         distance[i] = sign * outside;
     }
     if (!forward && distance[i] >= outside)
@@ -725,72 +692,77 @@ void VECTOR3_FIELD_3D::insertFront(const bool forward, FIELD_3D& distance, MIN_H
 //////////////////////////////////////////////////////////////////////
 // do extension in one direction
 //////////////////////////////////////////////////////////////////////
-void VECTOR3_FIELD_3D::extendOneway(bool forward, FIELD_3D& distance, MIN_HEAP& minHeap)
-{
+void VECTOR3_FIELD_3D::extendOneway(bool forward, FIELD_3D &distance,
+                                    MIN_HEAP &minHeap) {
   int pops = 0;
   REAL outside = distance.outside();
-  
+
   // do the forward marching
-  while (!minHeap.empty())
-  {
+  while (!minHeap.empty()) {
     // pop off the top and retire it
     HEAP_ENTRY popped = minHeap.popMin();
     _retired[popped.index] = true;
 
     pops++;
 
-    // popped was just retired, calculate a new distance value for all its neighbors
+    // popped was just retired, calculate a new distance value for all its
+    // neighbors
     int candidate = popped.index;
     int zIndex = candidate / _slabSize;
     int yIndex = (candidate - zIndex * _slabSize) / _xRes;
     int xIndex = (candidate - zIndex * _slabSize - yIndex * _xRes);
-  
-    for (int y = 0; y < 6; y++)
-    {
+
+    for (int y = 0; y < 6; y++) {
       candidate = popped.index;
 
-      if (y == 0)
-      {
-        if (xIndex < _xRes - 1) candidate++;
-        else continue;
+      if (y == 0) {
+        if (xIndex < _xRes - 1)
+          candidate++;
+        else
+          continue;
       }
 
-      if (y == 1) 
-      {
-        if (xIndex > 0) candidate--;
-        else continue;
+      if (y == 1) {
+        if (xIndex > 0)
+          candidate--;
+        else
+          continue;
       }
 
-      if (y == 2)
-      {
-        if (yIndex < _yRes - 1) candidate += _xRes;
-        else continue;
+      if (y == 2) {
+        if (yIndex < _yRes - 1)
+          candidate += _xRes;
+        else
+          continue;
       }
 
-      if (y == 3) 
-      {
-        if (yIndex > 0) candidate -= _xRes;
-        else continue;
+      if (y == 3) {
+        if (yIndex > 0)
+          candidate -= _xRes;
+        else
+          continue;
       }
 
-      if (y == 4) 
-      {
-        if (zIndex < _zRes - 1) candidate += _slabSize;
-        else continue;
+      if (y == 4) {
+        if (zIndex < _zRes - 1)
+          candidate += _slabSize;
+        else
+          continue;
       }
 
-      if (y == 5)
-      {
-        if (zIndex > 0) candidate -= _slabSize;
-        else continue;
+      if (y == 5) {
+        if (zIndex > 0)
+          candidate -= _slabSize;
+        else
+          continue;
       }
 
       // account for marching direction
       bool distanceTest = distance[candidate] >= 0.0 ? true : false;
-      if (!forward) distanceTest = !distanceTest;
+      if (!forward)
+        distanceTest = !distanceTest;
 
-      if (distanceTest && (_retired.find(candidate) == _retired.end()))
-      {
+      if (distanceTest && (_retired.find(candidate) == _retired.end())) {
         // get the distance values
         REAL distances[3];
         VECTOR3 extensions[3];
@@ -802,44 +774,56 @@ void VECTOR3_FIELD_3D::extendOneway(bool forward, FIELD_3D& distance, MIN_HEAP& 
         int xIndex = (candidate - zIndex * _slabSize - yIndex * _xRes);
 
         // x plus and minus
-        extensionNeighbors[0] = (xIndex < _xRes - 1) ? _data[candidate + 1] : _data[candidate];
-        extensionNeighbors[1] = (xIndex > 0)         ? _data[candidate - 1] : _data[candidate];
-        neighbors[0] = (xIndex < _xRes - 1) ? distance[candidate + 1] : distance[candidate];
-        neighbors[1] = (xIndex > 0)         ? distance[candidate - 1] : distance[candidate];
+        extensionNeighbors[0] =
+            (xIndex < _xRes - 1) ? _data[candidate + 1] : _data[candidate];
+        extensionNeighbors[1] =
+            (xIndex > 0) ? _data[candidate - 1] : _data[candidate];
+        neighbors[0] = (xIndex < _xRes - 1) ? distance[candidate + 1]
+                                            : distance[candidate];
+        neighbors[1] =
+            (xIndex > 0) ? distance[candidate - 1] : distance[candidate];
 
         // y plus and minus
-        extensionNeighbors[2] = (yIndex < _yRes - 1) ? _data[candidate + _xRes] : _data[candidate];
-        extensionNeighbors[3] = (yIndex > 0)         ? _data[candidate - _xRes] : _data[candidate];
-        neighbors[2] = (yIndex < _yRes - 1) ? distance[candidate + _xRes] : distance[candidate];
-        neighbors[3] = (yIndex > 0)         ? distance[candidate - _xRes] : distance[candidate];
+        extensionNeighbors[2] =
+            (yIndex < _yRes - 1) ? _data[candidate + _xRes] : _data[candidate];
+        extensionNeighbors[3] =
+            (yIndex > 0) ? _data[candidate - _xRes] : _data[candidate];
+        neighbors[2] = (yIndex < _yRes - 1) ? distance[candidate + _xRes]
+                                            : distance[candidate];
+        neighbors[3] =
+            (yIndex > 0) ? distance[candidate - _xRes] : distance[candidate];
 
         // z plus and minus
-        extensionNeighbors[4] = (zIndex < _zRes - 1) ? _data[candidate + _slabSize] : _data[candidate];
-        extensionNeighbors[5] = (zIndex > 0)         ? _data[candidate - _slabSize] : _data[candidate];
-        neighbors[4] = (zIndex < _zRes - 1) ? distance[candidate + _slabSize] : distance[candidate];
-        neighbors[5] = (zIndex > 0)         ? distance[candidate - _slabSize] : distance[candidate];
-      
-        for (int x = 0; x < 3; x++)
-        {
+        extensionNeighbors[4] = (zIndex < _zRes - 1)
+                                    ? _data[candidate + _slabSize]
+                                    : _data[candidate];
+        extensionNeighbors[5] =
+            (zIndex > 0) ? _data[candidate - _slabSize] : _data[candidate];
+        neighbors[4] = (zIndex < _zRes - 1) ? distance[candidate + _slabSize]
+                                            : distance[candidate];
+        neighbors[5] = (zIndex > 0) ? distance[candidate - _slabSize]
+                                    : distance[candidate];
+
+        for (int x = 0; x < 3; x++) {
           // store the positive direction
           distances[x] = neighbors[2 * x];
           extensions[x] = extensionNeighbors[2 * x];
-          
+
           // clamp out the wrong side
-          if (forward && distances[x] < 0.0f)  distances[x] = outside;
-          if (!forward && distances[x] > 0.0f) distances[x] = -outside;
-          
+          if (forward && distances[x] < 0.0f)
+            distances[x] = outside;
+          if (!forward && distances[x] > 0.0f)
+            distances[x] = -outside;
+
           // see if the negative direction is more upwind
-          if (forward)
-          {
-            if (neighbors[2 * x + 1] < distances[x] && neighbors[2 * x + 1] > 0.0f)
-            {
+          if (forward) {
+            if (neighbors[2 * x + 1] < distances[x] &&
+                neighbors[2 * x + 1] > 0.0f) {
               distances[x] = neighbors[2 * x + 1];
               extensions[x] = extensionNeighbors[2 * x + 1];
             }
-          }
-          else if (neighbors[2 * x + 1] > distances[x] && neighbors[2 * x + 1] < 0.0f)
-          {
+          } else if (neighbors[2 * x + 1] > distances[x] &&
+                     neighbors[2 * x + 1] < 0.0f) {
             distances[x] = neighbors[2 * x + 1];
             extensions[x] = extensionNeighbors[2 * x + 1];
           }
@@ -851,12 +835,11 @@ void VECTOR3_FIELD_3D::extendOneway(bool forward, FIELD_3D& distance, MIN_HEAP& 
             distances[x] = (distances[x] >= 0.0f) ? distances[x] : outside;
           else
             distances[x] = (distances[x] <= 0.0f) ? -distances[x] : outside;
-      
-        // do a 3-element bubble sort 
+
+        // do a 3-element bubble sort
         REAL temp;
         VECTOR3 tempPoint;
-        if (distances[0] > distances[1])
-        {
+        if (distances[0] > distances[1]) {
           temp = distances[0];
           distances[0] = distances[1];
           distances[1] = temp;
@@ -864,8 +847,7 @@ void VECTOR3_FIELD_3D::extendOneway(bool forward, FIELD_3D& distance, MIN_HEAP& 
           extensions[0] = extensions[1];
           extensions[1] = tempPoint;
         }
-        if (distances[1] > distances[2])
-        {
+        if (distances[1] > distances[2]) {
           temp = distances[1];
           distances[1] = distances[2];
           distances[2] = temp;
@@ -873,8 +855,7 @@ void VECTOR3_FIELD_3D::extendOneway(bool forward, FIELD_3D& distance, MIN_HEAP& 
           extensions[1] = extensions[2];
           extensions[2] = tempPoint;
         }
-        if (distances[0] > distances[1])
-        {
+        if (distances[0] > distances[1]) {
           temp = distances[0];
           distances[0] = distances[1];
           distances[1] = temp;
@@ -882,72 +863,66 @@ void VECTOR3_FIELD_3D::extendOneway(bool forward, FIELD_3D& distance, MIN_HEAP& 
           extensions[0] = extensions[1];
           extensions[1] = tempPoint;
         }
-        
+
         // set up the quadratics David's way
         float b[3];
         float c[3];
         b[0] = distances[0];
         c[0] = distances[0] * distances[0] - 1.0f;
-        for (int x = 1; x < 3; x++)
-        {
-          b[x] = distances[x] + b[x-1];
-          c[x] = distances[x] * distances[x] + c[x-1];
+        for (int x = 1; x < 3; x++) {
+          b[x] = distances[x] + b[x - 1];
+          c[x] = distances[x] * distances[x] + c[x - 1];
         }
 
         // solve for the right one
         int i = 2;
         float discrim = b[i] * b[i] - (float)(i + 1) * c[i];
         float newDist = (b[i] + sqrtf(discrim)) / (float)(i + 1);
-        while ((discrim < 0.0f || newDist < distances[i]) && i != -1)
-        {
+        while ((discrim < 0.0f || newDist < distances[i]) && i != -1) {
           i--;
           discrim = b[i] * b[i] - (float)(i + 1) * c[i];
-          
+
           if (discrim > 0.0f)
             newDist = (b[i] + sqrtf(discrim)) / (float)(i + 1);
         }
         if (i == -1)
-          cout << __FILE__ << " " << __LINE__ 
+          cout << __FILE__ << " " << __LINE__
                << " Couldn't solve the distance field quadratic!" << endl;
-       
+
         // get the extension
-        if (newDist < fabs(distance[candidate]))
-        {
-          if (i == 2)
-          {
-            REAL interpolate = 1.0f / (3.0f * newDist - distances[2] - distances[1] - distances[0]);
-            REAL diffs[] = {(newDist - distances[0]), (newDist - distances[1]), (newDist - distances[2])};
-            _data[candidate] = (diffs[0] * extensions[0] +
-                                diffs[1] * extensions[1] +
-                                diffs[2] * extensions[2]) * interpolate;
-          }
-          else if (i == 1)
-          {
-            REAL interpolate = 1.0f / (2.0f * newDist - distances[1] - distances[0]);
+        if (newDist < fabs(distance[candidate])) {
+          if (i == 2) {
+            REAL interpolate = 1.0f / (3.0f * newDist - distances[2] -
+                                       distances[1] - distances[0]);
+            REAL diffs[] = {(newDist - distances[0]), (newDist - distances[1]),
+                            (newDist - distances[2])};
+            _data[candidate] =
+                (diffs[0] * extensions[0] + diffs[1] * extensions[1] +
+                 diffs[2] * extensions[2]) *
+                interpolate;
+          } else if (i == 1) {
+            REAL interpolate =
+                1.0f / (2.0f * newDist - distances[1] - distances[0]);
             REAL diffs[] = {(newDist - distances[0]), (newDist - distances[1])};
-            _data[candidate] = (diffs[0] * extensions[0] +
-                                diffs[1] * extensions[1]) * interpolate;
-          }
-          else
+            _data[candidate] =
+                (diffs[0] * extensions[0] + diffs[1] * extensions[1]) *
+                interpolate;
+          } else
             _data[candidate] = extensions[0];
         }
 
         // try and insert the new distance value
-        if (newDist < outside)
-        {
+        if (newDist < outside) {
           float minus = forward ? 1.0f : -1.0f;
 
           // if it has never been on the heap
-          if (fabs(distance[candidate]) >= outside)
-          {
+          if (fabs(distance[candidate]) >= outside) {
             distance[candidate] = minus * newDist;
             HEAP_ENTRY entry;
             entry.distance = distance[candidate];
             entry.index = candidate;
             minHeap.insert(entry);
-          }
-          else if (minus * distance[candidate] > newDist)
-          {
+          } else if (minus * distance[candidate] > newDist) {
             distance[candidate] = minus * newDist;
             minHeap.decreaseKey(candidate, distance[candidate]);
           }
@@ -959,12 +934,8 @@ void VECTOR3_FIELD_3D::extendOneway(bool forward, FIELD_3D& distance, MIN_HEAP& 
 
 //////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
-VECTOR3_FIELD_3D& VECTOR3_FIELD_3D::operator=(const VECTOR3_FIELD_3D& input)
-{
-  if (input.xRes() != _xRes ||
-      input.yRes() != _yRes ||
-      input.zRes() != _zRes)
-  {
+VECTOR3_FIELD_3D &VECTOR3_FIELD_3D::operator=(const VECTOR3_FIELD_3D &input) {
+  if (input.xRes() != _xRes || input.yRes() != _yRes || input.zRes() != _zRes) {
     delete[] _data;
 
     _xRes = input.xRes();
@@ -982,9 +953,9 @@ VECTOR3_FIELD_3D& VECTOR3_FIELD_3D::operator=(const VECTOR3_FIELD_3D& input)
   _dx = _lengths[0] / _xRes;
   _dy = _lengths[1] / _yRes;
   _dz = _lengths[2] / _zRes;
-  
+
 #pragma omp parallel
-#pragma omp for  schedule(static)
+#pragma omp for schedule(static)
   for (int x = 0; x < _totalCells; x++)
     _data[x] = input[x];
 
@@ -996,41 +967,43 @@ VECTOR3_FIELD_3D& VECTOR3_FIELD_3D::operator=(const VECTOR3_FIELD_3D& input)
 //////////////////////////////////////////////////////////////////////
 // set the values in the field to the values at the closest points
 //////////////////////////////////////////////////////////////////////
-FIELD_3D VECTOR3_FIELD_3D::setToClosestPointValues(const FIELD_3D& input, const VECTOR3_FIELD_3D& closestPoints)
-{
+FIELD_3D VECTOR3_FIELD_3D::setToClosestPointValues(
+    const FIELD_3D &input, const VECTOR3_FIELD_3D &closestPoints) {
   TIMER functionTimer(__FUNCTION__);
   FIELD_3D final(input);
 
-  //int before = input.quinticClamps();
-  cout << " Using quartic ... "; flush(cout);
-  //cout << " Using quartic clamped ... "; flush(cout);
-  //cout << " Using sextic ... "; flush(cout);
-  //cout << " Using sextic clamped ... "; flush(cout);
-  //cout << " Using quinitic ... "; flush(cout);
-  //cout << " Using cubic ... "; flush(cout);
-  //cout << " Using linear ... "; flush(cout);
+  // int before = input.quinticClamps();
+  cout << " Using quartic ... ";
+  flush(cout);
+  // cout << " Using quartic clamped ... "; flush(cout);
+  // cout << " Using sextic ... "; flush(cout);
+  // cout << " Using sextic clamped ... "; flush(cout);
+  // cout << " Using quinitic ... "; flush(cout);
+  // cout << " Using cubic ... "; flush(cout);
+  // cout << " Using linear ... "; flush(cout);
 
 #pragma omp parallel
-#pragma omp for  schedule(dynamic)
+#pragma omp for schedule(dynamic)
   for (int z = 0; z < closestPoints.zRes(); z++)
     for (int y = 0; y < closestPoints.yRes(); y++)
       for (int x = 0; x < closestPoints.xRes(); x++)
-        //final(x,y,z) = input.lerpDebug(closestPoints(x,y,z), x,y,z);
-        //final(x,y,z) = input(closestPoints(x,y,z));
-        //final(x,y,z) = input.cubicLookup(closestPoints(x,y,z));
-        //final(x,y,z) = input.quinticLookup(closestPoints(x,y,z));
-        final(x,y,z) = input.quarticLookup(closestPoints(x,y,z));
-        //final(x,y,z) = input.quarticLookupClamped(closestPoints(x,y,z));
-        //final(x,y,z) = input.sexticLookup(closestPoints(x,y,z));
-        //final(x,y,z) = input.sexticLookupClamped(closestPoints(x,y,z));
-        //final(x,y,z) = input.cubicNewtonLookup(closestPoints(x,y,z));
+        // final(x,y,z) = input.lerpDebug(closestPoints(x,y,z), x,y,z);
+        // final(x,y,z) = input(closestPoints(x,y,z));
+        // final(x,y,z) = input.cubicLookup(closestPoints(x,y,z));
+        // final(x,y,z) = input.quinticLookup(closestPoints(x,y,z));
+        final(x, y, z) = input.quarticLookup(closestPoints(x, y, z));
+  // final(x,y,z) = input.quarticLookupClamped(closestPoints(x,y,z));
+  // final(x,y,z) = input.sexticLookup(closestPoints(x,y,z));
+  // final(x,y,z) = input.sexticLookupClamped(closestPoints(x,y,z));
+  // final(x,y,z) = input.cubicNewtonLookup(closestPoints(x,y,z));
 
   /*
   int totalCalls = 21 * closestPoints.totalCells();
   int after = input.quinticClamps();
   int clamps = after - before;
 
-  cout << " Quintic clamps: " << clamps << " of " << totalCalls << " " << 100.0 * clamps / (REAL)totalCalls << "%" << endl;
+  cout << " Quintic clamps: " << clamps << " of " << totalCalls << " " << 100.0
+  * clamps / (REAL)totalCalls << "%" << endl;
   */
 
   return final;
@@ -1039,10 +1012,12 @@ FIELD_3D VECTOR3_FIELD_3D::setToClosestPointValues(const FIELD_3D& input, const 
 //////////////////////////////////////////////////////////////////////
 // set the values in the field to the values at the closest points
 //////////////////////////////////////////////////////////////////////
-FIELD_3D VECTOR3_FIELD_3D::setToClosestPointValuesNarrowBand(const FIELD_3D& input, const VECTOR3_FIELD_3D& closestPoints, const FIELD_3D& distance, int maxCells)
-{
+FIELD_3D VECTOR3_FIELD_3D::setToClosestPointValuesNarrowBand(
+    const FIELD_3D &input, const VECTOR3_FIELD_3D &closestPoints,
+    const FIELD_3D &distance, int maxCells) {
   TIMER functionTimer(__FUNCTION__);
-  cout << " Setting to closest points, narrow banded ..."; flush(cout);
+  cout << " Setting to closest points, narrow banded ...";
+  flush(cout);
   FIELD_3D final(input);
   REAL invDx = 1.0 / distance.dx();
 
@@ -1052,15 +1027,15 @@ FIELD_3D VECTOR3_FIELD_3D::setToClosestPointValuesNarrowBand(const FIELD_3D& inp
 
   // find which cells are inside the band
 #pragma omp parallel
-#pragma omp for  schedule(dynamic)
+#pragma omp for schedule(dynamic)
   for (int z = 0; z < zRes; z++)
     for (int y = 0; y < yRes; y++)
-      for (int x = 0; x < xRes; x++)
-      {
-        REAL currentDistance = fabs(distance(x,y,z) * invDx);
-        if (currentDistance >= maxCells) continue;
+      for (int x = 0; x < xRes; x++) {
+        REAL currentDistance = fabs(distance(x, y, z) * invDx);
+        if (currentDistance >= maxCells)
+          continue;
 
-        final(x,y,z) = input.quarticLookup(closestPoints(x,y,z));
+        final(x, y, z) = input.quarticLookup(closestPoints(x, y, z));
       }
   cout << " done." << endl;
 
@@ -1109,12 +1084,14 @@ FIELD_3D VECTOR3_FIELD_3D::setToClosestPointValuesNarrowBand(const FIELD_3D& inp
 //
 // Might be better to called it a "cored band"
 //////////////////////////////////////////////////////////////////////
-FIELD_3D VECTOR3_FIELD_3D::setToClosestPointValuesNarrowBandFrozenCore(const FIELD_3D& input, const VECTOR3_FIELD_3D& closestPoints, const FIELD_3D& distance, int maxRadius, int coreRadius)
-{
+FIELD_3D VECTOR3_FIELD_3D::setToClosestPointValuesNarrowBandFrozenCore(
+    const FIELD_3D &input, const VECTOR3_FIELD_3D &closestPoints,
+    const FIELD_3D &distance, int maxRadius, int coreRadius) {
   TIMER functionTimer(__FUNCTION__);
-  cout << " Setting to closest points, narrow band, frozen core..."; flush(cout);
+  cout << " Setting to closest points, narrow band, frozen core...";
+  flush(cout);
   FIELD_3D final(input);
-  //const REAL invDx = 1.0 / distance.dx();
+  // const REAL invDx = 1.0 / distance.dx();
   const REAL invDx = 1.0 / input.dx();
 
   const int xRes = closestPoints.xRes();
@@ -1122,25 +1099,24 @@ FIELD_3D VECTOR3_FIELD_3D::setToClosestPointValuesNarrowBandFrozenCore(const FIE
   const int zRes = closestPoints.zRes();
 
 #pragma omp parallel
-#pragma omp for  schedule(dynamic)
+#pragma omp for schedule(dynamic)
   for (int z = 0; z < zRes; z++)
     for (int y = 0; y < yRes; y++)
-      for (int x = 0; x < xRes; x++)
-      {
-        REAL currentDistance = fabs(distance(x,y,z) * invDx);
-        if (currentDistance >= maxRadius || currentDistance <= coreRadius) continue;
-        
-        final(x,y,z) = input.quarticLookup(closestPoints(x,y,z));
-        //final(x,y,z) = input.sexticLookup(closestPoints(x,y,z));
+      for (int x = 0; x < xRes; x++) {
+        REAL currentDistance = fabs(distance(x, y, z) * invDx);
+        if (currentDistance >= maxRadius || currentDistance <= coreRadius)
+          continue;
+
+        final(x, y, z) = input.quarticLookup(closestPoints(x, y, z));
+        // final(x,y,z) = input.sexticLookup(closestPoints(x,y,z));
       }
   cout << " done." << endl;
 
   return final;
   /*
   TIMER functionTimer(__FUNCTION__);
-  cout << " Setting to closest points, narrow band, frozen core..."; flush(cout);
-  FIELD_3D final(input);
-  REAL invDx = 1.0 / distance.dx();
+  cout << " Setting to closest points, narrow band, frozen core...";
+flush(cout); FIELD_3D final(input); REAL invDx = 1.0 / distance.dx();
 
   // find which cells are inside the band
   vector<int> xs;
@@ -1182,11 +1158,14 @@ FIELD_3D VECTOR3_FIELD_3D::setToClosestPointValuesNarrowBandFrozenCore(const FIE
 
 //////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
-FIELD_3D VECTOR3_FIELD_3D::setToClosestPointValuesFrozenCore(const FIELD_3D& input, const VECTOR3_FIELD_3D& closestPoints, const FIELD_3D& distance, int coreRadius)
-{
+FIELD_3D VECTOR3_FIELD_3D::setToClosestPointValuesFrozenCore(
+    const FIELD_3D &input, const VECTOR3_FIELD_3D &closestPoints,
+    const FIELD_3D &distance, int coreRadius) {
   TIMER frozenCore("Building frozen core");
 
-  cout << " Setting to closest points, narrow band, frozen core radius " << coreRadius << " ..."; flush(cout);
+  cout << " Setting to closest points, narrow band, frozen core radius "
+       << coreRadius << " ...";
+  flush(cout);
   FIELD_3D final(input);
   REAL invDx = 1.0 / distance.dx();
 
@@ -1196,11 +1175,9 @@ FIELD_3D VECTOR3_FIELD_3D::setToClosestPointValuesFrozenCore(const FIELD_3D& inp
   vector<int> zs;
   for (int z = 0; z < closestPoints.zRes(); z++)
     for (int y = 0; y < closestPoints.yRes(); y++)
-      for (int x = 0; x < closestPoints.xRes(); x++)
-      {
-        REAL currentDistance = fabs(distance(x,y,z) * invDx);
-        if (currentDistance > coreRadius)
-        {
+      for (int x = 0; x < closestPoints.xRes(); x++) {
+        REAL currentDistance = fabs(distance(x, y, z) * invDx);
+        if (currentDistance > coreRadius) {
           xs.push_back(x);
           ys.push_back(y);
           zs.push_back(z);
@@ -1210,18 +1187,17 @@ FIELD_3D VECTOR3_FIELD_3D::setToClosestPointValuesFrozenCore(const FIELD_3D& inp
   TIMER functionTimer(__FUNCTION__);
   int size = xs.size();
 #pragma omp parallel
-#pragma omp for  schedule(dynamic)
-  for (int i = 0; i < size; i++)
-  {
+#pragma omp for schedule(dynamic)
+  for (int i = 0; i < size; i++) {
     int x = xs[i];
     int y = ys[i];
     int z = zs[i];
-    //final(x,y,z) = input(closestPoints(x,y,z));
-    //final(x,y,z) = input.cubicLookup(closestPoints(x,y,z));
-    final(x,y,z) = input.quarticLookup(closestPoints(x,y,z));
-    //final(x,y,z) = input.quarticLookupInlined(closestPoints(x,y,z));
-    //final(x,y,z) = input.quinticLookup(closestPoints(x,y,z));
-    //final(x,y,z) = input.cubicNewtonLookup(closestPoints(x,y,z));
+    // final(x,y,z) = input(closestPoints(x,y,z));
+    // final(x,y,z) = input.cubicLookup(closestPoints(x,y,z));
+    final(x, y, z) = input.quarticLookup(closestPoints(x, y, z));
+    // final(x,y,z) = input.quarticLookupInlined(closestPoints(x,y,z));
+    // final(x,y,z) = input.quinticLookup(closestPoints(x,y,z));
+    // final(x,y,z) = input.cubicNewtonLookup(closestPoints(x,y,z));
   }
   cout << " done." << endl;
 
@@ -1231,12 +1207,10 @@ FIELD_3D VECTOR3_FIELD_3D::setToClosestPointValuesFrozenCore(const FIELD_3D& inp
 //////////////////////////////////////////////////////////////////////
 // file IO
 //////////////////////////////////////////////////////////////////////
-void VECTOR3_FIELD_3D::write(const string filename) const
-{
-  FILE* file;
+void VECTOR3_FIELD_3D::write(const string filename) const {
+  FILE *file;
   file = fopen(filename.c_str(), "wb");
-  if (file == NULL)
-  {
+  if (file == NULL) {
     cout << __FILE__ << " " << __FUNCTION__ << " " << __LINE__ << " : " << endl;
     cout << " VECTOR3_FIELD_3D write failed! " << endl;
     cout << " Could not open file " << filename.c_str() << endl;
@@ -1249,10 +1223,9 @@ void VECTOR3_FIELD_3D::write(const string filename) const
 
 //////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
-void VECTOR3_FIELD_3D::read(FILE* file, VECTOR3& v)
-{
+void VECTOR3_FIELD_3D::read(FILE *file, VECTOR3 &v) {
   double data[3];
-  fread((void*)data, sizeof(double), 3, file);
+  fread((void *)data, sizeof(double), 3, file);
   v[0] = data[0];
   v[1] = data[1];
   v[2] = data[2];
@@ -1260,46 +1233,41 @@ void VECTOR3_FIELD_3D::read(FILE* file, VECTOR3& v)
 
 //////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
-void VECTOR3_FIELD_3D::write(FILE* file, const VECTOR3& v) const
-{
+void VECTOR3_FIELD_3D::write(FILE *file, const VECTOR3 &v) const {
   double data[3] = {v[0], v[1], v[2]};
-  fwrite((void*)data, sizeof(double), 3, file);
+  fwrite((void *)data, sizeof(double), 3, file);
 }
 
 //////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
-void VECTOR3_FIELD_3D::write(FILE* file) const
-{
+void VECTOR3_FIELD_3D::write(FILE *file) const {
   // write dimensions
-  fwrite((void*)&_xRes, sizeof(int), 1, file);
-  fwrite((void*)&_yRes, sizeof(int), 1, file);
-  fwrite((void*)&_zRes, sizeof(int), 1, file);
+  fwrite((void *)&_xRes, sizeof(int), 1, file);
+  fwrite((void *)&_yRes, sizeof(int), 1, file);
+  fwrite((void *)&_zRes, sizeof(int), 1, file);
   //_center.write(file);
   //_lengths.write(file);
   write(file, _center);
   write(file, _lengths);
 
-  double* dataDouble = new double[3 * _totalCells];
-  for (int x = 0; x < _totalCells; x++)
-  {
+  double *dataDouble = new double[3 * _totalCells];
+  for (int x = 0; x < _totalCells; x++) {
     dataDouble[3 * x] = _data[x][0];
     dataDouble[3 * x + 1] = _data[x][1];
     dataDouble[3 * x + 2] = _data[x][2];
   }
 
-  fwrite((void*)dataDouble, sizeof(double), 3 * _totalCells, file);
+  fwrite((void *)dataDouble, sizeof(double), 3 * _totalCells, file);
   delete[] dataDouble;
 }
 
 //////////////////////////////////////////////////////////////////////
 // file IO
 //////////////////////////////////////////////////////////////////////
-void VECTOR3_FIELD_3D::read(const string filename)
-{
-  FILE* file;
+void VECTOR3_FIELD_3D::read(const string filename) {
+  FILE *file;
   file = fopen(filename.c_str(), "rb");
-  if (file == NULL)
-  {
+  if (file == NULL) {
     cout << __FILE__ << " " << __FUNCTION__ << " " << __LINE__ << " : " << endl;
     cout << " VECTOR3_FIELD_3D read failed! " << endl;
     cout << " Could not open file " << filename.c_str() << endl;
@@ -1312,12 +1280,11 @@ void VECTOR3_FIELD_3D::read(const string filename)
 
 //////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////
-void VECTOR3_FIELD_3D::read(FILE* file)
-{
+void VECTOR3_FIELD_3D::read(FILE *file) {
   // read dimensions
-  fread((void*)&_xRes, sizeof(int), 1, file);
-  fread((void*)&_yRes, sizeof(int), 1, file);
-  fread((void*)&_zRes, sizeof(int), 1, file);
+  fread((void *)&_xRes, sizeof(int), 1, file);
+  fread((void *)&_yRes, sizeof(int), 1, file);
+  fread((void *)&_zRes, sizeof(int), 1, file);
   //_center.read(file);
   //_lengths.read(file);
   read(file, _center);
@@ -1328,16 +1295,16 @@ void VECTOR3_FIELD_3D::read(FILE* file)
 
   _slabSize = _xRes * _yRes;
   _totalCells = _xRes * _yRes * _zRes;
-  if (_data) delete[] _data;
+  if (_data)
+    delete[] _data;
   _data = new VECTOR3[_totalCells];
 
-  double* dataDouble = new double[3 * _totalCells];
-  fread((void*)dataDouble, sizeof(double), 3 * _totalCells, file);
-  for (int x = 0; x < _totalCells; x++)
-  {
-    _data[x][0]= dataDouble[3 * x];
-    _data[x][1]= dataDouble[3 * x + 1];
-    _data[x][2]= dataDouble[3 * x + 2];
+  double *dataDouble = new double[3 * _totalCells];
+  fread((void *)dataDouble, sizeof(double), 3 * _totalCells, file);
+  for (int x = 0; x < _totalCells; x++) {
+    _data[x][0] = dataDouble[3 * x];
+    _data[x][1] = dataDouble[3 * x + 1];
+    _data[x][2] = dataDouble[3 * x + 2];
   }
   delete[] dataDouble;
   _initialized = true;
@@ -1379,10 +1346,11 @@ void VECTOR3_FIELD_3D::draw(const VECTOR3_FIELD_3D& origins) const
 //////////////////////////////////////////////////////////////////////
 // draw to GL
 //////////////////////////////////////////////////////////////////////
-void VECTOR3_FIELD_3D::drawZSlice(const VECTOR3_FIELD_3D& origins, const int zSlice, const REAL scale, const int stride) const
+void VECTOR3_FIELD_3D::drawZSlice(const VECTOR3_FIELD_3D& origins, const int
+zSlice, const REAL scale, const int stride) const
 {
   float radius = 0.001;
-  
+
   glBegin(GL_LINES);
   for (int z = 0; z < _zRes; z++)
   {
@@ -1423,10 +1391,11 @@ void VECTOR3_FIELD_3D::drawZSlice(const VECTOR3_FIELD_3D& origins, const int zSl
 // draw to GL, but assume the field represents closest points,
 // so don't add the origin to the endpoint
 //////////////////////////////////////////////////////////////////////
-void VECTOR3_FIELD_3D::drawClosestPointZSlice(const VECTOR3_FIELD_3D& origins, const int zSlice, const REAL scale, const int stride) const
+void VECTOR3_FIELD_3D::drawClosestPointZSlice(const VECTOR3_FIELD_3D& origins,
+const int zSlice, const REAL scale, const int stride) const
 {
   float radius = 0.00125;
-  
+
   glBegin(GL_LINES);
   for (int z = 0; z < _zRes; z++)
   {
@@ -1469,7 +1438,7 @@ void VECTOR3_FIELD_3D::drawClosestPointZSlice(const VECTOR3_FIELD_3D& origins, c
         glTranslatef(origin[0], origin[1], origin[2]);
         glutSolidSphere(radius, 10,10);
         glPopMatrix();
-        
+
         glColor4f(0,0,1,1);
         glPushMatrix();
         glTranslatef(endpoint[0], endpoint[1], endpoint[2]);
@@ -1484,8 +1453,8 @@ void VECTOR3_FIELD_3D::drawClosestPointZSlice(const VECTOR3_FIELD_3D& origins, c
 //////////////////////////////////////////////////////////////////////
 // dump to a viewer
 //////////////////////////////////////////////////////////////////////
-void VECTOR3_FIELD_3D::fieldViewer(const VECTOR3_FIELD_3D& field, const FIELD_3D& distanceField, string name)
-{
+void VECTOR3_FIELD_3D::fieldViewer(const VECTOR3_FIELD_3D &field,
+                                   const FIELD_3D &distanceField, string name) {
   field.write("temp3d.vector.field");
   distanceField.write("temp3d.field");
   string execute("./vectorFieldViewer3D temp3d.vector.field temp3d.field \"");
@@ -1497,11 +1466,13 @@ void VECTOR3_FIELD_3D::fieldViewer(const VECTOR3_FIELD_3D& field, const FIELD_3D
 //////////////////////////////////////////////////////////////////////
 // dump to a viewer
 //////////////////////////////////////////////////////////////////////
-void VECTOR3_FIELD_3D::overlayFieldViewer(const VECTOR3_FIELD_3D& field, const FIELD_3D& distanceField, string name)
-{
+void VECTOR3_FIELD_3D::overlayFieldViewer(const VECTOR3_FIELD_3D &field,
+                                          const FIELD_3D &distanceField,
+                                          string name) {
   field.write("temp3d.vector.field");
   distanceField.write("temp3d.field");
-  string execute("./overlayVectorFieldViewer3D temp3d.vector.field temp3d.field \"");
+  string execute(
+      "./overlayVectorFieldViewer3D temp3d.vector.field temp3d.field \"");
   execute = execute + name + string("\" &");
   cout << " Executing " << execute.c_str() << endl;
   system(execute.c_str());
@@ -1510,11 +1481,13 @@ void VECTOR3_FIELD_3D::overlayFieldViewer(const VECTOR3_FIELD_3D& field, const F
 //////////////////////////////////////////////////////////////////////
 // dump to a viewer
 //////////////////////////////////////////////////////////////////////
-void VECTOR3_FIELD_3D::closestPointViewer(const VECTOR3_FIELD_3D& field, const FIELD_3D& distanceField, string name)
-{
+void VECTOR3_FIELD_3D::closestPointViewer(const VECTOR3_FIELD_3D &field,
+                                          const FIELD_3D &distanceField,
+                                          string name) {
   field.write("temp3d.vector.field");
   distanceField.write("temp3d.field");
-  //string execute("./bin/closestPointViewer3D temp3d.vector.field temp3d.field \"");
+  // string execute("./bin/closestPointViewer3D temp3d.vector.field temp3d.field
+  // \"");
   string execute("./closestPointViewer3D temp3d.vector.field temp3d.field \"");
   execute = execute + name + string("\" &");
   system(execute.c_str());
@@ -1523,14 +1496,13 @@ void VECTOR3_FIELD_3D::closestPointViewer(const VECTOR3_FIELD_3D& field, const F
 ///////////////////////////////////////////////////////////////////////
 // flip the x and y coordinates
 ///////////////////////////////////////////////////////////////////////
-VECTOR3_FIELD_3D VECTOR3_FIELD_3D::flipXY() const
-{
+VECTOR3_FIELD_3D VECTOR3_FIELD_3D::flipXY() const {
   VECTOR3_FIELD_3D final(_yRes, _xRes, _zRes);
 
   for (int z = 0; z < _zRes; z++)
     for (int y = 0; y < _yRes; y++)
       for (int x = 0; x < _xRes; x++)
-        final(y,x,z) = (*this)(x,y,z);
+        final(y, x, z) = (*this)(x, y, z);
 
   return final;
 }
@@ -1538,19 +1510,17 @@ VECTOR3_FIELD_3D VECTOR3_FIELD_3D::flipXY() const
 ///////////////////////////////////////////////////////////////////////
 // flip the x and y coordinates
 ///////////////////////////////////////////////////////////////////////
-VECTOR3_FIELD_3D VECTOR3_FIELD_3D::flipXZ() const
-{
+VECTOR3_FIELD_3D VECTOR3_FIELD_3D::flipXZ() const {
   VECTOR3_FIELD_3D final(_zRes, _yRes, _xRes);
 
   for (int z = 0; z < _zRes; z++)
     for (int y = 0; y < _yRes; y++)
-      for (int x = 0; x < _xRes; x++)
-      {
-        final(z,y,x) = (*this)(x,y,z);
+      for (int x = 0; x < _xRes; x++) {
+        final(z, y, x) = (*this)(x, y, z);
 
-        REAL temp = final(z,y,x)[0];
-        final(z,y,x)[0] = final(z,y,x)[2];
-        final(z,y,x)[2] = temp;
+        REAL temp = final(z, y, x)[0];
+        final(z, y, x)[0] = final(z, y, x)[2];
+        final(z, y, x)[2] = temp;
       }
 
   return final;
@@ -1559,14 +1529,13 @@ VECTOR3_FIELD_3D VECTOR3_FIELD_3D::flipXZ() const
 ///////////////////////////////////////////////////////////////////////
 // flip the z and y coordinates
 ///////////////////////////////////////////////////////////////////////
-VECTOR3_FIELD_3D VECTOR3_FIELD_3D::flipZY() const
-{
+VECTOR3_FIELD_3D VECTOR3_FIELD_3D::flipZY() const {
   VECTOR3_FIELD_3D final(_xRes, _zRes, _yRes);
 
   for (int z = 0; z < _zRes; z++)
     for (int y = 0; y < _yRes; y++)
       for (int x = 0; x < _xRes; x++)
-        final(x,z,y) = (*this)(x,y,z);
+        final(x, z, y) = (*this)(x, y, z);
 
   return final;
 }
@@ -1574,51 +1543,48 @@ VECTOR3_FIELD_3D VECTOR3_FIELD_3D::flipZY() const
 ///////////////////////////////////////////////////////////////////////
 // advect using first order semi-Lagrangian
 ///////////////////////////////////////////////////////////////////////
-void VECTOR3_FIELD_3D::advect(const REAL dt, const VECTOR3_FIELD_3D& velocityGrid, const FIELD_3D& oldField, FIELD_3D& newField)
-{
+void VECTOR3_FIELD_3D::advect(const REAL dt,
+                              const VECTOR3_FIELD_3D &velocityGrid,
+                              const FIELD_3D &oldField, FIELD_3D &newField) {
   TIMER functionTimer(__FUNCTION__);
 
   const int xRes = oldField.xRes();
   const int yRes = oldField.yRes();
   const int zRes = oldField.zRes();
   const int slabSize = oldField.slabSize();
- 
- /* 
-  const VECTOR3 corner = oldField.center() - (REAL)0.5 * oldField.lengths() + (REAL)0.5 * oldField.dxs();
-  const VECTOR3 dxs = oldField.dxs();
+
+  /*
+   const VECTOR3 corner = oldField.center() - (REAL)0.5 * oldField.lengths() +
+ (REAL)0.5 * oldField.dxs(); const VECTOR3 dxs = oldField.dxs();
+
+   // scale dt up to grid resolution
+ #pragma omp parallel
+ #pragma omp for schedule(static)
+   for (int z = 0; z < zRes; z++)
+     for (int y = 0; y < yRes; y++)
+       for (int x = 0; x < xRes; x++)
+       {
+         const int index = x + y * xRes + z * slabSize;
+
+         // backtrace
+         const VECTOR3 velocity = velocityGrid(oldField.cellCenter(x,y,z));
+         VECTOR3 position(x - dt * velocity[0], y - dt * velocity[1], z - dt *
+ velocity[2]); position[0] *= dxs[0]; position[1] *= dxs[1]; position[2] *=
+ dxs[2]; position += corner; newField[index] = oldField.quarticLookup(position);
+       }
+       */
 
   // scale dt up to grid resolution
 #pragma omp parallel
 #pragma omp for schedule(static)
   for (int z = 0; z < zRes; z++)
     for (int y = 0; y < yRes; y++)
-      for (int x = 0; x < xRes; x++)
-      {
+      for (int x = 0; x < xRes; x++) {
         const int index = x + y * xRes + z * slabSize;
-        
-        // backtrace
-        const VECTOR3 velocity = velocityGrid(oldField.cellCenter(x,y,z));
-        VECTOR3 position(x - dt * velocity[0], y - dt * velocity[1], z - dt * velocity[2]);
-        position[0] *= dxs[0];
-        position[1] *= dxs[1];
-        position[2] *= dxs[2];
-        position += corner;
-        newField[index] = oldField.quarticLookup(position);
-      }
-      */
 
-  // scale dt up to grid resolution
-#pragma omp parallel
-#pragma omp for schedule(static)
-  for (int z = 0; z < zRes; z++)
-    for (int y = 0; y < yRes; y++)
-      for (int x = 0; x < xRes; x++)
-      {
-        const int index = x + y * xRes + z * slabSize;
-        
         // backtrace
-        //const VECTOR3 velocity = velocityGrid[index];
-        const VECTOR3 velocity = velocityGrid(oldField.cellCenter(x,y,z));
+        // const VECTOR3 velocity = velocityGrid[index];
+        const VECTOR3 velocity = velocityGrid(oldField.cellCenter(x, y, z));
         REAL xTrace = x - dt * velocity[0];
         REAL yTrace = y - dt * velocity[1];
         REAL zTrace = z - dt * velocity[2];
@@ -1658,22 +1624,23 @@ void VECTOR3_FIELD_3D::advect(const REAL dt, const VECTOR3_FIELD_3D& velocityGri
 
         // interpolate
         // (indices could be computed once)
-        newField[index] = u0 * (s0 * (t0 * oldField[i000] +
-                                      t1 * oldField[i010]) +
-                                s1 * (t0 * oldField[i100] +
-                                      t1 * oldField[i110])) +
-                          u1 * (s0 * (t0 * oldField[i001] +
-                                      t1 * oldField[i011]) +
-                                s1 * (t0 * oldField[i101] +
-                                      t1 * oldField[i111]));
+        newField[index] =
+            u0 * (s0 * (t0 * oldField[i000] + t1 * oldField[i010]) +
+                  s1 * (t0 * oldField[i100] + t1 * oldField[i110])) +
+            u1 * (s0 * (t0 * oldField[i001] + t1 * oldField[i011]) +
+                  s1 * (t0 * oldField[i101] + t1 * oldField[i111]));
       }
 }
 
 ///////////////////////////////////////////////////////////////////////
 // advect using first order semi-Lagrangian
 ///////////////////////////////////////////////////////////////////////
-void VECTOR3_FIELD_3D::advectNarrowBand(const REAL dt, const VECTOR3_FIELD_3D& velocityGrid, const FIELD_3D& oldField, FIELD_3D& newField, const FIELD_3D& distance, const int maxCells)
-{
+void VECTOR3_FIELD_3D::advectNarrowBand(const REAL dt,
+                                        const VECTOR3_FIELD_3D &velocityGrid,
+                                        const FIELD_3D &oldField,
+                                        FIELD_3D &newField,
+                                        const FIELD_3D &distance,
+                                        const int maxCells) {
   TIMER functionTimer(__FUNCTION__);
 
   const int xRes = oldField.xRes();
@@ -1681,8 +1648,9 @@ void VECTOR3_FIELD_3D::advectNarrowBand(const REAL dt, const VECTOR3_FIELD_3D& v
   const int zRes = oldField.zRes();
   const int slabSize = oldField.slabSize();
   const REAL invDx = 1.0 / oldField.dx();
- 
-  const VECTOR3 corner = oldField.center() - (REAL)0.5 * oldField.lengths() + (REAL)0.5 * oldField.dxs();
+
+  const VECTOR3 corner = oldField.center() - (REAL)0.5 * oldField.lengths() +
+                         (REAL)0.5 * oldField.dxs();
   const VECTOR3 dxs = oldField.dxs();
 
   // scale dt up to grid resolution
@@ -1690,17 +1658,18 @@ void VECTOR3_FIELD_3D::advectNarrowBand(const REAL dt, const VECTOR3_FIELD_3D& v
 #pragma omp for schedule(static)
   for (int z = 0; z < zRes; z++)
     for (int y = 0; y < yRes; y++)
-      for (int x = 0; x < xRes; x++)
-      {
+      for (int x = 0; x < xRes; x++) {
         // is the cell in the narrow band?
-        REAL currentDistance = fabs(distance(oldField.cellCenter(x,y,z)) * invDx);
+        REAL currentDistance =
+            fabs(distance(oldField.cellCenter(x, y, z)) * invDx);
         if (currentDistance > maxCells)
           continue;
         const int index = x + y * xRes + z * slabSize;
-        
+
         // backtrace
-        const VECTOR3 velocity = velocityGrid(oldField.cellCenter(x,y,z));
-        VECTOR3 position(x - dt * velocity[0], y - dt * velocity[1], z - dt * velocity[2]);
+        const VECTOR3 velocity = velocityGrid(oldField.cellCenter(x, y, z));
+        VECTOR3 position(x - dt * velocity[0], y - dt * velocity[1],
+                         z - dt * velocity[2]);
         position[0] *= dxs[0];
         position[1] *= dxs[1];
         position[2] *= dxs[2];
@@ -1717,12 +1686,11 @@ void VECTOR3_FIELD_3D::advectNarrowBand(const REAL dt, const VECTOR3_FIELD_3D& v
       for (int x = 0; x < xRes; x++)
       {
         // is the cell in the narrow band?
-        REAL currentDistance = fabs(distance(oldField.cellCenter(x,y,z)) * invDx);
-        if (currentDistance > maxCells)
-          continue;
+        REAL currentDistance = fabs(distance(oldField.cellCenter(x,y,z)) *
+invDx); if (currentDistance > maxCells) continue;
 
         const int index = x + y * xRes + z * slabSize;
-        
+
         // backtrace
         const VECTOR3 velocity = velocityGrid(oldField.cellCenter(x,y,z));
         REAL xTrace = x - dt * velocity[0];
@@ -1779,8 +1747,10 @@ void VECTOR3_FIELD_3D::advectNarrowBand(const REAL dt, const VECTOR3_FIELD_3D& v
 ///////////////////////////////////////////////////////////////////////
 // advect using first order semi-Lagrangian
 ///////////////////////////////////////////////////////////////////////
-void VECTOR3_FIELD_3D::advectNarrowBandLinear(const REAL dt, const VECTOR3_FIELD_3D& velocityGrid, const FIELD_3D& oldField, FIELD_3D& newField, const FIELD_3D& distance, const int maxCells)
-{
+void VECTOR3_FIELD_3D::advectNarrowBandLinear(
+    const REAL dt, const VECTOR3_FIELD_3D &velocityGrid,
+    const FIELD_3D &oldField, FIELD_3D &newField, const FIELD_3D &distance,
+    const int maxCells) {
   TIMER functionTimer(__FUNCTION__);
 
   const int xRes = oldField.xRes();
@@ -1788,8 +1758,9 @@ void VECTOR3_FIELD_3D::advectNarrowBandLinear(const REAL dt, const VECTOR3_FIELD
   const int zRes = oldField.zRes();
   const int slabSize = oldField.slabSize();
   const REAL invDx = 1.0 / oldField.dx();
- 
-  const VECTOR3 corner = oldField.center() - (REAL)0.5 * oldField.lengths() + (REAL)0.5 * oldField.dxs();
+
+  const VECTOR3 corner = oldField.center() - (REAL)0.5 * oldField.lengths() +
+                         (REAL)0.5 * oldField.dxs();
   const VECTOR3 dxs = oldField.dxs();
 
   // scale dt up to grid resolution
@@ -1797,22 +1768,23 @@ void VECTOR3_FIELD_3D::advectNarrowBandLinear(const REAL dt, const VECTOR3_FIELD
 #pragma omp for schedule(static)
   for (int z = 0; z < zRes; z++)
     for (int y = 0; y < yRes; y++)
-      for (int x = 0; x < xRes; x++)
-      {
+      for (int x = 0; x < xRes; x++) {
         // is the cell in the narrow band?
-        REAL currentDistance = fabs(distance(oldField.cellCenter(x,y,z)) * invDx);
+        REAL currentDistance =
+            fabs(distance(oldField.cellCenter(x, y, z)) * invDx);
         if (currentDistance > maxCells)
           continue;
         const int index = x + y * xRes + z * slabSize;
-        
+
         // backtrace
-        const VECTOR3 velocity = velocityGrid(oldField.cellCenter(x,y,z));
-        VECTOR3 position(x - dt * velocity[0], y - dt * velocity[1], z - dt * velocity[2]);
+        const VECTOR3 velocity = velocityGrid(oldField.cellCenter(x, y, z));
+        VECTOR3 position(x - dt * velocity[0], y - dt * velocity[1],
+                         z - dt * velocity[2]);
         position[0] *= dxs[0];
         position[1] *= dxs[1];
         position[2] *= dxs[2];
         position += corner;
-        //newField[index] = oldField.quarticLookup(position);
+        // newField[index] = oldField.quarticLookup(position);
         newField[index] = oldField(position);
       }
 
@@ -1825,12 +1797,11 @@ void VECTOR3_FIELD_3D::advectNarrowBandLinear(const REAL dt, const VECTOR3_FIELD
       for (int x = 0; x < xRes; x++)
       {
         // is the cell in the narrow band?
-        REAL currentDistance = fabs(distance(oldField.cellCenter(x,y,z)) * invDx);
-        if (currentDistance > maxCells)
-          continue;
+        REAL currentDistance = fabs(distance(oldField.cellCenter(x,y,z)) *
+invDx); if (currentDistance > maxCells) continue;
 
         const int index = x + y * xRes + z * slabSize;
-        
+
         // backtrace
         const VECTOR3 velocity = velocityGrid(oldField.cellCenter(x,y,z));
         REAL xTrace = x - dt * velocity[0];
@@ -1887,8 +1858,10 @@ void VECTOR3_FIELD_3D::advectNarrowBandLinear(const REAL dt, const VECTOR3_FIELD
 ///////////////////////////////////////////////////////////////////////
 // do an advection of a subset of the grid
 ///////////////////////////////////////////////////////////////////////
-FIELD_3D VECTOR3_FIELD_3D::advectSubset(const REAL dt, const VECTOR3_FIELD_3D& velocityGrid, const FIELD_3D& oldField, const vector<int>& subset)
-{
+FIELD_3D VECTOR3_FIELD_3D::advectSubset(const REAL dt,
+                                        const VECTOR3_FIELD_3D &velocityGrid,
+                                        const FIELD_3D &oldField,
+                                        const vector<int> &subset) {
   TIMER functionTimer(__FUNCTION__);
   FIELD_3D newField(oldField);
   const int xRes = oldField.xRes();
@@ -1898,15 +1871,14 @@ FIELD_3D VECTOR3_FIELD_3D::advectSubset(const REAL dt, const VECTOR3_FIELD_3D& v
 
 #pragma omp parallel
 #pragma omp for schedule(dynamic)
-  for (unsigned int i = 0; i < subset.size(); i++)
-  {
+  for (unsigned int i = 0; i < subset.size(); i++) {
     const int index = subset[i];
     const int z = index / slabSize;
     const int y = (index - z * slabSize) / xRes;
     const int x = index - z * slabSize - y * xRes;
-    
+
     // backtrace
-    const VECTOR3 velocity = velocityGrid(oldField.cellCenter(x,y,z));
+    const VECTOR3 velocity = velocityGrid(oldField.cellCenter(x, y, z));
     REAL xTrace = x - dt * velocity[0];
     REAL yTrace = y - dt * velocity[1];
     REAL zTrace = z - dt * velocity[2];
@@ -1951,14 +1923,10 @@ FIELD_3D VECTOR3_FIELD_3D::advectSubset(const REAL dt, const VECTOR3_FIELD_3D& v
 
     // interpolate
     // (indices could be computed once)
-    newField[index] = u0 * (s0 * (t0 * oldField[i000] +
-                                  t1 * oldField[i010]) +
-                            s1 * (t0 * oldField[i100] +
-                                  t1 * oldField[i110])) +
-                      u1 * (s0 * (t0 * oldField[i001] +
-                                  t1 * oldField[i011]) +
-                            s1 * (t0 * oldField[i101] +
-                                  t1 * oldField[i111]));
+    newField[index] = u0 * (s0 * (t0 * oldField[i000] + t1 * oldField[i010]) +
+                            s1 * (t0 * oldField[i100] + t1 * oldField[i110])) +
+                      u1 * (s0 * (t0 * oldField[i001] + t1 * oldField[i011]) +
+                            s1 * (t0 * oldField[i101] + t1 * oldField[i111]));
   }
   return newField;
 }
@@ -1966,32 +1934,33 @@ FIELD_3D VECTOR3_FIELD_3D::advectSubset(const REAL dt, const VECTOR3_FIELD_3D& v
 ///////////////////////////////////////////////////////////////////////
 // get a single closest point
 ///////////////////////////////////////////////////////////////////////
-REAL VECTOR3_FIELD_3D::getClosestPointValue(const VECTOR3_FIELD_3D& targetGradient, const VECTOR3& startPosition, const FIELD_3D& distanceField, const FIELD_3D& toExtend)
-{
+REAL VECTOR3_FIELD_3D::getClosestPointValue(
+    const VECTOR3_FIELD_3D &targetGradient, const VECTOR3 &startPosition,
+    const FIELD_3D &distanceField, const FIELD_3D &toExtend) {
   TIMER functionTimer(__FUNCTION__);
 
   int maxSteps = 100;
   REAL fictionalDt = 1.0;
-  
+
   REAL diff = 1;
   int steps = 0;
   VECTOR3 position = startPosition;
   VECTOR3 targetDelta = targetGradient(position);
 
-  while (diff > 1e-6 && steps < maxSteps)
-  {
+  while (diff > 1e-6 && steps < maxSteps) {
     REAL targetDistance = distanceField(position);
     diff = fabs(targetDistance);
 
     // if the gradient is zero, stop trying, because it probably
     // wandered off the grid
-    //if (norm2(targetDelta) < 1e-6) break;
-    if (targetDelta.norm() < 1e-6) break;
+    // if (norm2(targetDelta) < 1e-6) break;
+    if (targetDelta.norm() < 1e-6)
+      break;
 
     // go ahead and always do first -- second gives the occasional wacky value
     // that throws off the stability of the simulation
     targetDelta.normalize();
-    VECTOR3 move = (targetDistance) * targetDelta * fictionalDt;
+    VECTOR3 move = (targetDistance)*targetDelta * fictionalDt;
 
     position = position - move;
 
@@ -2007,11 +1976,13 @@ REAL VECTOR3_FIELD_3D::getClosestPointValue(const VECTOR3_FIELD_3D& targetGradie
 ///////////////////////////////////////////////////////////////////////
 // compute the extension field for some subset of points
 ///////////////////////////////////////////////////////////////////////
-FIELD_3D VECTOR3_FIELD_3D::computeExtensionFieldSubset(const FIELD_3D& distanceField, const FIELD_3D& toExtend, const vector<int>& subset)
-{
+FIELD_3D
+VECTOR3_FIELD_3D::computeExtensionFieldSubset(const FIELD_3D &distanceField,
+                                              const FIELD_3D &toExtend,
+                                              const vector<int> &subset) {
   TIMER functionTimer(__FUNCTION__);
 
-  // get the cell centers 
+  // get the cell centers
   VECTOR3_FIELD_3D cellCenters = VECTOR3_FIELD_3D::cellCenters(toExtend);
 
   // build the gradient field
@@ -2021,30 +1992,30 @@ FIELD_3D VECTOR3_FIELD_3D::computeExtensionFieldSubset(const FIELD_3D& distanceF
   FIELD_3D extendedOld(toExtend);
   int maxSteps = 100;
   REAL fictionalDt = 1.0;
-  cout << " Computing extension field ..."; flush(cout);
+  cout << " Computing extension field ...";
+  flush(cout);
 #pragma omp parallel
 #pragma omp for schedule(dynamic)
-  for (unsigned int i = 0; i < subset.size(); i++)
-  {
+  for (unsigned int i = 0; i < subset.size(); i++) {
     REAL diff = 1;
     int steps = 0;
-    VECTOR3& position = cellCenters[subset[i]];
+    VECTOR3 &position = cellCenters[subset[i]];
     VECTOR3 targetDelta = targetGradient(position);
 
-    while (diff > 1e-6 && steps < maxSteps)
-    {
+    while (diff > 1e-6 && steps < maxSteps) {
       REAL targetDistance = distanceField(position);
       diff = fabs(targetDistance);
 
       // if the gradient is zero, stop trying, because it probably
       // wandered off the grid
-      //if (norm2(targetDelta) < 1e-6) break;
-      if (targetDelta.norm() < 1e-6) break;
+      // if (norm2(targetDelta) < 1e-6) break;
+      if (targetDelta.norm() < 1e-6)
+        break;
 
       // go ahead and always do first -- second gives the occasional wacky value
       // that throws off the stability of the simulation
       targetDelta.normalize();
-      VECTOR3 move = (targetDistance) * targetDelta * fictionalDt;
+      VECTOR3 move = (targetDistance)*targetDelta * fictionalDt;
 
       position = position - move;
 
@@ -2063,11 +2034,13 @@ FIELD_3D VECTOR3_FIELD_3D::computeExtensionFieldSubset(const FIELD_3D& distanceF
 ///////////////////////////////////////////////////////////////////////
 // compute the extension field for a masked set of points
 ///////////////////////////////////////////////////////////////////////
-FIELD_3D VECTOR3_FIELD_3D::computeExtensionFieldMasked(const FIELD_3D& distanceField, const FIELD_3D& toExtend, const FIELD_3D& mask)
-{
+FIELD_3D
+VECTOR3_FIELD_3D::computeExtensionFieldMasked(const FIELD_3D &distanceField,
+                                              const FIELD_3D &toExtend,
+                                              const FIELD_3D &mask) {
   TIMER functionTimer(__FUNCTION__);
 
-  // get the cell centers 
+  // get the cell centers
   VECTOR3_FIELD_3D cellCenters = VECTOR3_FIELD_3D::cellCenters(toExtend);
 
   // build the gradient field
@@ -2077,44 +2050,45 @@ FIELD_3D VECTOR3_FIELD_3D::computeExtensionFieldMasked(const FIELD_3D& distanceF
   const int yRes = mask.yRes();
   const int zRes = mask.zRes();
 
-  //const REAL invDx = 1.0 / distanceField.dx();
+  // const REAL invDx = 1.0 / distanceField.dx();
   const REAL invDx = 1.0 / distanceField.dx();
 
   // perform Nacelle on all the tagged extension cells
   FIELD_3D extendedOld(toExtend);
   int maxSteps = 100;
   REAL fictionalDt = 1.0;
-  cout << " Computing masked extension field ..."; flush(cout);
+  cout << " Computing masked extension field ...";
+  flush(cout);
 #pragma omp parallel
 #pragma omp for schedule(dynamic)
   for (int z = 0; z < zRes; z++)
     for (int y = 0; y < yRes; y++)
-      for (int x = 0; x < xRes; x++)
-      {
-        VECTOR3& position = cellCenters(x,y,z);
+      for (int x = 0; x < xRes; x++) {
+        VECTOR3 &position = cellCenters(x, y, z);
         REAL currentDistance = fabs(distanceField(position) * invDx);
 
-        //if (mask(x,y,z) < 0.5) continue;
-        if (mask(x,y,z) < 0.5 || currentDistance <= 1.0) continue;
+        // if (mask(x,y,z) < 0.5) continue;
+        if (mask(x, y, z) < 0.5 || currentDistance <= 1.0)
+          continue;
 
         REAL diff = 1;
         int steps = 0;
         VECTOR3 targetDelta = targetGradient(position);
 
-        while (diff > 1e-6 && steps < maxSteps)
-        {
+        while (diff > 1e-6 && steps < maxSteps) {
           const REAL targetDistance = distanceField(position);
           diff = fabs(targetDistance);
 
           // if the gradient is zero, stop trying, because it probably
           // wandered off the grid
-          //if (norm2(targetDelta) < 1e-6) break;
-          if (targetDelta.norm() < 1e-6) break;
+          // if (norm2(targetDelta) < 1e-6) break;
+          if (targetDelta.norm() < 1e-6)
+            break;
 
-          // go ahead and always do first -- second gives the occasional wacky value
-          // that throws off the stability of the simulation
+          // go ahead and always do first -- second gives the occasional wacky
+          // value that throws off the stability of the simulation
           targetDelta.normalize();
-          const VECTOR3 move = (targetDistance) * targetDelta * fictionalDt;
+          const VECTOR3 move = (targetDistance)*targetDelta * fictionalDt;
 
           position = position - move;
 
@@ -2124,8 +2098,8 @@ FIELD_3D VECTOR3_FIELD_3D::computeExtensionFieldMasked(const FIELD_3D& distanceF
         }
 
         // do the extension here
-        //extendedOld(x,y,z) = toExtend.quarticLookup(position);
-        extendedOld(x,y,z) = toExtend.nearestNeighborLookup(position);
+        // extendedOld(x,y,z) = toExtend.quarticLookup(position);
+        extendedOld(x, y, z) = toExtend.nearestNeighborLookup(position);
       }
 
   return extendedOld;
@@ -2134,11 +2108,12 @@ FIELD_3D VECTOR3_FIELD_3D::computeExtensionFieldMasked(const FIELD_3D& distanceF
 ///////////////////////////////////////////////////////////////////////
 // compute the extension field for a masked set of points
 ///////////////////////////////////////////////////////////////////////
-FIELD_3D VECTOR3_FIELD_3D::computeExtensionFieldMaskedBadAdvect(const FIELD_3D& distanceField, const FIELD_3D& toExtend, const FIELD_3D& mask)
-{
+FIELD_3D VECTOR3_FIELD_3D::computeExtensionFieldMaskedBadAdvect(
+    const FIELD_3D &distanceField, const FIELD_3D &toExtend,
+    const FIELD_3D &mask) {
   TIMER functionTimer(__FUNCTION__);
 
-  // get the cell centers 
+  // get the cell centers
   VECTOR3_FIELD_3D cellCenters = VECTOR3_FIELD_3D::cellCenters(toExtend);
 
   // build the gradient field
@@ -2148,43 +2123,44 @@ FIELD_3D VECTOR3_FIELD_3D::computeExtensionFieldMaskedBadAdvect(const FIELD_3D& 
   const int yRes = mask.yRes();
   const int zRes = mask.zRes();
 
-  //const REAL invDx = 1.0 / distanceField.dx();
+  // const REAL invDx = 1.0 / distanceField.dx();
 
   // perform Nacelle on all the tagged extension cells
   FIELD_3D extendedOld(toExtend);
   int maxSteps = 100;
   REAL fictionalDt = 1.0;
-  cout << " Computing bad masked extension field ..."; flush(cout);
+  cout << " Computing bad masked extension field ...";
+  flush(cout);
 #pragma omp parallel
 #pragma omp for schedule(dynamic)
   for (int z = 0; z < zRes; z++)
     for (int y = 0; y < yRes; y++)
-      for (int x = 0; x < xRes; x++)
-      {
-        VECTOR3& position = cellCenters(x,y,z);
-        //REAL currentDistance = fabs(distanceField(position) * invDx);
+      for (int x = 0; x < xRes; x++) {
+        VECTOR3 &position = cellCenters(x, y, z);
+        // REAL currentDistance = fabs(distanceField(position) * invDx);
 
-        //if (mask(x,y,z) < 0.5) continue;
-        if (mask(x,y,z) < 0.5) continue;
+        // if (mask(x,y,z) < 0.5) continue;
+        if (mask(x, y, z) < 0.5)
+          continue;
 
         REAL diff = 1;
         int steps = 0;
         VECTOR3 targetDelta = targetGradient(position);
 
-        while (diff > 1e-6 && steps < maxSteps)
-        {
+        while (diff > 1e-6 && steps < maxSteps) {
           const REAL targetDistance = distanceField(position);
           diff = fabs(targetDistance);
 
           // if the gradient is zero, stop trying, because it probably
           // wandered off the grid
-          //if (norm2(targetDelta) < 1e-6) break;
-          if (targetDelta.norm() < 1e-6) break;
+          // if (norm2(targetDelta) < 1e-6) break;
+          if (targetDelta.norm() < 1e-6)
+            break;
 
-          // go ahead and always do first -- second gives the occasional wacky value
-          // that throws off the stability of the simulation
+          // go ahead and always do first -- second gives the occasional wacky
+          // value that throws off the stability of the simulation
           targetDelta.normalize();
-          const VECTOR3 move = (targetDistance) * targetDelta * fictionalDt;
+          const VECTOR3 move = (targetDistance)*targetDelta * fictionalDt;
 
           position = position - move;
 
@@ -2194,8 +2170,8 @@ FIELD_3D VECTOR3_FIELD_3D::computeExtensionFieldMaskedBadAdvect(const FIELD_3D& 
         }
 
         // do the extension here
-        extendedOld(x,y,z) = toExtend.quarticLookup(position);
-        //extendedOld(x,y,z) = toExtend.nearestNeighborLookup(position);
+        extendedOld(x, y, z) = toExtend.quarticLookup(position);
+        // extendedOld(x,y,z) = toExtend.nearestNeighborLookup(position);
       }
 
   return extendedOld;
@@ -2204,8 +2180,12 @@ FIELD_3D VECTOR3_FIELD_3D::computeExtensionFieldMaskedBadAdvect(const FIELD_3D& 
 ///////////////////////////////////////////////////////////////////////
 // advect using first order semi-Lagrangian
 ///////////////////////////////////////////////////////////////////////
-void VECTOR3_FIELD_3D::advectLazy(const REAL dt, const VECTOR3_FIELD_3D& velocityGrid, const FIELD_3D& distanceOld, const FIELD_3D& distanceNew, const int maxCells, const FIELD_3D& oldField, FIELD_3D& newField)
-{
+void VECTOR3_FIELD_3D::advectLazy(const REAL dt,
+                                  const VECTOR3_FIELD_3D &velocityGrid,
+                                  const FIELD_3D &distanceOld,
+                                  const FIELD_3D &distanceNew,
+                                  const int maxCells, const FIELD_3D &oldField,
+                                  FIELD_3D &newField) {
   const int xRes = oldField.xRes();
   const int yRes = oldField.yRes();
   const int zRes = oldField.zRes();
@@ -2213,7 +2193,7 @@ void VECTOR3_FIELD_3D::advectLazy(const REAL dt, const VECTOR3_FIELD_3D& velocit
 
   // build the gradient field
   REAL invDx = 1.0 / oldField.dx();
-  
+
   // which cells need extension values?
   map<int, bool> extensionMap;
 
@@ -2221,13 +2201,14 @@ void VECTOR3_FIELD_3D::advectLazy(const REAL dt, const VECTOR3_FIELD_3D& velocit
   vector<int> finalIndices;
 
   // build a list of cells to populate the extension for
-  cout << " Computing extension band ..."; flush(cout);
+  cout << " Computing extension band ...";
+  flush(cout);
   for (int z = 0; z < zRes; z++)
     for (int y = 0; y < yRes; y++)
-      for (int x = 0; x < xRes; x++)
-      {
+      for (int x = 0; x < xRes; x++) {
         // is the cell in the narrow band?
-        REAL currentDistance = fabs(distanceNew(oldField.cellCenter(x,y,z)) * invDx);
+        REAL currentDistance =
+            fabs(distanceNew(oldField.cellCenter(x, y, z)) * invDx);
         if (currentDistance > maxCells)
           continue;
 
@@ -2236,7 +2217,7 @@ void VECTOR3_FIELD_3D::advectLazy(const REAL dt, const VECTOR3_FIELD_3D& velocit
         finalIndices.push_back(index);
 
         // backtrace, store those cells for extension later.
-        const VECTOR3 velocity = velocityGrid(oldField.cellCenter(x,y,z));
+        const VECTOR3 velocity = velocityGrid(oldField.cellCenter(x, y, z));
         REAL xTrace = x - dt * velocity[0];
         REAL yTrace = y - dt * velocity[1];
         REAL zTrace = z - dt * velocity[2];
@@ -2278,42 +2259,48 @@ void VECTOR3_FIELD_3D::advectLazy(const REAL dt, const VECTOR3_FIELD_3D& velocit
 
   // convert extension map to a vector
   vector<int> extensionVector;
-  map<int,bool>::const_iterator iter;
+  map<int, bool>::const_iterator iter;
   for (iter = extensionMap.begin(); iter != extensionMap.end(); iter++)
     extensionVector.push_back(iter->first);
 
   // perform Nacelle on all the tagged extension cells
-  FIELD_3D extendedOld = computeExtensionFieldSubset(distanceOld, oldField, extensionVector); 
+  FIELD_3D extendedOld =
+      computeExtensionFieldSubset(distanceOld, oldField, extensionVector);
 
-  cout << " Computing final advection ..."; flush(cout);
+  cout << " Computing final advection ...";
+  flush(cout);
   newField = advectSubset(dt, velocityGrid, extendedOld, finalIndices);
 }
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-void VECTOR3_FIELD_3D::advectMacCormack(const REAL dt, const VECTOR3_FIELD_3D& velocityGrid, FIELD_3D& oldField, FIELD_3D& newField, FIELD_3D& temp1, FIELD_3D& temp2)
-{
+void VECTOR3_FIELD_3D::advectMacCormack(const REAL dt,
+                                        const VECTOR3_FIELD_3D &velocityGrid,
+                                        FIELD_3D &oldField, FIELD_3D &newField,
+                                        FIELD_3D &temp1, FIELD_3D &temp2) {
   TIMER functionTimer(__FUNCTION__);
-	FIELD_3D& phiHatN  = temp1;
-	FIELD_3D& phiHatN1 = temp2;
+  FIELD_3D &phiHatN = temp1;
+  FIELD_3D &phiHatN1 = temp2;
 
-	const int sx = oldField.xRes();
-	const int sy = oldField.yRes();
-	const int sz = oldField.zRes();
+  const int sx = oldField.xRes();
+  const int sy = oldField.yRes();
+  const int sz = oldField.zRes();
 
-	for (int x = 0; x < sx * sy * sz; x++)
-		phiHatN[x] = phiHatN1[x] = oldField[x];
+  for (int x = 0; x < sx * sy * sz; x++)
+    phiHatN[x] = phiHatN1[x] = oldField[x];
 
-	FIELD_3D& phiN    = oldField;
-	FIELD_3D& phiN1   = newField;
+  FIELD_3D &phiN = oldField;
+  FIELD_3D &phiN1 = newField;
 
-	// phiHatN1 = A(phiN)
-  cout << " forward ... ";flush(cout);
-	advect(dt, velocityGrid, phiN, phiHatN1);
+  // phiHatN1 = A(phiN)
+  cout << " forward ... ";
+  flush(cout);
+  advect(dt, velocityGrid, phiN, phiHatN1);
 
-	// phiHatN = A^R(phiHatN1)
-  cout << " backward ... ";flush(cout);
-	advect(-1.0 * dt, velocityGrid, phiHatN1, phiHatN);
+  // phiHatN = A^R(phiHatN1)
+  cout << " backward ... ";
+  flush(cout);
+  advect(-1.0 * dt, velocityGrid, phiHatN1, phiHatN);
 
   phiN1.clear();
   phiN1 += phiN;
@@ -2321,21 +2308,25 @@ void VECTOR3_FIELD_3D::advectMacCormack(const REAL dt, const VECTOR3_FIELD_3D& v
   phiN1 *= 0.5;
   phiN1 += phiHatN1;
 
-	// clamp any newly created extrema
-  cout << " clamping extrema ... ";flush(cout);
-	clampExtrema(dt, velocityGrid, oldField, newField);
+  // clamp any newly created extrema
+  cout << " clamping extrema ... ";
+  flush(cout);
+  clampExtrema(dt, velocityGrid, oldField, newField);
 
-	// if the error estimate was bad, revert to first order
-  cout << " clamping rays ... ";flush(cout);
-	clampOutsideRays(dt, velocityGrid, oldField, phiHatN1, newField);
+  // if the error estimate was bad, revert to first order
+  cout << " clamping rays ... ";
+  flush(cout);
+  clampOutsideRays(dt, velocityGrid, oldField, phiHatN1, newField);
   cout << " done. " << endl;
 }
 
 ///////////////////////////////////////////////////////////////////////
 // set the closes point values needed for MacCormack
 ///////////////////////////////////////////////////////////////////////
-FIELD_3D VECTOR3_FIELD_3D::setMacCormackClosestPoints(const REAL dt, const VECTOR3_FIELD_3D& velocityGrid, const FIELD_3D& distanceOld, const FIELD_3D& distanceNew, const int maxCells, const FIELD_3D& oldField)
-{
+FIELD_3D VECTOR3_FIELD_3D::setMacCormackClosestPoints(
+    const REAL dt, const VECTOR3_FIELD_3D &velocityGrid,
+    const FIELD_3D &distanceOld, const FIELD_3D &distanceNew,
+    const int maxCells, const FIELD_3D &oldField) {
   TIMER functionTimer(__FUNCTION__);
   const int xRes = oldField.xRes();
   const int yRes = oldField.yRes();
@@ -2348,23 +2339,24 @@ FIELD_3D VECTOR3_FIELD_3D::setMacCormackClosestPoints(const REAL dt, const VECTO
 
   // build a list of cells to populate the extension for
   TIMER forwardTimer("Forward band");
-  cout << " Computing forward extension band ..."; flush(cout);
+  cout << " Computing forward extension band ...";
+  flush(cout);
 #pragma omp parallel
 #pragma omp for schedule(dynamic)
   for (int z = 0; z < zRes; z++)
     for (int y = 0; y < yRes; y++)
-      for (int x = 0; x < xRes; x++)
-      {
+      for (int x = 0; x < xRes; x++) {
         // is the cell in the narrow band?
-        REAL currentDistance = fabs(distanceNew(oldField.cellCenter(x,y,z)) * invDx);
+        REAL currentDistance =
+            fabs(distanceNew(oldField.cellCenter(x, y, z)) * invDx);
         if (currentDistance > maxCells)
           continue;
 
         // add it to the list of final
-        //int index = x + y * xRes + z * slabSize;
+        // int index = x + y * xRes + z * slabSize;
 
         // backtrace, store those cells for extension later.
-        const VECTOR3 velocity = velocityGrid(oldField.cellCenter(x,y,z));
+        const VECTOR3 velocity = velocityGrid(oldField.cellCenter(x, y, z));
         REAL xTrace = x - dt * velocity[0];
         REAL yTrace = y - dt * velocity[1];
         REAL zTrace = z - dt * velocity[2];
@@ -2399,35 +2391,52 @@ FIELD_3D VECTOR3_FIELD_3D::setMacCormackClosestPoints(const REAL dt, const VECTO
         const int i101 = x1 + y0xRes + z1slabSize;
         const int i111 = x1 + y1xRes + z1slabSize;
 
-        closestPointValues[i000] = getClosestPointValue(targetGradient, oldField.cellCenter(x0, y0, z0), distanceOld, oldField); 
-        closestPointValues[i001] = getClosestPointValue(targetGradient, oldField.cellCenter(x0, y0, z1), distanceOld, oldField); 
-        closestPointValues[i010] = getClosestPointValue(targetGradient, oldField.cellCenter(x0, y1, z0), distanceOld, oldField); 
-        closestPointValues[i011] = getClosestPointValue(targetGradient, oldField.cellCenter(x0, y1, z1), distanceOld, oldField); 
-        closestPointValues[i100] = getClosestPointValue(targetGradient, oldField.cellCenter(x1, y0, z0), distanceOld, oldField); 
-        closestPointValues[i101] = getClosestPointValue(targetGradient, oldField.cellCenter(x1, y0, z1), distanceOld, oldField); 
-        closestPointValues[i110] = getClosestPointValue(targetGradient, oldField.cellCenter(x1, y1, z0), distanceOld, oldField); 
-        closestPointValues[i111] = getClosestPointValue(targetGradient, oldField.cellCenter(x1, y1, z1), distanceOld, oldField); 
+        closestPointValues[i000] = getClosestPointValue(
+            targetGradient, oldField.cellCenter(x0, y0, z0), distanceOld,
+            oldField);
+        closestPointValues[i001] = getClosestPointValue(
+            targetGradient, oldField.cellCenter(x0, y0, z1), distanceOld,
+            oldField);
+        closestPointValues[i010] = getClosestPointValue(
+            targetGradient, oldField.cellCenter(x0, y1, z0), distanceOld,
+            oldField);
+        closestPointValues[i011] = getClosestPointValue(
+            targetGradient, oldField.cellCenter(x0, y1, z1), distanceOld,
+            oldField);
+        closestPointValues[i100] = getClosestPointValue(
+            targetGradient, oldField.cellCenter(x1, y0, z0), distanceOld,
+            oldField);
+        closestPointValues[i101] = getClosestPointValue(
+            targetGradient, oldField.cellCenter(x1, y0, z1), distanceOld,
+            oldField);
+        closestPointValues[i110] = getClosestPointValue(
+            targetGradient, oldField.cellCenter(x1, y1, z0), distanceOld,
+            oldField);
+        closestPointValues[i111] = getClosestPointValue(
+            targetGradient, oldField.cellCenter(x1, y1, z1), distanceOld,
+            oldField);
       }
 
   // see what cells show up in the backward advection
-  cout << " Computing backward extension band ..."; flush(cout);
+  cout << " Computing backward extension band ...";
+  flush(cout);
   TIMER backwardTimer("Backward band");
 #pragma omp parallel
 #pragma omp for schedule(dynamic)
   for (int z = 0; z < zRes; z++)
     for (int y = 0; y < yRes; y++)
-      for (int x = 0; x < xRes; x++)
-      {
+      for (int x = 0; x < xRes; x++) {
         // is the cell in the narrow band?
-        REAL currentDistance = fabs(distanceNew(oldField.cellCenter(x,y,z)) * invDx);
+        REAL currentDistance =
+            fabs(distanceNew(oldField.cellCenter(x, y, z)) * invDx);
         if (currentDistance > maxCells)
           continue;
 
         // add it to the list of final
-        //int index = x + y * xRes + z * slabSize;
+        // int index = x + y * xRes + z * slabSize;
 
         // backtrace, store those cells for extension later.
-        const VECTOR3 velocity = velocityGrid(oldField.cellCenter(x,y,z));
+        const VECTOR3 velocity = velocityGrid(oldField.cellCenter(x, y, z));
         REAL xTrace = x + dt * velocity[0];
         REAL yTrace = y + dt * velocity[1];
         REAL zTrace = z + dt * velocity[2];
@@ -2462,18 +2471,34 @@ FIELD_3D VECTOR3_FIELD_3D::setMacCormackClosestPoints(const REAL dt, const VECTO
         const int i101 = x1 + y0xRes + z1slabSize;
         const int i111 = x1 + y1xRes + z1slabSize;
 
-        closestPointValues[i000] = getClosestPointValue(targetGradient, oldField.cellCenter(x0, y0, z0), distanceOld, oldField); 
-        closestPointValues[i001] = getClosestPointValue(targetGradient, oldField.cellCenter(x0, y0, z1), distanceOld, oldField); 
-        closestPointValues[i010] = getClosestPointValue(targetGradient, oldField.cellCenter(x0, y1, z0), distanceOld, oldField); 
-        closestPointValues[i011] = getClosestPointValue(targetGradient, oldField.cellCenter(x0, y1, z1), distanceOld, oldField); 
-        closestPointValues[i100] = getClosestPointValue(targetGradient, oldField.cellCenter(x1, y0, z0), distanceOld, oldField); 
-        closestPointValues[i101] = getClosestPointValue(targetGradient, oldField.cellCenter(x1, y0, z1), distanceOld, oldField); 
-        closestPointValues[i110] = getClosestPointValue(targetGradient, oldField.cellCenter(x1, y1, z0), distanceOld, oldField); 
-        closestPointValues[i111] = getClosestPointValue(targetGradient, oldField.cellCenter(x1, y1, z1), distanceOld, oldField); 
+        closestPointValues[i000] = getClosestPointValue(
+            targetGradient, oldField.cellCenter(x0, y0, z0), distanceOld,
+            oldField);
+        closestPointValues[i001] = getClosestPointValue(
+            targetGradient, oldField.cellCenter(x0, y0, z1), distanceOld,
+            oldField);
+        closestPointValues[i010] = getClosestPointValue(
+            targetGradient, oldField.cellCenter(x0, y1, z0), distanceOld,
+            oldField);
+        closestPointValues[i011] = getClosestPointValue(
+            targetGradient, oldField.cellCenter(x0, y1, z1), distanceOld,
+            oldField);
+        closestPointValues[i100] = getClosestPointValue(
+            targetGradient, oldField.cellCenter(x1, y0, z0), distanceOld,
+            oldField);
+        closestPointValues[i101] = getClosestPointValue(
+            targetGradient, oldField.cellCenter(x1, y0, z1), distanceOld,
+            oldField);
+        closestPointValues[i110] = getClosestPointValue(
+            targetGradient, oldField.cellCenter(x1, y1, z0), distanceOld,
+            oldField);
+        closestPointValues[i111] = getClosestPointValue(
+            targetGradient, oldField.cellCenter(x1, y1, z1), distanceOld,
+            oldField);
       }
 
   /*
-  // what cells need to be extended so that correct values appear 
+  // what cells need to be extended so that correct values appear
   // upon backwards advection?
   TIMER backwardExtensionTimer("Backward extension band");
 #pragma omp parallel
@@ -2547,8 +2572,11 @@ FIELD_3D VECTOR3_FIELD_3D::setMacCormackClosestPoints(const REAL dt, const VECTO
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-void VECTOR3_FIELD_3D::advectMacCormackNarrowBand(const REAL dt, const VECTOR3_FIELD_3D& velocityGrid, const FIELD_3D& distanceOld, const FIELD_3D& distanceNew, const int maxCells, const FIELD_3D& oldField, FIELD_3D& newField, FIELD_3D& temp1, FIELD_3D& temp2)
-{
+void VECTOR3_FIELD_3D::advectMacCormackNarrowBand(
+    const REAL dt, const VECTOR3_FIELD_3D &velocityGrid,
+    const FIELD_3D &distanceOld, const FIELD_3D &distanceNew,
+    const int maxCells, const FIELD_3D &oldField, FIELD_3D &newField,
+    FIELD_3D &temp1, FIELD_3D &temp2) {
   TIMER functionTimer(__FUNCTION__);
   const int xRes = oldField.xRes();
   const int yRes = oldField.yRes();
@@ -2557,36 +2585,37 @@ void VECTOR3_FIELD_3D::advectMacCormackNarrowBand(const REAL dt, const VECTOR3_F
   REAL invDx = 1.0 / oldField.dx();
 
   // get the number of OMP threads
-  //static int totalThreads = omp_get_max_threads();
+  // static int totalThreads = omp_get_max_threads();
 
   // track what cell to do the closest point transform on
-  FIELD_3D& forwardExtend = temp1;
+  FIELD_3D &forwardExtend = temp1;
   forwardExtend.clear();
-  REAL* forwardExtendData = forwardExtend.data();
+  REAL *forwardExtendData = forwardExtend.data();
 
-  FIELD_3D& backwardExtend = temp2;
+  FIELD_3D &backwardExtend = temp2;
   backwardExtend.clear();
-  REAL* backwardExtendData = backwardExtend.data();
+  REAL *backwardExtendData = backwardExtend.data();
 
   // build a list of cells to populate the extension for
   TIMER forwardTimer("Forward band");
-  cout << " Computing forward extension band ..."; flush(cout);
+  cout << " Computing forward extension band ...";
+  flush(cout);
 #pragma omp parallel
 #pragma omp for schedule(dynamic)
   for (int z = 0; z < zRes; z++)
     for (int y = 0; y < yRes; y++)
-      for (int x = 0; x < xRes; x++)
-      {
+      for (int x = 0; x < xRes; x++) {
         // is the cell in the narrow band?
-        REAL currentDistance = fabs(distanceNew(oldField.cellCenter(x,y,z)) * invDx);
+        REAL currentDistance =
+            fabs(distanceNew(oldField.cellCenter(x, y, z)) * invDx);
         if (currentDistance > maxCells)
           continue;
 
         // add it to the list of final
-        //int index = x + y * xRes + z * slabSize;
+        // int index = x + y * xRes + z * slabSize;
 
         // backtrace, store those cells for extension later.
-        const VECTOR3 velocity = velocityGrid(oldField.cellCenter(x,y,z));
+        const VECTOR3 velocity = velocityGrid(oldField.cellCenter(x, y, z));
         REAL xTrace = x - dt * velocity[0];
         REAL yTrace = y - dt * velocity[1];
         REAL zTrace = z - dt * velocity[2];
@@ -2621,7 +2650,7 @@ void VECTOR3_FIELD_3D::advectMacCormackNarrowBand(const REAL dt, const VECTOR3_F
         const int i101 = x1 + y0xRes + z1slabSize;
         const int i111 = x1 + y1xRes + z1slabSize;
 
-        //int threadID = omp_get_thread_num();
+        // int threadID = omp_get_thread_num();
 
 #pragma omp atomic
         forwardExtendData[i000] += 1;
@@ -2647,18 +2676,18 @@ void VECTOR3_FIELD_3D::advectMacCormackNarrowBand(const REAL dt, const VECTOR3_F
 #pragma omp for schedule(dynamic)
   for (int z = 0; z < zRes; z++)
     for (int y = 0; y < yRes; y++)
-      for (int x = 0; x < xRes; x++)
-      {
+      for (int x = 0; x < xRes; x++) {
         // is the cell in the narrow band?
-        REAL currentDistance = fabs(distanceNew(oldField.cellCenter(x,y,z)) * invDx);
+        REAL currentDistance =
+            fabs(distanceNew(oldField.cellCenter(x, y, z)) * invDx);
         if (currentDistance > maxCells)
           continue;
 
         // add it to the list of final
-        //int index = x + y * xRes + z * slabSize;
+        // int index = x + y * xRes + z * slabSize;
 
         // backtrace, store those cells for extension later.
-        const VECTOR3 velocity = velocityGrid(oldField.cellCenter(x,y,z));
+        const VECTOR3 velocity = velocityGrid(oldField.cellCenter(x, y, z));
         REAL xTrace = x + dt * velocity[0];
         REAL yTrace = y + dt * velocity[1];
         REAL zTrace = z + dt * velocity[2];
@@ -2693,8 +2722,8 @@ void VECTOR3_FIELD_3D::advectMacCormackNarrowBand(const REAL dt, const VECTOR3_F
         const int i101 = x1 + y0xRes + z1slabSize;
         const int i111 = x1 + y1xRes + z1slabSize;
 
-        //int threadID = omp_get_thread_num();
-        
+        // int threadID = omp_get_thread_num();
+
 #pragma omp atomic
         backwardExtendData[i000] += 1;
 #pragma omp atomic
@@ -2713,23 +2742,22 @@ void VECTOR3_FIELD_3D::advectMacCormackNarrowBand(const REAL dt, const VECTOR3_F
         backwardExtendData[i111] += 1;
       }
 
-  // what cells need to be extended so that correct values appear 
+  // what cells need to be extended so that correct values appear
   // upon backwards advection?
   TIMER backwardExtensionTimer("Backward extension band");
 #pragma omp parallel
 #pragma omp for schedule(dynamic)
   for (int z = 0; z < zRes; z++)
     for (int y = 0; y < yRes; y++)
-      for (int x = 0; x < xRes; x++)
-      {
+      for (int x = 0; x < xRes; x++) {
         // add it to the list of final
         int index = x + y * xRes + z * slabSize;
 
-        if (backwardExtendData[index] < 0.5) 
+        if (backwardExtendData[index] < 0.5)
           continue;
 
         // backtrace, store those cells for extension later.
-        const VECTOR3 velocity = velocityGrid(oldField.cellCenter(x,y,z));
+        const VECTOR3 velocity = velocityGrid(oldField.cellCenter(x, y, z));
         REAL xTrace = x - dt * velocity[0];
         REAL yTrace = y - dt * velocity[1];
         REAL zTrace = z - dt * velocity[2];
@@ -2786,18 +2814,21 @@ void VECTOR3_FIELD_3D::advectMacCormackNarrowBand(const REAL dt, const VECTOR3_F
   forwardExtend += backwardExtend;
 
   // perform Nacelle on all the tagged extension cells
-  FIELD_3D extendedOld = computeExtensionFieldMasked(distanceOld, oldField, forwardExtend); 
+  FIELD_3D extendedOld =
+      computeExtensionFieldMasked(distanceOld, oldField, forwardExtend);
 
-	FIELD_3D& phiN    = extendedOld;
-	FIELD_3D& phiN1   = newField;
-	FIELD_3D& phiHatN  = temp1;
-	FIELD_3D& phiHatN1 = temp2;
+  FIELD_3D &phiN = extendedOld;
+  FIELD_3D &phiN1 = newField;
+  FIELD_3D &phiHatN = temp1;
+  FIELD_3D &phiHatN1 = temp2;
 
-  cout << " advecting forward ... ";flush(cout);
+  cout << " advecting forward ... ";
+  flush(cout);
   advect(dt, velocityGrid, phiN, phiHatN1);
 
-  cout << " advecting backward ... ";flush(cout);
-	advect(-1.0 * dt, velocityGrid, phiHatN1, phiHatN);
+  cout << " advecting backward ... ";
+  flush(cout);
+  advect(-1.0 * dt, velocityGrid, phiHatN1, phiHatN);
 
   TIMER arithmeticTimer("Arithmetic field ops");
   phiN1.clear();
@@ -2806,21 +2837,25 @@ void VECTOR3_FIELD_3D::advectMacCormackNarrowBand(const REAL dt, const VECTOR3_F
   phiN1 *= 0.5;
   phiN1 += phiHatN1;
 
-  cout << " clamping ... ";flush(cout);
+  cout << " clamping ... ";
+  flush(cout);
 
-	// clamp any newly created extrema
-	clampExtrema(dt, velocityGrid, extendedOld, newField);
+  // clamp any newly created extrema
+  clampExtrema(dt, velocityGrid, extendedOld, newField);
 
-	// if the error estimate was bad, revert to first order
-	clampOutsideRays(dt, velocityGrid, extendedOld, phiHatN1, newField);
+  // if the error estimate was bad, revert to first order
+  clampOutsideRays(dt, velocityGrid, extendedOld, phiHatN1, newField);
 
   cout << " done." << endl;
 }
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-void VECTOR3_FIELD_3D::advectMacCormackLazy(const REAL dt, const VECTOR3_FIELD_3D& velocityGrid, const FIELD_3D& distanceOld, const FIELD_3D& distanceNew, const int maxCells, const FIELD_3D& oldField, FIELD_3D& newField, FIELD_3D& temp1, FIELD_3D& temp2)
-{
+void VECTOR3_FIELD_3D::advectMacCormackLazy(
+    const REAL dt, const VECTOR3_FIELD_3D &velocityGrid,
+    const FIELD_3D &distanceOld, const FIELD_3D &distanceNew,
+    const int maxCells, const FIELD_3D &oldField, FIELD_3D &newField,
+    FIELD_3D &temp1, FIELD_3D &temp2) {
   TIMER functionTimer(__FUNCTION__);
   const int xRes = oldField.xRes();
   const int yRes = oldField.yRes();
@@ -2831,25 +2866,27 @@ void VECTOR3_FIELD_3D::advectMacCormackLazy(const REAL dt, const VECTOR3_FIELD_3
   // get the number of OMP threads
   static int totalThreads = omp_get_max_threads();
 
-  // This block is very slow on Snow Leopard for some reason. Is OpenMP doing something under the hood
-  // that sets things up to be parallel in a clever way?
+  // This block is very slow on Snow Leopard for some reason. Is OpenMP doing
+  // something under the hood that sets things up to be parallel in a clever
+  // way?
   TIMER setTimer("Set allocation");
-  //vector<set<int> > forwardExtensionMapPerThread(totalThreads);
-  //vector<set<int> > finalMapPerThread(totalThreads);
-  set<int>* forwardExtensionMapPerThread = new set<int>[totalThreads];
-  set<int>* finalMapPerThread = new set<int>[totalThreads];
+  // vector<set<int> > forwardExtensionMapPerThread(totalThreads);
+  // vector<set<int> > finalMapPerThread(totalThreads);
+  set<int> *forwardExtensionMapPerThread = new set<int>[totalThreads];
+  set<int> *finalMapPerThread = new set<int>[totalThreads];
 
   // build a list of cells to populate the extension for
   TIMER forwardTimer("Forward band");
-  cout << " Computing forward extension band ..."; flush(cout);
+  cout << " Computing forward extension band ...";
+  flush(cout);
 #pragma omp parallel
 #pragma omp for schedule(dynamic)
   for (int z = 0; z < zRes; z++)
     for (int y = 0; y < yRes; y++)
-      for (int x = 0; x < xRes; x++)
-      {
+      for (int x = 0; x < xRes; x++) {
         // is the cell in the narrow band?
-        REAL currentDistance = fabs(distanceNew(oldField.cellCenter(x,y,z)) * invDx);
+        REAL currentDistance =
+            fabs(distanceNew(oldField.cellCenter(x, y, z)) * invDx);
         if (currentDistance > maxCells)
           continue;
 
@@ -2857,7 +2894,7 @@ void VECTOR3_FIELD_3D::advectMacCormackLazy(const REAL dt, const VECTOR3_FIELD_3
         int index = x + y * xRes + z * slabSize;
 
         // backtrace, store those cells for extension later.
-        const VECTOR3 velocity = velocityGrid(oldField.cellCenter(x,y,z));
+        const VECTOR3 velocity = velocityGrid(oldField.cellCenter(x, y, z));
         REAL xTrace = x - dt * velocity[0];
         REAL yTrace = y - dt * velocity[1];
         REAL zTrace = z - dt * velocity[2];
@@ -2906,8 +2943,8 @@ void VECTOR3_FIELD_3D::advectMacCormackLazy(const REAL dt, const VECTOR3_FIELD_3
       }
 
   // which cells are touched on the backward extension?
-  //vector<set<int> > backwardExtensionMapPerThread(totalThreads);
-  set<int>* backwardExtensionMapPerThread = new set<int>[totalThreads];
+  // vector<set<int> > backwardExtensionMapPerThread(totalThreads);
+  set<int> *backwardExtensionMapPerThread = new set<int>[totalThreads];
 
   // see what cells show up in the backward advection
   TIMER backwardTimer("Backward band");
@@ -2915,10 +2952,10 @@ void VECTOR3_FIELD_3D::advectMacCormackLazy(const REAL dt, const VECTOR3_FIELD_3
 #pragma omp for schedule(dynamic)
   for (int z = 0; z < zRes; z++)
     for (int y = 0; y < yRes; y++)
-      for (int x = 0; x < xRes; x++)
-      {
+      for (int x = 0; x < xRes; x++) {
         // is the cell in the narrow band?
-        REAL currentDistance = fabs(distanceNew(oldField.cellCenter(x,y,z)) * invDx);
+        REAL currentDistance =
+            fabs(distanceNew(oldField.cellCenter(x, y, z)) * invDx);
         if (currentDistance > maxCells)
           continue;
 
@@ -2926,7 +2963,7 @@ void VECTOR3_FIELD_3D::advectMacCormackLazy(const REAL dt, const VECTOR3_FIELD_3
         int index = x + y * xRes + z * slabSize;
 
         // backtrace, store those cells for extension later.
-        const VECTOR3 velocity = velocityGrid(oldField.cellCenter(x,y,z));
+        const VECTOR3 velocity = velocityGrid(oldField.cellCenter(x, y, z));
         REAL xTrace = x + dt * velocity[0];
         REAL yTrace = y + dt * velocity[1];
         REAL zTrace = z + dt * velocity[2];
@@ -2962,7 +2999,7 @@ void VECTOR3_FIELD_3D::advectMacCormackLazy(const REAL dt, const VECTOR3_FIELD_3
         const int i111 = x1 + y1xRes + z1slabSize;
 
         int threadID = omp_get_thread_num();
-        
+
         finalMapPerThread[threadID].insert(index);
         backwardExtensionMapPerThread[threadID].insert(i000);
         backwardExtensionMapPerThread[threadID].insert(i001);
@@ -2976,26 +3013,26 @@ void VECTOR3_FIELD_3D::advectMacCormackLazy(const REAL dt, const VECTOR3_FIELD_3
 
   // convert to a vector so OpenMP will support it
   vector<int> backwardExtensionVector;
-  //map<int, bool>::const_iterator iter;
+  // map<int, bool>::const_iterator iter;
   set<int>::const_iterator iter;
   for (int x = 0; x < totalThreads; x++)
-    for (iter = backwardExtensionMapPerThread[x].begin(); iter != backwardExtensionMapPerThread[x].end(); iter++)
+    for (iter = backwardExtensionMapPerThread[x].begin();
+         iter != backwardExtensionMapPerThread[x].end(); iter++)
       backwardExtensionVector.push_back(*iter);
 
-  // what cells need to be extended so that correct values appear 
+  // what cells need to be extended so that correct values appear
   // upon backwards advection?
   TIMER backwardExtensionTimer("Backward extension band");
 #pragma omp parallel
 #pragma omp for schedule(dynamic)
-  for (unsigned int i = 0; i < backwardExtensionVector.size(); i++)
-  {
+  for (unsigned int i = 0; i < backwardExtensionVector.size(); i++) {
     int index = backwardExtensionVector[i];
     const int z = index / slabSize;
     const int y = (index - z * slabSize) / xRes;
     const int x = index - z * slabSize - y * xRes;
 
     // backtrace, store those cells for extension later.
-    const VECTOR3 velocity = velocityGrid(oldField.cellCenter(x,y,z));
+    const VECTOR3 velocity = velocityGrid(oldField.cellCenter(x, y, z));
     REAL xTrace = x - dt * velocity[0];
     REAL yTrace = y - dt * velocity[1];
     REAL zTrace = z - dt * velocity[2];
@@ -3054,14 +3091,16 @@ void VECTOR3_FIELD_3D::advectMacCormackLazy(const REAL dt, const VECTOR3_FIELD_3
   TIMER mapMergeTimer("Map merge");
 
   // join together the extension maps
-  //map<int, bool> extensionMap;
+  // map<int, bool> extensionMap;
   set<int> extensionMap;
   for (int x = 0; x < totalThreads; x++)
-    for (iter = backwardExtensionMapPerThread[x].begin(); iter != backwardExtensionMapPerThread[x].end(); iter++)
+    for (iter = backwardExtensionMapPerThread[x].begin();
+         iter != backwardExtensionMapPerThread[x].end(); iter++)
       extensionMap.insert(*iter);
 
   for (int x = 0; x < totalThreads; x++)
-    for (iter = forwardExtensionMapPerThread[x].begin(); iter != forwardExtensionMapPerThread[x].end(); iter++)
+    for (iter = forwardExtensionMapPerThread[x].begin();
+         iter != forwardExtensionMapPerThread[x].end(); iter++)
       extensionMap.insert(*iter);
 
   // convert extension maps to a vectors
@@ -3071,26 +3110,30 @@ void VECTOR3_FIELD_3D::advectMacCormackLazy(const REAL dt, const VECTOR3_FIELD_3
 
   vector<int> finalIndices;
   for (int x = 0; x < totalThreads; x++)
-    for (iter = finalMapPerThread[x].begin(); iter != finalMapPerThread[x].end(); iter++)
+    for (iter = finalMapPerThread[x].begin();
+         iter != finalMapPerThread[x].end(); iter++)
       finalIndices.push_back(*iter);
 
   TIMER functionTimer2(__FUNCTION__);
 
   // perform Nacelle on all the tagged extension cells
-  FIELD_3D extendedOld = computeExtensionFieldSubset(distanceOld, oldField, extensionVector); 
+  FIELD_3D extendedOld =
+      computeExtensionFieldSubset(distanceOld, oldField, extensionVector);
 
-	FIELD_3D& phiN    = extendedOld;
-	FIELD_3D& phiN1   = newField;
-	FIELD_3D& phiHatN  = temp1;
-	FIELD_3D& phiHatN1 = temp2;
+  FIELD_3D &phiN = extendedOld;
+  FIELD_3D &phiN1 = newField;
+  FIELD_3D &phiHatN = temp1;
+  FIELD_3D &phiHatN1 = temp2;
 
   // TODO: don't do a copy here?
 
-  cout << " advecting forward ... ";flush(cout);
+  cout << " advecting forward ... ";
+  flush(cout);
   phiHatN1 = advectSubset(dt, velocityGrid, phiN, finalIndices);
 
-  cout << " advecting backward ... ";flush(cout);
-	phiHatN  = advectSubset(-1.0 * dt, velocityGrid, phiHatN1, finalIndices);
+  cout << " advecting backward ... ";
+  flush(cout);
+  phiHatN = advectSubset(-1.0 * dt, velocityGrid, phiHatN1, finalIndices);
 
   TIMER arithmeticTimer("Arithmetic field ops");
   phiN1.clear();
@@ -3099,21 +3142,22 @@ void VECTOR3_FIELD_3D::advectMacCormackLazy(const REAL dt, const VECTOR3_FIELD_3
   phiN1 *= 0.5;
   phiN1 += phiHatN1;
 
-  cout << " clamping ... ";flush(cout);
+  cout << " clamping ... ";
+  flush(cout);
 
-	// clamp any newly created extrema
-	clampExtremaSubset(dt, velocityGrid, extendedOld, newField, finalIndices);
+  // clamp any newly created extrema
+  clampExtremaSubset(dt, velocityGrid, extendedOld, newField, finalIndices);
 
-	// if the error estimate was bad, revert to first order
-	clampOutsideRaysSubset(dt, velocityGrid, extendedOld, phiHatN1, newField, finalIndices);
+  // if the error estimate was bad, revert to first order
+  clampOutsideRaysSubset(dt, velocityGrid, extendedOld, phiHatN1, newField,
+                         finalIndices);
 
   cout << " done." << endl;
 
   // cleanup
   TIMER cleanupTimer("Cleanup timer");
 
-  for (int x = 0; x < totalThreads; x++)
-  {
+  for (int x = 0; x < totalThreads; x++) {
     forwardExtensionMapPerThread[x].clear();
     finalMapPerThread[x].clear();
     backwardExtensionMapPerThread[x].clear();
@@ -3126,31 +3170,33 @@ void VECTOR3_FIELD_3D::advectMacCormackLazy(const REAL dt, const VECTOR3_FIELD_3
 ///////////////////////////////////////////////////////////////////////
 // Clamp the extrema generated by the BFECC error correction
 ///////////////////////////////////////////////////////////////////////
-void VECTOR3_FIELD_3D::clampExtrema(const REAL dt, const VECTOR3_FIELD_3D& velocityField, const FIELD_3D& oldField, FIELD_3D& newField)
-{
+void VECTOR3_FIELD_3D::clampExtrema(const REAL dt,
+                                    const VECTOR3_FIELD_3D &velocityField,
+                                    const FIELD_3D &oldField,
+                                    FIELD_3D &newField) {
   TIMER functionTimer(__FUNCTION__);
   const int xRes = oldField.xRes();
   const int yRes = oldField.yRes();
   const int zRes = oldField.zRes();
-  //const int slabSize = oldField.slabSize();
+  // const int slabSize = oldField.slabSize();
 
 #pragma omp parallel
 #pragma omp for schedule(dynamic)
-	for (int z = 1; z < zRes-1; z++)
-		for (int y = 1; y < yRes-1; y++)
-			for (int x = 1; x < xRes-1; x++)
-			{
-				//const int index = x + y * xRes + z * slabSize;
-				// backtrace
-        const VECTOR3 velocity = velocityField(oldField.cellCenter(x,y,z));
-        //if (norm2(velocity) < 1e-6) continue;
-        if (velocity.norm() < 1e-6) continue;
+  for (int z = 1; z < zRes - 1; z++)
+    for (int y = 1; y < yRes - 1; y++)
+      for (int x = 1; x < xRes - 1; x++) {
+        // const int index = x + y * xRes + z * slabSize;
+        //  backtrace
+        const VECTOR3 velocity = velocityField(oldField.cellCenter(x, y, z));
+        // if (norm2(velocity) < 1e-6) continue;
+        if (velocity.norm() < 1e-6)
+          continue;
 
         REAL xTrace = x - dt * velocity[0];
         REAL yTrace = y - dt * velocity[1];
         REAL zTrace = z - dt * velocity[2];
 
-				// clamp backtrace to grid boundaries
+        // clamp backtrace to grid boundaries
         xTrace = (xTrace < 0.5) ? 0.5 : xTrace;
         xTrace = (xTrace > xRes - 1.5) ? xRes - 1.5 : xTrace;
         yTrace = (yTrace < 0.5) ? 0.5 : yTrace;
@@ -3158,24 +3204,24 @@ void VECTOR3_FIELD_3D::clampExtrema(const REAL dt, const VECTOR3_FIELD_3D& veloc
         zTrace = (zTrace < 0.5) ? 0.5 : zTrace;
         zTrace = (zTrace > zRes - 1.5) ? zRes - 1.5 : zTrace;
 
-				// locate neighbors to interpolate
-				const int x0 = (int)xTrace;
-				const int x1 = x0 + 1;
-				const int y0 = (int)yTrace;
-				const int y1 = y0 + 1;
-				const int z0 = (int)zTrace;
-				const int z1 = z0 + 1;
+        // locate neighbors to interpolate
+        const int x0 = (int)xTrace;
+        const int x1 = x0 + 1;
+        const int y0 = (int)yTrace;
+        const int y1 = y0 + 1;
+        const int z0 = (int)zTrace;
+        const int z1 = z0 + 1;
 
-        REAL minField = oldField(x0,y0,z0);
+        REAL minField = oldField(x0, y0, z0);
         REAL maxField = minField;
 
-        const REAL x0y1z0 = oldField(x0,y1,z0);
-        const REAL x1y0z0 = oldField(x1,y0,z0);
-        const REAL x1y1z0 = oldField(x1,y1,z0);
-        const REAL x0y0z1 = oldField(x0,y0,z1);
-        const REAL x0y1z1 = oldField(x0,y1,z1);
-        const REAL x1y0z1 = oldField(x1,y0,z1);
-        const REAL x1y1z1 = oldField(x1,y1,z1);
+        const REAL x0y1z0 = oldField(x0, y1, z0);
+        const REAL x1y0z0 = oldField(x1, y0, z0);
+        const REAL x1y1z0 = oldField(x1, y1, z0);
+        const REAL x0y0z1 = oldField(x0, y0, z1);
+        const REAL x0y1z1 = oldField(x0, y1, z1);
+        const REAL x1y0z1 = oldField(x1, y0, z1);
+        const REAL x1y1z1 = oldField(x1, y1, z1);
 
         minField = (x0y1z0 < minField) ? x0y1z0 : minField;
         maxField = (x0y1z0 > maxField) ? x0y1z0 : maxField;
@@ -3198,18 +3244,21 @@ void VECTOR3_FIELD_3D::clampExtrema(const REAL dt, const VECTOR3_FIELD_3D& veloc
         minField = (x1y1z1 < minField) ? x1y1z1 : minField;
         maxField = (x1y1z1 > maxField) ? x1y1z1 : maxField;
 
-        const REAL newValue = newField(x,y,z);
+        const REAL newValue = newField(x, y, z);
 
-        newField(x,y,z) = (newValue > maxField) ? maxField : newValue;
-        newField(x,y,z) = (newValue < minField) ? minField : newValue;
+        newField(x, y, z) = (newValue > maxField) ? maxField : newValue;
+        newField(x, y, z) = (newValue < minField) ? minField : newValue;
       }
 }
 
 ///////////////////////////////////////////////////////////////////////
 // Clamp the extrema generated by the BFECC error correction
 ///////////////////////////////////////////////////////////////////////
-void VECTOR3_FIELD_3D::clampExtremaSubset(const REAL dt, const VECTOR3_FIELD_3D& velocityField, const FIELD_3D& oldField, FIELD_3D& newField, const vector<int>& subset)
-{
+void VECTOR3_FIELD_3D::clampExtremaSubset(const REAL dt,
+                                          const VECTOR3_FIELD_3D &velocityField,
+                                          const FIELD_3D &oldField,
+                                          FIELD_3D &newField,
+                                          const vector<int> &subset) {
   TIMER functionTimer(__FUNCTION__);
   const int xRes = oldField.xRes();
   const int yRes = oldField.yRes();
@@ -3218,17 +3267,17 @@ void VECTOR3_FIELD_3D::clampExtremaSubset(const REAL dt, const VECTOR3_FIELD_3D&
 
 #pragma omp parallel
 #pragma omp for schedule(dynamic)
-  for (unsigned int i = 0; i < subset.size(); i++)
-  {
+  for (unsigned int i = 0; i < subset.size(); i++) {
     const int index = subset[i];
     const int z = index / slabSize;
     const int y = (index - z * slabSize) / xRes;
     const int x = index - z * slabSize - y * xRes;
 
     // backtrace
-    const VECTOR3 velocity = velocityField(oldField.cellCenter(x,y,z));
-    //if (norm2(velocity) < 1e-6) continue;
-    if (velocity.norm() < 1e-6) continue;
+    const VECTOR3 velocity = velocityField(oldField.cellCenter(x, y, z));
+    // if (norm2(velocity) < 1e-6) continue;
+    if (velocity.norm() < 1e-6)
+      continue;
 
     REAL xTrace = x - dt * velocity[0];
     REAL yTrace = y - dt * velocity[1];
@@ -3250,16 +3299,16 @@ void VECTOR3_FIELD_3D::clampExtremaSubset(const REAL dt, const VECTOR3_FIELD_3D&
     const int z0 = (int)zTrace;
     const int z1 = z0 + 1;
 
-    REAL minField = oldField(x0,y0,z0);
+    REAL minField = oldField(x0, y0, z0);
     REAL maxField = minField;
 
-    const REAL x0y1z0 = oldField(x0,y1,z0);
-    const REAL x1y0z0 = oldField(x1,y0,z0);
-    const REAL x1y1z0 = oldField(x1,y1,z0);
-    const REAL x0y0z1 = oldField(x0,y0,z1);
-    const REAL x0y1z1 = oldField(x0,y1,z1);
-    const REAL x1y0z1 = oldField(x1,y0,z1);
-    const REAL x1y1z1 = oldField(x1,y1,z1);
+    const REAL x0y1z0 = oldField(x0, y1, z0);
+    const REAL x1y0z0 = oldField(x1, y0, z0);
+    const REAL x1y1z0 = oldField(x1, y1, z0);
+    const REAL x0y0z1 = oldField(x0, y0, z1);
+    const REAL x0y1z1 = oldField(x0, y1, z1);
+    const REAL x1y0z1 = oldField(x1, y0, z1);
+    const REAL x1y1z1 = oldField(x1, y1, z1);
 
     minField = (x0y1z0 < minField) ? x0y1z0 : minField;
     maxField = (x0y1z0 > maxField) ? x0y1z0 : maxField;
@@ -3282,169 +3331,172 @@ void VECTOR3_FIELD_3D::clampExtremaSubset(const REAL dt, const VECTOR3_FIELD_3D&
     minField = (x1y1z1 < minField) ? x1y1z1 : minField;
     maxField = (x1y1z1 > maxField) ? x1y1z1 : maxField;
 
-    const REAL newValue = newField(x,y,z);
+    const REAL newValue = newField(x, y, z);
 
-    newField(x,y,z) = (newValue > maxField) ? maxField : newValue;
-    newField(x,y,z) = (newValue < minField) ? minField : newValue;
+    newField(x, y, z) = (newValue > maxField) ? maxField : newValue;
+    newField(x, y, z) = (newValue < minField) ? minField : newValue;
   }
 }
 
 //////////////////////////////////////////////////////////////////////
-// Reverts any backtraces that go into boundaries back to first 
+// Reverts any backtraces that go into boundaries back to first
 // order -- in this case the error correction term was totally
 // incorrect
 //////////////////////////////////////////////////////////////////////
-void VECTOR3_FIELD_3D::clampOutsideRays(const REAL dt, const VECTOR3_FIELD_3D& velocityField, const FIELD_3D& oldField, const FIELD_3D& oldAdvection, FIELD_3D& newField)
-{
+void VECTOR3_FIELD_3D::clampOutsideRays(const REAL dt,
+                                        const VECTOR3_FIELD_3D &velocityField,
+                                        const FIELD_3D &oldField,
+                                        const FIELD_3D &oldAdvection,
+                                        FIELD_3D &newField) {
   TIMER functionTimer(__FUNCTION__);
   // this actually is correct -- should be using the res of the
   // low res grid
   const int sx = velocityField.xRes();
   const int sy = velocityField.yRes();
   const int sz = velocityField.zRes();
-  //const int slabSize = oldField.slabSize();
-	//for (int z = 1; z < sz - 1; z++)
-	//	for (int y = 1; y < sy - 1; y++)
-	//		for (int x = 1; x < sx - 1; x++)
+  // const int slabSize = oldField.slabSize();
+  // for (int z = 1; z < sz - 1; z++)
+  //	for (int y = 1; y < sy - 1; y++)
+  //		for (int x = 1; x < sx - 1; x++)
 #pragma omp parallel
 #pragma omp for schedule(dynamic)
-	for (int z = 0; z < oldField.zRes(); z++)
-		for (int y = 0; y < oldField.yRes(); y++)
-			for (int x = 0; x < oldField.xRes(); x++)
-			{
-				//const int index = x + y * sx + z * slabSize;
-				// backtrace
-        VECTOR3 velocity = velocityField(oldField.cellCenter(x,y,z));
+  for (int z = 0; z < oldField.zRes(); z++)
+    for (int y = 0; y < oldField.yRes(); y++)
+      for (int x = 0; x < oldField.xRes(); x++) {
+        // const int index = x + y * sx + z * slabSize;
+        //  backtrace
+        VECTOR3 velocity = velocityField(oldField.cellCenter(x, y, z));
 
         // this line seems to *significantly* reduce banding
-        //if (norm2(velocity) < 1e-6) continue;
-        if (velocity.norm() < 1e-6) continue;
+        // if (norm2(velocity) < 1e-6) continue;
+        if (velocity.norm() < 1e-6)
+          continue;
 
         velocity *= dt;
 
-				float xBackward = x + velocity[0];
-				float yBackward = y + velocity[1];
-				float zBackward = z + velocity[2];
+        float xBackward = x + velocity[0];
+        float yBackward = y + velocity[1];
+        float zBackward = z + velocity[2];
 
-				float xTrace    = x - velocity[0];
-				float yTrace    = x - velocity[1];
-				float zTrace    = x - velocity[2];
+        float xTrace = x - velocity[0];
+        float yTrace = x - velocity[1];
+        float zTrace = x - velocity[2];
 
-				// see if it goes outside the boundaries
-				bool hasObstacle = 
-					(zTrace < 1.0f)    || (zTrace > sz - 2.0f) ||
-					(yTrace < 1.0f)    || (yTrace > sy - 2.0f) ||
-					(xTrace < 1.0f)    || (xTrace > sx - 2.0f) ||
-					(zBackward < 1.0f) || (zBackward > sz - 2.0f) ||
-					(yBackward < 1.0f) || (yBackward > sy - 2.0f) ||
-					(xBackward < 1.0f) || (xBackward > sx - 2.0f);
+        // see if it goes outside the boundaries
+        bool hasObstacle = (zTrace < 1.0f) || (zTrace > sz - 2.0f) ||
+                           (yTrace < 1.0f) || (yTrace > sy - 2.0f) ||
+                           (xTrace < 1.0f) || (xTrace > sx - 2.0f) ||
+                           (zBackward < 1.0f) || (zBackward > sz - 2.0f) ||
+                           (yBackward < 1.0f) || (yBackward > sy - 2.0f) ||
+                           (xBackward < 1.0f) || (xBackward > sx - 2.0f);
 
-				// reuse old advection instead of doing another one...
-				//if(hasObstacle) { newField[index] = oldAdvection[index]; continue; }
-				if(hasObstacle) { newField(x,y,z) = oldAdvection(x,y,z); continue; }
+        // reuse old advection instead of doing another one...
+        // if(hasObstacle) { newField[index] = oldAdvection[index]; continue; }
+        if (hasObstacle) {
+          newField(x, y, z) = oldAdvection(x, y, z);
+          continue;
+        }
 
         /*
-				// clamp to prevent an out of bounds access when looking into
-				// the _obstacles array
-				zTrace = (zTrace < 0.5f) ? 0.5f : zTrace;
-				zTrace = (zTrace > sz - 1.5f) ? sz - 1.5f : zTrace;
-				yTrace = (yTrace < 0.5f) ? 0.5f : yTrace;
-				yTrace = (yTrace > sy - 1.5f) ? sy - 1.5f : yTrace;
-				xTrace = (xTrace < 0.5f) ? 0.5f : xTrace;
-				xTrace = (xTrace > sx - 1.5f) ? sx - 1.5f : xTrace;
+                                // clamp to prevent an out of bounds access when
+           looking into
+                                // the _obstacles array
+                                zTrace = (zTrace < 0.5f) ? 0.5f : zTrace;
+                                zTrace = (zTrace > sz - 1.5f) ? sz - 1.5f :
+           zTrace; yTrace = (yTrace < 0.5f) ? 0.5f : yTrace; yTrace = (yTrace >
+           sy - 1.5f) ? sy - 1.5f : yTrace; xTrace = (xTrace < 0.5f) ? 0.5f :
+           xTrace; xTrace = (xTrace > sx - 1.5f) ? sx - 1.5f : xTrace;
 
-				// locate neighbors to interpolate,
-				// do backward first since we will use the forward indices if a
-				// reversion is actually necessary
-				zBackward = (zBackward < 0.5f) ? 0.5f : zBackward;
-				zBackward = (zBackward > sz - 1.5f) ? sz - 1.5f : zBackward;
-				yBackward = (yBackward < 0.5f) ? 0.5f : yBackward;
-				yBackward = (yBackward > sy - 1.5f) ? sy - 1.5f : yBackward;
-				xBackward = (xBackward < 0.5f) ? 0.5f : xBackward;
-				xBackward = (xBackward > sx - 1.5f) ? sx - 1.5f : xBackward;
+                                // locate neighbors to interpolate,
+                                // do backward first since we will use the
+           forward indices if a
+                                // reversion is actually necessary
+                                zBackward = (zBackward < 0.5f) ? 0.5f :
+           zBackward; zBackward = (zBackward > sz - 1.5f) ? sz - 1.5f :
+           zBackward; yBackward = (yBackward < 0.5f) ? 0.5f : yBackward;
+                                yBackward = (yBackward > sy - 1.5f) ? sy - 1.5f
+           : yBackward; xBackward = (xBackward < 0.5f) ? 0.5f : xBackward;
+                                xBackward = (xBackward > sx - 1.5f) ? sx - 1.5f
+           : xBackward;
 
-				int x0 = (int)xBackward;
-				int x1 = x0 + 1;
-				int y0 = (int)yBackward;
-				int y1 = y0 + 1;
-				int z0 = (int)zBackward;
-				int z1 = z0 + 1;
-				if(obstacles && !hasObstacle) {
-					hasObstacle = hasObstacle || 
-						obstacles[x0 + y0 * sx + z0*slabSize] ||
-						obstacles[x0 + y1 * sx + z0*slabSize] ||
-						obstacles[x1 + y0 * sx + z0*slabSize] ||
-						obstacles[x1 + y1 * sx + z0*slabSize] ||
-						obstacles[x0 + y0 * sx + z1*slabSize] ||
-						obstacles[x0 + y1 * sx + z1*slabSize] ||
-						obstacles[x1 + y0 * sx + z1*slabSize] ||
-						obstacles[x1 + y1 * sx + z1*slabSize] ;
-				}
-				// reuse old advection instead of doing another one...
-				if(hasObstacle) { newField[index] = oldAdvection[index]; continue; }
+                                int x0 = (int)xBackward;
+                                int x1 = x0 + 1;
+                                int y0 = (int)yBackward;
+                                int y1 = y0 + 1;
+                                int z0 = (int)zBackward;
+                                int z1 = z0 + 1;
+                                if(obstacles && !hasObstacle) {
+                                        hasObstacle = hasObstacle ||
+                                                obstacles[x0 + y0 * sx +
+           z0*slabSize] || obstacles[x0 + y1 * sx + z0*slabSize] || obstacles[x1
+           + y0 * sx + z0*slabSize] || obstacles[x1 + y1 * sx + z0*slabSize] ||
+                                                obstacles[x0 + y0 * sx +
+           z1*slabSize] || obstacles[x0 + y1 * sx + z1*slabSize] || obstacles[x1
+           + y0 * sx + z1*slabSize] || obstacles[x1 + y1 * sx + z1*slabSize] ;
+                                }
+                                // reuse old advection instead of doing another
+           one... if(hasObstacle) { newField[index] = oldAdvection[index];
+           continue; }
 
-				x0 = (int)xTrace;
-				x1 = x0 + 1;
-				y0 = (int)yTrace;
-				y1 = y0 + 1;
-				z0 = (int)zTrace;
-				z1 = z0 + 1;
-				if(obstacles && !hasObstacle) {
-					hasObstacle = hasObstacle || 
-						obstacles[x0 + y0 * sx + z0*slabSize] ||
-						obstacles[x0 + y1 * sx + z0*slabSize] ||
-						obstacles[x1 + y0 * sx + z0*slabSize] ||
-						obstacles[x1 + y1 * sx + z0*slabSize] ||
-						obstacles[x0 + y0 * sx + z1*slabSize] ||
-						obstacles[x0 + y1 * sx + z1*slabSize] ||
-						obstacles[x1 + y0 * sx + z1*slabSize] ||
-						obstacles[x1 + y1 * sx + z1*slabSize] ;
-				} // obstacle array
-				// reuse old advection instead of doing another one...
-				if(hasObstacle) { newField[index] = oldAdvection[index]; continue; }
+                                x0 = (int)xTrace;
+                                x1 = x0 + 1;
+                                y0 = (int)yTrace;
+                                y1 = y0 + 1;
+                                z0 = (int)zTrace;
+                                z1 = z0 + 1;
+                                if(obstacles && !hasObstacle) {
+                                        hasObstacle = hasObstacle ||
+                                                obstacles[x0 + y0 * sx +
+           z0*slabSize] || obstacles[x0 + y1 * sx + z0*slabSize] || obstacles[x1
+           + y0 * sx + z0*slabSize] || obstacles[x1 + y1 * sx + z0*slabSize] ||
+                                                obstacles[x0 + y0 * sx +
+           z1*slabSize] || obstacles[x0 + y1 * sx + z1*slabSize] || obstacles[x1
+           + y0 * sx + z1*slabSize] || obstacles[x1 + y1 * sx + z1*slabSize] ;
+                                } // obstacle array
+                                // reuse old advection instead of doing another
+           one... if(hasObstacle) { newField[index] = oldAdvection[index];
+           continue; }
 
-				// see if either the forward or backward ray went into
-				// a boundary
-				if (hasObstacle) {
-					// get interpolation weights
-					float s1 = xTrace - x0;
-					float s0 = 1.0f - s1;
-					float t1 = yTrace - y0;
-					float t0 = 1.0f - t1;
-					float u1 = zTrace - z0;
-					float u0 = 1.0f - u1;
+                                // see if either the forward or backward ray
+           went into
+                                // a boundary
+                                if (hasObstacle) {
+                                        // get interpolation weights
+                                        float s1 = xTrace - x0;
+                                        float s0 = 1.0f - s1;
+                                        float t1 = yTrace - y0;
+                                        float t0 = 1.0f - t1;
+                                        float u1 = zTrace - z0;
+                                        float u0 = 1.0f - u1;
 
-					const int i000 = x0 + y0 * sx + z0 * slabSize;
-					const int i010 = x0 + y1 * sx + z0 * slabSize;
-					const int i100 = x1 + y0 * sx + z0 * slabSize;
-					const int i110 = x1 + y1 * sx + z0 * slabSize;
-					const int i001 = x0 + y0 * sx + z1 * slabSize;
-					const int i011 = x0 + y1 * sx + z1 * slabSize;
-					const int i101 = x1 + y0 * sx + z1 * slabSize;
-					const int i111 = x1 + y1 * sx + z1 * slabSize;
+                                        const int i000 = x0 + y0 * sx + z0 *
+           slabSize; const int i010 = x0 + y1 * sx + z0 * slabSize; const int
+           i100 = x1 + y0 * sx + z0 * slabSize; const int i110 = x1 + y1 * sx +
+           z0 * slabSize; const int i001 = x0 + y0 * sx + z1 * slabSize; const
+           int i011 = x0 + y1 * sx + z1 * slabSize; const int i101 = x1 + y0 *
+           sx + z1 * slabSize; const int i111 = x1 + y1 * sx + z1 * slabSize;
 
-					// interpolate, (indices could be computed once)
-					newField[index] = u0 * (s0 * (
-								t0 * oldField[i000] +
-								t1 * oldField[i010]) +
-							s1 * (t0 * oldField[i100] +
-								t1 * oldField[i110])) +
-						u1 * (s0 * (t0 * oldField[i001] +
-									t1 * oldField[i011]) +
-								s1 * (t0 * oldField[i101] +
-									t1 * oldField[i111])); 
-				}
+                                        // interpolate, (indices could be
+           computed once) newField[index] = u0 * (s0 * ( t0 * oldField[i000] +
+                                                                t1 *
+           oldField[i010]) + s1 * (t0 * oldField[i100] + t1 * oldField[i110])) +
+                                                u1 * (s0 * (t0 * oldField[i001]
+           + t1 * oldField[i011]) + s1 * (t0 * oldField[i101] + t1 *
+           oldField[i111]));
+                                }
         */
-			} // xyz
+      } // xyz
 }
 
 //////////////////////////////////////////////////////////////////////
-// Reverts any backtraces that go into boundaries back to first 
+// Reverts any backtraces that go into boundaries back to first
 // order -- in this case the error correction term was totally
 // incorrect
 //////////////////////////////////////////////////////////////////////
-void VECTOR3_FIELD_3D::clampOutsideRaysSubset(const REAL dt, const VECTOR3_FIELD_3D& velocityField, const FIELD_3D& oldField, const FIELD_3D& oldAdvection, FIELD_3D& newField, const vector<int>& subset)
-{
+void VECTOR3_FIELD_3D::clampOutsideRaysSubset(
+    const REAL dt, const VECTOR3_FIELD_3D &velocityField,
+    const FIELD_3D &oldField, const FIELD_3D &oldAdvection, FIELD_3D &newField,
+    const vector<int> &subset) {
   TIMER functionTimer(__FUNCTION__);
   // this actually is correct -- should be using the res of the
   // low res grid
@@ -3454,19 +3506,19 @@ void VECTOR3_FIELD_3D::clampOutsideRaysSubset(const REAL dt, const VECTOR3_FIELD
   const int xRes = oldField.xRes();
   const int slabSize = oldField.slabSize();
 
-  for (unsigned int i = 0; i < subset.size(); i++)
-  {
+  for (unsigned int i = 0; i < subset.size(); i++) {
     const int index = subset[i];
     const int z = index / slabSize;
     const int y = (index - z * slabSize) / xRes;
     const int x = index - z * slabSize - y * xRes;
-    
+
     // backtrace
-    VECTOR3 velocity = velocityField(oldField.cellCenter(x,y,z));
+    VECTOR3 velocity = velocityField(oldField.cellCenter(x, y, z));
 
     // this line seems to *significantly* reduce banding
-    //if (norm2(velocity) < 1e-6) continue;
-    if (velocity.norm() < 1e-6) continue;
+    // if (norm2(velocity) < 1e-6) continue;
+    if (velocity.norm() < 1e-6)
+      continue;
 
     velocity *= dt;
 
@@ -3474,22 +3526,24 @@ void VECTOR3_FIELD_3D::clampOutsideRaysSubset(const REAL dt, const VECTOR3_FIELD
     float yBackward = y + velocity[1];
     float zBackward = z + velocity[2];
 
-    float xTrace    = x - velocity[0];
-    float yTrace    = x - velocity[1];
-    float zTrace    = x - velocity[2];
+    float xTrace = x - velocity[0];
+    float yTrace = x - velocity[1];
+    float zTrace = x - velocity[2];
 
     // see if it goes outside the boundaries
-    bool hasObstacle = 
-      (zTrace < 1.0f)    || (zTrace > sz - 2.0f) ||
-      (yTrace < 1.0f)    || (yTrace > sy - 2.0f) ||
-      (xTrace < 1.0f)    || (xTrace > sx - 2.0f) ||
-      (zBackward < 1.0f) || (zBackward > sz - 2.0f) ||
-      (yBackward < 1.0f) || (yBackward > sy - 2.0f) ||
-      (xBackward < 1.0f) || (xBackward > sx - 2.0f);
+    bool hasObstacle = (zTrace < 1.0f) || (zTrace > sz - 2.0f) ||
+                       (yTrace < 1.0f) || (yTrace > sy - 2.0f) ||
+                       (xTrace < 1.0f) || (xTrace > sx - 2.0f) ||
+                       (zBackward < 1.0f) || (zBackward > sz - 2.0f) ||
+                       (yBackward < 1.0f) || (yBackward > sy - 2.0f) ||
+                       (xBackward < 1.0f) || (xBackward > sx - 2.0f);
 
     // reuse old advection instead of doing another one...
-    //if(hasObstacle) { newField[index] = oldAdvection[index]; continue; }
-    if(hasObstacle) { newField(x,y,z) = oldAdvection(x,y,z); continue; }
+    // if(hasObstacle) { newField[index] = oldAdvection[index]; continue; }
+    if (hasObstacle) {
+      newField(x, y, z) = oldAdvection(x, y, z);
+      continue;
+    }
 
     /*
     // clamp to prevent an out of bounds access when looking into
@@ -3518,7 +3572,7 @@ void VECTOR3_FIELD_3D::clampOutsideRaysSubset(const REAL dt, const VECTOR3_FIELD
     int z0 = (int)zBackward;
     int z1 = z0 + 1;
     if(obstacles && !hasObstacle) {
-      hasObstacle = hasObstacle || 
+      hasObstacle = hasObstacle ||
         obstacles[x0 + y0 * sx + z0*slabSize] ||
         obstacles[x0 + y1 * sx + z0*slabSize] ||
         obstacles[x1 + y0 * sx + z0*slabSize] ||
@@ -3538,7 +3592,7 @@ void VECTOR3_FIELD_3D::clampOutsideRaysSubset(const REAL dt, const VECTOR3_FIELD
     z0 = (int)zTrace;
     z1 = z0 + 1;
     if(obstacles && !hasObstacle) {
-      hasObstacle = hasObstacle || 
+      hasObstacle = hasObstacle ||
         obstacles[x0 + y0 * sx + z0*slabSize] ||
         obstacles[x0 + y1 * sx + z0*slabSize] ||
         obstacles[x1 + y0 * sx + z0*slabSize] ||
@@ -3580,7 +3634,7 @@ void VECTOR3_FIELD_3D::clampOutsideRaysSubset(const REAL dt, const VECTOR3_FIELD
         u1 * (s0 * (t0 * oldField[i001] +
               t1 * oldField[i011]) +
             s1 * (t0 * oldField[i101] +
-              t1 * oldField[i111])); 
+              t1 * oldField[i111]));
     }
     */
   } // xyz
@@ -3589,8 +3643,7 @@ void VECTOR3_FIELD_3D::clampOutsideRaysSubset(const REAL dt, const VECTOR3_FIELD
 ///////////////////////////////////////////////////////////////////////
 // real-valued cell center coordinates
 ///////////////////////////////////////////////////////////////////////
-VECTOR3 VECTOR3_FIELD_3D::cellCenter(int x, int y, int z) const
-{
+VECTOR3 VECTOR3_FIELD_3D::cellCenter(int x, int y, int z) const {
   VECTOR3 halfLengths = (REAL)0.5 * _lengths;
 
   // set it to the lower corner
@@ -3611,10 +3664,10 @@ VECTOR3 VECTOR3_FIELD_3D::cellCenter(int x, int y, int z) const
 
 ///////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////
-void VECTOR3_FIELD_3D::resizeAndWipe(int xRes, int yRes, int zRes, const VECTOR3& center, const VECTOR3& lengths)
-{
-  if (_xRes == xRes && _yRes == yRes && _zRes == zRes)
-  {
+void VECTOR3_FIELD_3D::resizeAndWipe(int xRes, int yRes, int zRes,
+                                     const VECTOR3 &center,
+                                     const VECTOR3 &lengths) {
+  if (_xRes == xRes && _yRes == yRes && _zRes == zRes) {
     _center = center;
     _lengths = lengths;
     clear();
@@ -3625,7 +3678,8 @@ void VECTOR3_FIELD_3D::resizeAndWipe(int xRes, int yRes, int zRes, const VECTOR3
     return;
   }
 
-  if (_data) delete[] _data;
+  if (_data)
+    delete[] _data;
 
   _xRes = xRes;
   _yRes = yRes;
@@ -3641,12 +3695,11 @@ void VECTOR3_FIELD_3D::resizeAndWipe(int xRes, int yRes, int zRes, const VECTOR3
 
   try {
     _data = new VECTOR3[_totalCells];
-  }
-  catch(std::bad_alloc& exc)
-  {
-    cout << " Failed to allocate " << _xRes << " " << _yRes << " " << _zRes << " VECTOR3_FIELD_3D!" << endl;
+  } catch (std::bad_alloc &exc) {
+    cout << " Failed to allocate " << _xRes << " " << _yRes << " " << _zRes
+         << " VECTOR3_FIELD_3D!" << endl;
     double bytes = _xRes * _yRes * _zRes * sizeof(VECTOR3);
-    cout <<  bytes / pow(2.0,20.0) << " MB needed" << endl;
+    cout << bytes / pow(2.0, 20.0) << " MB needed" << endl;
     exit(0);
   }
 
@@ -3656,115 +3709,98 @@ void VECTOR3_FIELD_3D::resizeAndWipe(int xRes, int yRes, int zRes, const VECTOR3
 ///////////////////////////////////////////////////////////////////////
 // normalize all the vectors in the field
 ///////////////////////////////////////////////////////////////////////
-void VECTOR3_FIELD_3D::normalize()
-{
+void VECTOR3_FIELD_3D::normalize() {
   for (int x = 0; x < _totalCells; x++)
     _data[x].normalize();
 }
 
 ///////////////////////////////////////////////////////////////////////
-// copy values out into the border, assuming that "borderSize" is the 
+// copy values out into the border, assuming that "borderSize" is the
 // width of the grid padding
 ///////////////////////////////////////////////////////////////////////
-void VECTOR3_FIELD_3D::copyIntoBorder(int borderSize)
-{
+void VECTOR3_FIELD_3D::copyIntoBorder(int borderSize) {
   TIMER functionTimer(__FUNCTION__);
   for (int z = 0; z < _zRes; z++)
     for (int y = 0; y < _yRes; y++)
-      for (int x = 0; x < _xRes; x++)
-      {
-        if (x == borderSize)
-        {
-          VECTOR3 value = (*this)(x,y,z);
+      for (int x = 0; x < _xRes; x++) {
+        if (x == borderSize) {
+          VECTOR3 value = (*this)(x, y, z);
           for (int i = 1; i <= borderSize; i++)
-            (*this)(x - i,y,z) = value;
+            (*this)(x - i, y, z) = value;
         }
-        if (x == _xRes - 1 - borderSize)
-        {
-          VECTOR3 value = (*this)(x,y,z);
+        if (x == _xRes - 1 - borderSize) {
+          VECTOR3 value = (*this)(x, y, z);
           for (int i = 1; i <= borderSize; i++)
-            (*this)(x + i,y,z) = value;
-        }              
-        if (y == borderSize)
-        {
-          VECTOR3 value = (*this)(x,y,z);
-          for (int i = 1; i <= borderSize; i++)
-            (*this)(x,y - i,z) = value;
+            (*this)(x + i, y, z) = value;
         }
-        if (y == _yRes - 1 - borderSize)
-        {
-          VECTOR3 value = (*this)(x,y,z);
+        if (y == borderSize) {
+          VECTOR3 value = (*this)(x, y, z);
           for (int i = 1; i <= borderSize; i++)
-            (*this)(x,y+i,z) = value;
-        }              
-        if (z == borderSize)
-        {
-          VECTOR3 value = (*this)(x,y,z);
-          for (int i = 1; i <= borderSize; i++)
-            (*this)(x,y,z - i) = value;
+            (*this)(x, y - i, z) = value;
         }
-        if (z == _zRes - 1 - borderSize)
-        {
-          VECTOR3 value = (*this)(x,y,z);
+        if (y == _yRes - 1 - borderSize) {
+          VECTOR3 value = (*this)(x, y, z);
           for (int i = 1; i <= borderSize; i++)
-            (*this)(x,y,z+i) = value;
+            (*this)(x, y + i, z) = value;
+        }
+        if (z == borderSize) {
+          VECTOR3 value = (*this)(x, y, z);
+          for (int i = 1; i <= borderSize; i++)
+            (*this)(x, y, z - i) = value;
+        }
+        if (z == _zRes - 1 - borderSize) {
+          VECTOR3 value = (*this)(x, y, z);
+          for (int i = 1; i <= borderSize; i++)
+            (*this)(x, y, z + i) = value;
         }
 
         // handle the corners
-        if (x == borderSize && z == borderSize)
-        {
-          VECTOR3 value = (*this)(x,y,z);
+        if (x == borderSize && z == borderSize) {
+          VECTOR3 value = (*this)(x, y, z);
           for (int i = 1; i <= borderSize; i++)
             for (int j = 1; j <= borderSize; j++)
-              (*this)(x - i,y,z-j) = value;
+              (*this)(x - i, y, z - j) = value;
         }
-        if (x == _xRes - 1 - borderSize && z == _zRes - 1 - borderSize)
-        {
-          VECTOR3 value = (*this)(x,y,z);
+        if (x == _xRes - 1 - borderSize && z == _zRes - 1 - borderSize) {
+          VECTOR3 value = (*this)(x, y, z);
           for (int i = 1; i <= borderSize; i++)
             for (int j = 1; j <= borderSize; j++)
-              (*this)(x + i,y,z+j) = value;
+              (*this)(x + i, y, z + j) = value;
         }
 
-        if (z == borderSize && y == borderSize)
-        {
-          VECTOR3 value = (*this)(x,y,z);
+        if (z == borderSize && y == borderSize) {
+          VECTOR3 value = (*this)(x, y, z);
           for (int i = 1; i <= borderSize; i++)
             for (int j = 1; j <= borderSize; j++)
-              (*this)(x,y - j,z -i) = value;
+              (*this)(x, y - j, z - i) = value;
         }
-        if (z == _xRes - 1 - borderSize && y == _yRes - 1 - borderSize)
-        {
-          VECTOR3 value = (*this)(x,y,z);
+        if (z == _xRes - 1 - borderSize && y == _yRes - 1 - borderSize) {
+          VECTOR3 value = (*this)(x, y, z);
           for (int i = 1; i <= borderSize; i++)
             for (int j = 1; j <= borderSize; j++)
-              (*this)(x,y + j,z+i) = value;
+              (*this)(x, y + j, z + i) = value;
         }
-
       }
 }
 
 ///////////////////////////////////////////////////////////////////////
 // pass back a field with a new padding of size "paddingSize"
 ///////////////////////////////////////////////////////////////////////
-VECTOR3_FIELD_3D VECTOR3_FIELD_3D::withAddedPadding(int paddingSize) const
-{
+VECTOR3_FIELD_3D VECTOR3_FIELD_3D::withAddedPadding(int paddingSize) const {
   // new length, with padding
   VECTOR3 newLengths = _lengths;
   newLengths[0] += paddingSize * 2 * _dx;
   newLengths[1] += paddingSize * 2 * _dx;
   newLengths[2] += paddingSize * 2 * _dx;
 
-  VECTOR3_FIELD_3D final(_xRes + 2 * paddingSize, 
-                         _yRes + 2 * paddingSize, 
+  VECTOR3_FIELD_3D final(_xRes + 2 * paddingSize, _yRes + 2 * paddingSize,
                          _zRes + 2 * paddingSize, _center, newLengths);
 
   for (int z = 0; z < _zRes; z++)
     for (int y = 0; y < _yRes; y++)
       for (int x = 0; x < _xRes; x++)
-        final(x + paddingSize,
-              y + paddingSize,
-              z + paddingSize) = (*this)(x,y,z);
+        final(x + paddingSize, y + paddingSize, z + paddingSize) =
+            (*this)(x, y, z);
 
   final.copyIntoBorder(paddingSize);
 
@@ -3777,55 +3813,54 @@ VECTOR3_FIELD_3D VECTOR3_FIELD_3D::withAddedPadding(int paddingSize) const
 // For each cell center in input, compute the position of the closest point
 // in the surface field
 //////////////////////////////////////////////////////////////////////
-VECTOR3_FIELD_3D VECTOR3_FIELD_3D::computeClosestPoints(const FIELD_3D& input, const FIELD_3D& surfaceField, bool verbose)
-{
+VECTOR3_FIELD_3D VECTOR3_FIELD_3D::computeClosestPoints(
+    const FIELD_3D &input, const FIELD_3D &surfaceField, bool verbose) {
   TIMER functionTimer(__FUNCTION__);
   VECTOR3_FIELD_3D final = VECTOR3_FIELD_3D::cellCenters(input);
   VECTOR3_FIELD_3D targetGradient = VECTOR3_FIELD_3D::gradient(surfaceField);
-  
+
   // DEBUG
-  //int maxSteps = 1000;
+  // int maxSteps = 1000;
   int maxSteps = 100;
-  //int maxSteps = 10;
-  //int maxSeen = 0;
+  // int maxSteps = 10;
+  // int maxSeen = 0;
 
   int xRes = input.xRes();
   int yRes = input.yRes();
   int zRes = input.zRes();
 
   REAL fictionalDt = 1.0;
-  //REAL fictionalDt = 0.95;
-  //REAL fictionalDt = 0.5;
+  // REAL fictionalDt = 0.95;
+  // REAL fictionalDt = 0.5;
 
   int maxOuts = 0;
   int totalIterations = 0;
 
 #pragma omp parallel
-#pragma omp for  schedule(static)
+#pragma omp for schedule(static)
   for (int z = 0; z < zRes; z++)
     for (int y = 0; y < yRes; y++)
-      for (int x = 0; x < xRes; x++)
-      {
+      for (int x = 0; x < xRes; x++) {
         REAL diff = 1;
         int steps = 0;
-        VECTOR3& position = final(x,y,z);
+        VECTOR3 &position = final(x, y, z);
         VECTOR3 targetDelta = targetGradient(position);
 
-        while (diff > 1e-6 && steps < maxSteps)
-        {
+        while (diff > 1e-6 && steps < maxSteps) {
           REAL targetDistance = surfaceField(position);
           diff = fabs(targetDistance);
 
           // if the gradient is zero, stop trying, because it probably
           // wandered off the grid
-          //if (norm2(targetDelta) < 1e-6) break;
-          if (targetDelta.norm() < 1e-6) break;
+          // if (norm2(targetDelta) < 1e-6) break;
+          if (targetDelta.norm() < 1e-6)
+            break;
 
-          // go ahead and always do first -- second gives the occasional wacky value
-          // that throws off the stability of the simulation
+          // go ahead and always do first -- second gives the occasional wacky
+          // value that throws off the stability of the simulation
           targetDelta.normalize();
-          //VECTOR3 move = (targetDistance) * targetDelta;
-          VECTOR3 move = (targetDistance) * targetDelta * fictionalDt;
+          // VECTOR3 move = (targetDistance) * targetDelta;
+          VECTOR3 move = (targetDistance)*targetDelta * fictionalDt;
 
           position = position - move;
 
@@ -3837,16 +3872,19 @@ VECTOR3_FIELD_3D VECTOR3_FIELD_3D::computeClosestPoints(const FIELD_3D& input, c
         /*
         if (steps == maxSteps)
         {
-#pragma omp atomic 
+#pragma omp atomic
           maxOuts++;
         }
         */
 #pragma omp atomic
-        totalIterations += steps; 
+        totalIterations += steps;
       }
 
-  cout << " Closest point iteration (full grid) maxed out " << 100.0f * (REAL)maxOuts / (xRes * yRes * zRes) << "% of the time" << endl;
-  cout << " Mean number of iterations: " << (REAL)totalIterations / (xRes * yRes * zRes) << endl;
+  cout << " Closest point iteration (full grid) maxed out "
+       << 100.0f * (REAL)maxOuts / (xRes * yRes * zRes) << "% of the time"
+       << endl;
+  cout << " Mean number of iterations: "
+       << (REAL)totalIterations / (xRes * yRes * zRes) << endl;
 
   return final;
 }
@@ -3857,11 +3895,13 @@ VECTOR3_FIELD_3D VECTOR3_FIELD_3D::computeClosestPoints(const FIELD_3D& input, c
 // For each cell center in input, compute the position of the closest point
 // in the surface field
 //////////////////////////////////////////////////////////////////////
-void VECTOR3_FIELD_3D::computeClosestPointsNarrowBand(const FIELD_3D& input, const FIELD_3D& surfaceField, const int maxCells, VECTOR3_FIELD_3D& final)
-{
+void VECTOR3_FIELD_3D::computeClosestPointsNarrowBand(
+    const FIELD_3D &input, const FIELD_3D &surfaceField, const int maxCells,
+    VECTOR3_FIELD_3D &final) {
   TIMER functionTimer(__FUNCTION__);
-  const VECTOR3_FIELD_3D targetGradient = VECTOR3_FIELD_3D::gradient(surfaceField);
-  
+  const VECTOR3_FIELD_3D targetGradient =
+      VECTOR3_FIELD_3D::gradient(surfaceField);
+
   const REAL invDx = 1.0 / surfaceField.dx();
 
   /*
@@ -3889,41 +3929,40 @@ void VECTOR3_FIELD_3D::computeClosestPointsNarrowBand(const FIELD_3D& input, con
   const int yRes = input.yRes();
   const int zRes = input.zRes();
 
-  //REAL fictionalDt = 1;
-  //REAL fictionalDt = 0.5;
+  // REAL fictionalDt = 1;
+  // REAL fictionalDt = 0.5;
 
-  const VECTOR3 lowerCorner = input.center() - (REAL)0.5 * input.lengths(); 
-  const VECTOR3 upperCorner = input.center() + (REAL)0.5 * input.lengths(); 
+  const VECTOR3 lowerCorner = input.center() - (REAL)0.5 * input.lengths();
+  const VECTOR3 upperCorner = input.center() + (REAL)0.5 * input.lengths();
 
 #pragma omp parallel
-#pragma omp for  schedule(dynamic)
+#pragma omp for schedule(dynamic)
   for (int z = 0; z < zRes; z++)
     for (int y = 0; y < yRes; y++)
-      for (int x = 0; x < xRes; x++)
-      {
-        REAL currentDistance = fabs(surfaceField(x,y,z) * invDx);
-        if (currentDistance >= maxCells) continue;
+      for (int x = 0; x < xRes; x++) {
+        REAL currentDistance = fabs(surfaceField(x, y, z) * invDx);
+        if (currentDistance >= maxCells)
+          continue;
 
         REAL diff = 1;
         int steps = 0;
-        VECTOR3& position = final(x,y,z);
-        position = input.cellCenter(x,y,z);
+        VECTOR3 &position = final(x, y, z);
+        position = input.cellCenter(x, y, z);
         VECTOR3 targetDelta = targetGradient(position);
 
-        while (diff > 1e-6 && steps < maxSteps)
-        {
+        while (diff > 1e-6 && steps < maxSteps) {
           REAL targetDistance = surfaceField(position);
           diff = fabs(targetDistance);
 
           // if the gradient is zero, stop trying, because it probably
           // wandered off the grid
-          //if (norm2(targetDelta) < 1e-6) break;
+          // if (norm2(targetDelta) < 1e-6) break;
 
-          // go ahead and always do first -- second gives the occasional wacky value
-          // that throws off the stability of the simulation
+          // go ahead and always do first -- second gives the occasional wacky
+          // value that throws off the stability of the simulation
           targetDelta.normalize();
-          VECTOR3 move = (targetDistance) * targetDelta;
-          //VECTOR3 move = (targetDistance) * targetDelta * fictionalDt;
+          VECTOR3 move = (targetDistance)*targetDelta;
+          // VECTOR3 move = (targetDistance) * targetDelta * fictionalDt;
 
           position = position - move;
 
@@ -3933,29 +3972,34 @@ void VECTOR3_FIELD_3D::computeClosestPointsNarrowBand(const FIELD_3D& input, con
         }
 
         // clamp position to something reasonable
-        position[0] = (position[0] < lowerCorner[0]) ? lowerCorner[0] : position[0]; 
-        position[1] = (position[1] < lowerCorner[1]) ? lowerCorner[1] : position[1]; 
-        position[2] = (position[2] < lowerCorner[2]) ? lowerCorner[2] : position[2]; 
+        position[0] =
+            (position[0] < lowerCorner[0]) ? lowerCorner[0] : position[0];
+        position[1] =
+            (position[1] < lowerCorner[1]) ? lowerCorner[1] : position[1];
+        position[2] =
+            (position[2] < lowerCorner[2]) ? lowerCorner[2] : position[2];
 
-        position[0] = (position[0] > upperCorner[0]) ? upperCorner[0] : position[0]; 
-        position[1] = (position[1] > upperCorner[1]) ? upperCorner[1] : position[1]; 
-        position[2] = (position[2] > upperCorner[2]) ? upperCorner[2] : position[2]; 
+        position[0] =
+            (position[0] > upperCorner[0]) ? upperCorner[0] : position[0];
+        position[1] =
+            (position[1] > upperCorner[1]) ? upperCorner[1] : position[1];
+        position[2] =
+            (position[2] > upperCorner[2]) ? upperCorner[2] : position[2];
       }
 }
 
 //////////////////////////////////////////////////////////////////////
 // getting nans and infs from reading in the Houdini file -- stomp them here.
 //////////////////////////////////////////////////////////////////////
-void VECTOR3_FIELD_3D::fixNanInfs()
-{
+void VECTOR3_FIELD_3D::fixNanInfs() {
 #pragma omp parallel
-#pragma omp for  schedule(dynamic)
+#pragma omp for schedule(dynamic)
   for (int z = 0; z < _zRes; z++)
     for (int y = 0; y < _yRes; y++)
       for (int x = 0; x < _xRes; x++)
         for (int i = 0; i < 3; i++)
-          if (isinf((*this)(x,y,z)[i]) || isnan((*this)(x,y,z)[i]))
-            (*this)(x,y,z)[i] = 0;
+          if (isinf((*this)(x, y, z)[i]) || isnan((*this)(x, y, z)[i]))
+            (*this)(x, y, z)[i] = 0;
 }
 
-} // ANGLE
+} // namespace HOBAK

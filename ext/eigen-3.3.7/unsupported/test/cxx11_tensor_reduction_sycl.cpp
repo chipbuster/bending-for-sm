@@ -20,9 +20,7 @@
 #include "main.h"
 #include <unsupported/Eigen/CXX11/Tensor>
 
-
-
-static void test_full_reductions_sycl(const Eigen::SyclDevice&  sycl_device) {
+static void test_full_reductions_sycl(const Eigen::SyclDevice &sycl_device) {
 
   const int num_rows = 452;
   const int num_cols = 765;
@@ -36,15 +34,18 @@ static void test_full_reductions_sycl(const Eigen::SyclDevice&  sycl_device) {
 
   full_redux = in.sum();
 
-  float* gpu_in_data = static_cast<float*>(sycl_device.allocate(in.dimensions().TotalSize()*sizeof(float)));
-  float* gpu_out_data =(float*)sycl_device.allocate(sizeof(float));
+  float *gpu_in_data = static_cast<float *>(
+      sycl_device.allocate(in.dimensions().TotalSize() * sizeof(float)));
+  float *gpu_out_data = (float *)sycl_device.allocate(sizeof(float));
 
-  TensorMap<Tensor<float, 2> >  in_gpu(gpu_in_data, tensorRange);
-  TensorMap<Tensor<float, 0> >  out_gpu(gpu_out_data);
+  TensorMap<Tensor<float, 2>> in_gpu(gpu_in_data, tensorRange);
+  TensorMap<Tensor<float, 0>> out_gpu(gpu_out_data);
 
-  sycl_device.memcpyHostToDevice(gpu_in_data, in.data(),(in.dimensions().TotalSize())*sizeof(float));
+  sycl_device.memcpyHostToDevice(gpu_in_data, in.data(),
+                                 (in.dimensions().TotalSize()) * sizeof(float));
   out_gpu.device(sycl_device) = in_gpu.sum();
-  sycl_device.memcpyDeviceToHost(full_redux_gpu.data(), gpu_out_data, sizeof(float));
+  sycl_device.memcpyDeviceToHost(full_redux_gpu.data(), gpu_out_data,
+                                 sizeof(float));
   // Check that the CPU and GPU reductions return the same result.
   VERIFY_IS_APPROX(full_redux_gpu(), full_redux());
 
@@ -52,7 +53,8 @@ static void test_full_reductions_sycl(const Eigen::SyclDevice&  sycl_device) {
   sycl_device.deallocate(gpu_out_data);
 }
 
-static void test_first_dim_reductions_sycl(const Eigen::SyclDevice& sycl_device) {
+static void
+test_first_dim_reductions_sycl(const Eigen::SyclDevice &sycl_device) {
 
   int dim_x = 145;
   int dim_y = 1;
@@ -69,28 +71,34 @@ static void test_first_dim_reductions_sycl(const Eigen::SyclDevice& sycl_device)
 
   in.setRandom();
 
-  redux= in.sum(red_axis);
+  redux = in.sum(red_axis);
 
-  float* gpu_in_data = static_cast<float*>(sycl_device.allocate(in.dimensions().TotalSize()*sizeof(float)));
-  float* gpu_out_data = static_cast<float*>(sycl_device.allocate(redux_gpu.dimensions().TotalSize()*sizeof(float)));
+  float *gpu_in_data = static_cast<float *>(
+      sycl_device.allocate(in.dimensions().TotalSize() * sizeof(float)));
+  float *gpu_out_data = static_cast<float *>(
+      sycl_device.allocate(redux_gpu.dimensions().TotalSize() * sizeof(float)));
 
-  TensorMap<Tensor<float, 3> >  in_gpu(gpu_in_data, tensorRange);
-  TensorMap<Tensor<float, 2> >  out_gpu(gpu_out_data, reduced_tensorRange);
+  TensorMap<Tensor<float, 3>> in_gpu(gpu_in_data, tensorRange);
+  TensorMap<Tensor<float, 2>> out_gpu(gpu_out_data, reduced_tensorRange);
 
-  sycl_device.memcpyHostToDevice(gpu_in_data, in.data(),(in.dimensions().TotalSize())*sizeof(float));
+  sycl_device.memcpyHostToDevice(gpu_in_data, in.data(),
+                                 (in.dimensions().TotalSize()) * sizeof(float));
   out_gpu.device(sycl_device) = in_gpu.sum(red_axis);
-  sycl_device.memcpyDeviceToHost(redux_gpu.data(), gpu_out_data, redux_gpu.dimensions().TotalSize()*sizeof(float));
+  sycl_device.memcpyDeviceToHost(redux_gpu.data(), gpu_out_data,
+                                 redux_gpu.dimensions().TotalSize() *
+                                     sizeof(float));
 
   // Check that the CPU and GPU reductions return the same result.
-  for(int j=0; j<reduced_tensorRange[0]; j++ )
-    for(int k=0; k<reduced_tensorRange[1]; k++ )
-      VERIFY_IS_APPROX(redux_gpu(j,k), redux(j,k));
+  for (int j = 0; j < reduced_tensorRange[0]; j++)
+    for (int k = 0; k < reduced_tensorRange[1]; k++)
+      VERIFY_IS_APPROX(redux_gpu(j, k), redux(j, k));
 
   sycl_device.deallocate(gpu_in_data);
   sycl_device.deallocate(gpu_out_data);
 }
 
-static void test_last_dim_reductions_sycl(const Eigen::SyclDevice &sycl_device) {
+static void
+test_last_dim_reductions_sycl(const Eigen::SyclDevice &sycl_device) {
 
   int dim_x = 567;
   int dim_y = 1;
@@ -107,25 +115,29 @@ static void test_last_dim_reductions_sycl(const Eigen::SyclDevice &sycl_device) 
 
   in.setRandom();
 
-  redux= in.sum(red_axis);
+  redux = in.sum(red_axis);
 
-  float* gpu_in_data = static_cast<float*>(sycl_device.allocate(in.dimensions().TotalSize()*sizeof(float)));
-  float* gpu_out_data = static_cast<float*>(sycl_device.allocate(redux_gpu.dimensions().TotalSize()*sizeof(float)));
+  float *gpu_in_data = static_cast<float *>(
+      sycl_device.allocate(in.dimensions().TotalSize() * sizeof(float)));
+  float *gpu_out_data = static_cast<float *>(
+      sycl_device.allocate(redux_gpu.dimensions().TotalSize() * sizeof(float)));
 
-  TensorMap<Tensor<float, 3> >  in_gpu(gpu_in_data, tensorRange);
-  TensorMap<Tensor<float, 2> >  out_gpu(gpu_out_data, reduced_tensorRange);
+  TensorMap<Tensor<float, 3>> in_gpu(gpu_in_data, tensorRange);
+  TensorMap<Tensor<float, 2>> out_gpu(gpu_out_data, reduced_tensorRange);
 
-  sycl_device.memcpyHostToDevice(gpu_in_data, in.data(),(in.dimensions().TotalSize())*sizeof(float));
+  sycl_device.memcpyHostToDevice(gpu_in_data, in.data(),
+                                 (in.dimensions().TotalSize()) * sizeof(float));
   out_gpu.device(sycl_device) = in_gpu.sum(red_axis);
-  sycl_device.memcpyDeviceToHost(redux_gpu.data(), gpu_out_data, redux_gpu.dimensions().TotalSize()*sizeof(float));
+  sycl_device.memcpyDeviceToHost(redux_gpu.data(), gpu_out_data,
+                                 redux_gpu.dimensions().TotalSize() *
+                                     sizeof(float));
   // Check that the CPU and GPU reductions return the same result.
-  for(int j=0; j<reduced_tensorRange[0]; j++ )
-    for(int k=0; k<reduced_tensorRange[1]; k++ )
-      VERIFY_IS_APPROX(redux_gpu(j,k), redux(j,k));
+  for (int j = 0; j < reduced_tensorRange[0]; j++)
+    for (int k = 0; k < reduced_tensorRange[1]; k++)
+      VERIFY_IS_APPROX(redux_gpu(j, k), redux(j, k));
 
   sycl_device.deallocate(gpu_in_data);
   sycl_device.deallocate(gpu_out_data);
-
 }
 
 void test_cxx11_tensor_reduction_sycl() {
@@ -134,5 +146,4 @@ void test_cxx11_tensor_reduction_sycl() {
   CALL_SUBTEST((test_full_reductions_sycl(sycl_device)));
   CALL_SUBTEST((test_first_dim_reductions_sycl(sycl_device)));
   CALL_SUBTEST((test_last_dim_reductions_sycl(sycl_device)));
-
 }
